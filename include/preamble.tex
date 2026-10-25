@@ -139,6 +139,15 @@
 	aboveskip=10pt}
 
 \renewcommand{\captionlabelfont}{\bf}
+
+% Number column in the list of figures and tables, wide enough for A.3.1.
+\makeatletter
+\renewcommand*{\l@figure}{\@dottedtocline{1}{1.5em}{3.2em}}
+\renewcommand*{\l@table}{\@dottedtocline{1}{1.5em}{3.2em}}
+\makeatother
+
+% Ragged right bibliography: long URLs and DOIs otherwise stretch the line.
+\renewcommand{\bibfont}{\raggedright}
 %\renewcommand{\captionfont}{\footnotesize\it}
 
 %--------------------------------------------------------------------------------------
@@ -155,7 +164,10 @@
 %--------------------------------------------------------------------------------------
 % The page margins are narrow (see \marginsize in thesis.tex), so margin notes get
 % squeezed. Prefer \todo[inline]{...} for anything longer than a few words.
-\setlength{\marginparwidth}{13mm}
+% todonotes checks for at least 2cm at \begin{document}; the narrow width is deliberate,
+% so it is set after that check.
+\setlength{\marginparwidth}{2cm}
+\AtBeginDocument{\setlength{\marginparwidth}{13mm}}
 \newcommand{\todoinline}[1]{\todo[inline]{#1}}
 
 

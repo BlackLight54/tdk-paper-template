@@ -43,7 +43,7 @@ Ranges compress: \cref{eq:latex:window,eq:latex:fresh,eq:latex:valid}.
 Label prefixes are listed in \texttt{include/preamble.tex}.
 
 %----------------------------------------------------------------------------
-\subsection{Mathematics and theorem-like environments (amsmath, amssymb, ntheorem)}\label{app:latex:theorems}
+\subsection{Mathematics and theorems (amsmath, amssymb, ntheorem)}\label{app:latex:theorems}
 A numbered equation:
 \begin{equation}\label{eq:latex:window}
   \mathit{valid}(c, t) \iff t \in [t_\mathrm{issue}(c), t_\mathrm{exp}(c)) \land c \notin R_t .
@@ -167,7 +167,7 @@ Export draw.io and Inkscape drawings as SVG and include them this way, so the te
   \begin{subfigure}[b]{0.45\linewidth}
     \centering
     \begin{tikzpicture}
-      \begin{axis}[ybar, width=\linewidth, height=40mm, symbolic x coords={Fabric, Besu, Ethereum}, xtick=data, ylabel={Latency [s]}, ymin=0, font=\footnotesize]
+      \begin{axis}[ybar, width=0.9\linewidth, height=40mm, symbolic x coords={Fabric, Besu, Ethereum}, xtick=data, ylabel={Latency [s]}, ymin=0, font=\footnotesize]
         \addplot coordinates {(Fabric,0.8) (Besu,1.5) (Ethereum,12)};
       \end{axis}
     \end{tikzpicture}
@@ -183,6 +183,7 @@ Export draw.io and Inkscape drawings as SVG and include them this way, so the te
 
 \begin{wrapfigure}{r}{0.3\linewidth}
   \centering
+  \captionsetup{format=plain, justification=centering}
   \begin{tikzpicture}
     \node[draw, circle, fill=red!15, minimum size=14mm, font=\footnotesize] {revoked};
   \end{tikzpicture}
@@ -275,7 +276,8 @@ Put one before a section whose text must not be preceded by stray floats.
 
 %----------------------------------------------------------------------------
 \subsection{Code with syntax highlighting (minted, listings)}\label{app:latex:code}
-Common languages go through minted, which uses the Pygments highlighter: wrap \texttt{\textbackslash begin\{minted\}\{<language>\}} in a \texttt{listing} float for a caption, or use \mintinline{python}{print("inline")} in running text.
+Common languages go through minted, which uses the Pygments highlighter.
+For a captioned listing, put a \texttt{minted} environment inside a \texttt{listing} float; in running text, use \mintinline{python}{print("inline")}.
 Pygments knows over 500 languages; \texttt{pygmentize -L lexers} lists their names.
 Languages Pygments does not know (Refinery, Tamarin, Lean) go through listings with the styles in \texttt{include/code-languages.tex}: \lstinline[style=lean]{theorem le_succ (n : Nat) : n <= n + 1 := by omega}.
 Inline listings must be ASCII under XeLaTeX; Unicode notation such as $\forall$ or $\mathbb{N}$ works in block listings (\cref{lst:latex:lean}).

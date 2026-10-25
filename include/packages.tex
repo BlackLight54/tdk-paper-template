@@ -12,10 +12,11 @@
   \usepackage[T1]{fontenc}
   \usepackage[utf8]{inputenc}
   \usepackage[lighttt]{lmodern}
+  % Latin Modern Mono has no italic; use slanted (italic comments in code listings).
+  {\ttfamily}\DeclareFontShape{T1}{lmtt}{m}{it}{<->ssub*lmtt/m/sl}{} % \ttfamily loads the family first
 \fi
 
 \usepackage[english,magyar]{babel} % Alapértelmezés szerint utoljára definiált nyelv lesz aktív, de később külön beállítjuk az aktív nyelvet.
-\usepackage[autostyle=true]{csquotes} % \enquote{...}
 
 %--------------------------------------------------------------------------------------
 % Math and theorems
@@ -47,6 +48,9 @@
 
 % SVG figures: \includesvg[width=\linewidth]{figures/foo}. Needs shell escape and Inkscape,
 % both available on Overleaf. Locally run the compiler with -shell-escape.
+% svg loads the transparent package, which works only with pdfLaTeX and warns otherwise.
+% With inkscapelatex=false nothing calls it, so XeLaTeX and LuaLaTeX skip it.
+\ifxetexorluatex\expandafter\def\csname ver@transparent.sty\endcsname{2019/11/29 v1.4 (skipped: pdfTeX only)}\fi
 \usepackage[inkscapearea=drawing,inkscapelatex=false]{svg}
 
 \usepackage{tikz}
@@ -76,6 +80,7 @@
 %--------------------------------------------------------------------------------------
 \usepackage{listings} % For source code snippets.
 \usepackage[newfloat]{minted} % Pygments highlighting; setup in include/code-languages.tex.
+\usepackage[autostyle=true]{csquotes} % \enquote{...}. Load after lineno and fvextra (minted).
 \usepackage{algorithm}
 \usepackage{algpseudocode}
 \usepackage{comment}
