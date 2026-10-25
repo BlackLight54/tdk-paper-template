@@ -20,8 +20,13 @@ The long form on demand: \acl{zkp}. Declare acronyms in \texttt{content/acronyms
 \subsection{Citations and cross-references}
 Numeric citations are sorted and compressed \cite{lamport1978time,w3c2025vcdm}; \texttt{\textbackslash citet} names the author: \citet{lamport1978time}.
 Use \texttt{\textbackslash cref} for every reference, so the type name comes for free:
-\cref{fig:demo-tikz,fig:demo-svg}, \cref{tab:demo}, \cref{alg:demo}, \cref{lst:demo}, \cref{def:example}, \cref{rq:scale}.
-Label prefixes: \texttt{chap:}, \texttt{sec:}, \texttt{fig:}, \texttt{tab:}, \texttt{eq:}, \texttt{lst:}, \texttt{alg:}, \texttt{def:}, \texttt{thm:}, \texttt{rq:}.
+\cref{fig:demo-tikz,fig:demo-svg}, \cref{tab:demo}, \cref{alg:demo}, \cref{lst:demo}, \cref{def:example}, \cref{lem:helper}, \cref{thm:main}.
+The tagged lists give short, stable names for the things a paper argues about:
+\cref{c:method,c:impl}, \cref{rq:correct,rq:scale}, \cref{thr:example}, \cref{asm:example}, \cref{g:example}, \cref{lim:example}.
+Requirements work the same way with the \texttt{requirements} environment.
+Theorem-like environments: \texttt{definition}, \texttt{theorem}, \texttt{lemma}, \texttt{proposition}, \texttt{corollary}, \texttt{invariant}, \texttt{property}, \texttt{claim}, \texttt{remark}, \texttt{notation}, \texttt{example}, and \texttt{proof}.
+Tagged lists: \texttt{contributions}, \texttt{rqlist}, \texttt{requirements}, \texttt{assumptions}, \texttt{guarantees}, \texttt{threats}, \texttt{limitations}; add more with \texttt{\textbackslash NewTagList} in \texttt{include/preamble.tex}.
+Label prefixes are listed there too.
 Quotes use csquotes: \enquote{quoted text}.
 
 \subsection{Figures}

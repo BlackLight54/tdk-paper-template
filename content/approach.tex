@@ -30,9 +30,29 @@ TODO Walk through \cref{fig:architecture} with the running example.
 \section{TODO Model or design}
 TODO The formal model or the design decisions, each with the alternative you rejected and why.
 
-\section{TODO Properties}
-TODO What your approach guarantees, stated precisely, with the argument for each.
+\section{Threat model and guarantees}
+TODO Who the adversary is and what they can do, what you assume, and what your approach guarantees under those assumptions. Every guarantee needs an argument: a proof, a mechanised proof, or a measurement in \cref{chap:evaluation}.
+
+\begin{threats}
+  \item\label{thr:example} TODO A malicious participant who ...
+\end{threats}
+
+\begin{assumptions}
+  \item\label{asm:example} TODO The underlying signature scheme is unforgeable.
+\end{assumptions}
+
+\begin{guarantees}
+  \item\label{g:example} TODO Under \cref{asm:example}, no participant can ...
+\end{guarantees}
+
+\begin{lemma}[TODO]\label{lem:helper}
+TODO A helper statement.
+\end{lemma}
 
 \begin{theorem}[TODO]\label{thm:main}
-TODO
+TODO The main result: \cref{g:example} holds against \cref{thr:example}.
 \end{theorem}
+
+\begin{proof}
+TODO By \cref{lem:helper} and \cref{asm:example}.
+\end{proof}

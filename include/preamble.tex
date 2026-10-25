@@ -88,6 +88,29 @@
 %\theorempostwork{\hrule\bigskip}
 \newtheorem{theorem}{\tetel}
 
+% More theorem-like environments, numbered together with theorems (Lemma 3, Theorem 4, ...).
+% Italic body: formal statements.
+\theorembodyfont{\itshape}
+\theoremsymbol{}
+\newtheorem{lemma}[theorem]{Lemma}
+\newtheorem{proposition}[theorem]{Proposition}
+\newtheorem{corollary}[theorem]{Corollary}
+\newtheorem{invariant}[theorem]{Invariant}
+\newtheorem{property}[theorem]{Property}
+\newtheorem{claim}[theorem]{Claim}
+% Upright body: commentary.
+\theorembodyfont{\upshape}
+\newtheorem{remark}[theorem]{Remark}
+\newtheorem{notation}[theorem]{Notation}
+% Unnumbered proof that ends with a box.
+\theoremstyle{nonumberplain}
+\theoremheaderfont{\itshape}
+\theoremsymbol{\ensuremath{\square}}
+\newtheorem{proof}{Proof}
+\theoremstyle{plain}
+\theoremheaderfont{\normalfont\bfseries}
+\theoremsymbol{}
+
 
 %--------------------------------------------------------------------------------------
 % Some new commands and declarations
@@ -170,15 +193,56 @@
 % Cross-references (cleveref)
 %--------------------------------------------------------------------------------------
 % Write \cref{fig:overview} instead of Figure~\ref{fig:overview}; \Cref at sentence start.
-% Names for the ntheorem environments defined above; cleveref knows the standard ones.
+% Label prefixes: chap: sec: fig: tab: eq: lst: alg: app: def: thm: lem: prop: cor: inv:
+% prty: claim: rem: not: ex: c: rq: req: asm: g: thr: lim:
 \crefname{definition}{Definition}{Definitions}
 \crefname{theorem}{Theorem}{Theorems}
 \crefname{example}{Example}{Examples}
+\crefname{lemma}{Lemma}{Lemmas}
+\crefname{proposition}{Proposition}{Propositions}
+\crefname{corollary}{Corollary}{Corollaries}
+\crefname{invariant}{Invariant}{Invariants}
+\crefname{property}{Property}{Properties}
+\crefname{claim}{Claim}{Claims}
+\crefname{remark}{Remark}{Remarks}
+\crefname{notation}{Notation}{Notations}
 \crefname{lstlisting}{Listing}{Listings}
-\crefname{rq}{RQ}{RQs}
 
-% Research questions: \begin{rqlist} \item\label{rq:scale} ... \end{rqlist}, then \cref{rq:scale}.
-\newlist{rqlist}{enumerate}{1}
-\setlist[rqlist]{label=\textbf{RQ\arabic*}, ref=\arabic*, leftmargin=*}
-\crefalias{rqlisti}{rq}
-\creflabelformat{rq}{#2#1#3}
+% The environments above share the theorem counter, so cleveref would call all of them
+% "Theorem". Inside each one, labels on that counter get the environment's own name.
+\makeatletter
+\@for\tdk@env:=lemma,proposition,corollary,invariant,property,claim,remark,notation\do{%
+  \edef\tdk@hook{\noexpand\AddToHook{env/\tdk@env/begin}{\noexpand\crefalias{theorem}{\tdk@env}}}%
+  \tdk@hook}
+\makeatother
+
+% Tagged lists: numbered items with a short tag that \cref can point to.
+%   \NewTagList{<environment>}{<tag>}{<Name>}{<Names>}
+% defines an enumerate-like environment whose items read "C1", "C2", ... and whose
+% references read "Contribution C1", "Contributions C1 and C2".
+% Usage:
+%   \begin{contributions}
+%     \item\label{c:model} A formal model of ...
+%   \end{contributions}
+%   ... as \cref{c:model} shows ...
+\newcommand{\NewTagList}[4]{%
+  \newlist{#1}{enumerate}{1}%
+  \setlist[#1]{label=\textbf{#2\arabic*}, ref=#2\arabic*, leftmargin=*, widest=99}%
+  \crefalias{#1i}{#1}%
+  \crefname{#1}{#3}{#4}%
+}
+\NewTagList{contributions}{C}{Contribution}{Contributions}
+\NewTagList{requirements}{R}{Requirement}{Requirements}
+\NewTagList{assumptions}{A}{Assumption}{Assumptions}
+\NewTagList{guarantees}{G}{Guarantee}{Guarantees}
+\NewTagList{threats}{T}{Threat}{Threats}
+\NewTagList{limitations}{L}{Limitation}{Limitations}
+
+% Research questions are referred to by tag alone: \cref{rq:scale} -> "RQ2".
+\NewTagList{rqlist}{RQ}{}{}
+\crefformat{rqlist}{#2#1#3}
+\Crefformat{rqlist}{#2#1#3}
+\crefmultiformat{rqlist}{#2#1#3}{ and~#2#1#3}{, #2#1#3}{ and~#2#1#3}
+\Crefmultiformat{rqlist}{#2#1#3}{ and~#2#1#3}{, #2#1#3}{ and~#2#1#3}
+\crefrangeformat{rqlist}{#3#1#4--#5#2#6}
+\Crefrangeformat{rqlist}{#3#1#4--#5#2#6}
