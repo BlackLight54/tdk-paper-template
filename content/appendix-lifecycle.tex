@@ -1,0 +1,58 @@
+%----------------------------------------------------------------------------
+\clearpage\section{The TDK lifecycle}\label{app:lifecycle}
+%----------------------------------------------------------------------------
+A TDK paper comes together in the phases of \cref{tab:lifecycle}, planned backwards from the deadlines of \cref{app:tdk}. Each step has an owner, a condition that says when it is done, and a pointer to what helps.
+A \gate{} is a point where you stop and wait for our approval: work after a gate builds on what the gate fixed, so skipping it is the most expensive mistake in the process.
+We track every student's progress in the same steps.
+
+\newcommand{\lcphase}[2]{\midrule\multicolumn{4}{l}{\textbf{#1}\quad\textit{#2}}\\\midrule}
+{\small
+\begin{xltabular}{\linewidth}{>{\raggedright\arraybackslash}p{0.2\linewidth} >{\raggedright\arraybackslash}p{0.09\linewidth} >{\raggedright\arraybackslash}X >{\raggedright\arraybackslash}p{0.21\linewidth}}
+  \caption{The TDK lifecycle. Owner: you, we (the advisors), or both.}\label{tab:lifecycle}\\
+  \toprule
+  \textbf{Step} & \textbf{Owner} & \textbf{Done when} & \textbf{Support} \\
+  \endfirsthead
+  \toprule
+  \textbf{Step} & \textbf{Owner} & \textbf{Done when} & \textbf{Support} \\
+  \endhead
+  \bottomrule
+  \endlastfoot
+  \lcphase{0. Topic}{before the semester}
+  Topic manifest \gate & both & One page: the problem, why it matters, the expected contribution; approved by us & TDK topic page \\
+  \lcphase{1. Setup}{first week}
+  Identifiers & you & We have your Neptun code, GitHub username and e-mail & \cref{app:start:ids} \\
+  Overleaf project and paper repository & we & You can edit in Overleaf and push to the synced GitHub repository & \cref{app:start:access} \\
+  Code repository & you & Created from the template, both advisors added & \cref{app:start:access} \\
+  Zotero & both & You are in the group, the connector is installed, \texttt{bib/references.bib} exports from it & \cref{app:start:access} \\
+  Calendar and weekly slot & you & Neptun timetable synced, calendars shared, recurring Teams event set & \cref{app:start:calendar,app:consult} \\
+  Context upload & we & Our papers, notes and earlier work on the topic are in your repository; nothing to do if we work in one repository from the start & --- \\
+  \lcphase{2. Research}{first half of September}
+  Problem & you & The problem stated with a running example & \cref{chap:intro} \\
+  Literature review (SLR) and gap analysis & you & Sources found systematically are in Zotero; the gap matrix is filled; the gap is one sentence & Gap matrix in \cref{chap:related}; \cref{app:writing} \\
+  Research questions and contributions & you & RQ1--RQ3 and C1--C3 written as checkable claims & \texttt{rqlist}, \texttt{contributions} \\
+  Threats and requirements & you & Threat model, assumptions, requirements listed & \cref{chap:intro,chap:approach} \\
+  Leading figure draft (vezérábra) & you & \Cref{fig:overview} explains the work without the text & \cref{app:writing:figure} \\
+  \lcphase{3. Plan}{second half of September}
+  Examples and validation plan & you & One worked example; how each claim will be verified or measured & \cref{chap:evaluation} \\
+  Spine \gate & both & One page of claims, terminology and notation; approved by us & \cref{app:writing:spine} \\
+  Skeleton mind map & you & Every chapter broken into paragraph topic sentences with their evidence & \cref{app:writing:spine} \\
+  Abstract & you & Seven sentences in Nature's structure, submitted on the TDK portal by 30 September & Abstract todo \\
+  \lcphase{4. Draft}{October}
+  Outline check & we & The skeleton fits the template's chapters and the review sheet & Chapter todos \\
+  Proofs and implementation & you & Every claim has its proof, mechanised proof, or measurement; the code runs from the README & \cref{chap:approach,chap:implementation} \\
+  Scalability and robustness & you & Measurements beyond small examples, with setup and repetitions & \cref{fig:scalability} \\
+  Full draft \gate & both & Every chapter written; handed to us about ten days before the deadline & --- \\
+  \lcphase{5. Polish}{last ten days of October}
+  Labels and cross-references & you & Every reference uses \texttt{\textbackslash cref}; no undefined references & \cref{app:latex:cref} \\
+  Citations & you & Every claim from the literature is cited; bibliography entries complete; no warnings & \cref{app:latex:cite} \\
+  Acronyms & you & Every abbreviation goes through \texttt{\textbackslash ac} & \cref{app:latex:acro} \\
+  Advisor review and todos & both & Our comments are resolved; the list of todos is empty & \texttt{\textbackslash listoftodos} \\
+  Review sheet hill climb & you & You scored the paper on criteria A--E yourself, fixed the weakest, and repeated until nothing cheap is left & Review sheet in \texttt{docs/} \\
+  Code archive & you & The code is on Zenodo and cited by its version DOI & \cref{app:zenodo} \\
+  Submission & you & The guide appendices are deleted, the PDF is 30--35 pages, and it is uploaded by 1 November & \cref{app:tdk:form} \\
+  \lcphase{6. Conference}{November}
+  Talk & you & Slides ready and rehearsed with us at least once before the conference & --- \\
+  After the TDK & both & Decided together: OTDK, a conference paper, or a thesis built on the work & --- \\
+\end{xltabular}
+}
+\advisortodo{The phases, timing and done-when conditions refine the TDK task matrix of the 2026 cohort; confirm them.}

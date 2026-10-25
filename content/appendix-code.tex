@@ -1,0 +1,42 @@
+%----------------------------------------------------------------------------
+\clearpage\section{Code, tools and AI}\label{app:code}
+%----------------------------------------------------------------------------
+\subsection{GitHub}\label{app:code:github}
+Use GitHub for:
+\begin{itemize}[noitemsep]
+  \item code and models;
+  \item notes and drawings;
+  \item artifacts such as PDFs and presentations;
+  \item syncing with Overleaf (\cref{app:start:access});
+  \item submitting code anonymously for double-blind review, through \href{https://anonymous.4open.science/}{Anonymous GitHub};
+  \item archiving with a DOI on Zenodo (\cref{app:zenodo}).
+\end{itemize}
+Run the repository's recurring commands (build, test, reproduce the measurements) through \href{https://github.com/casey/just}{just}, a command runner: one \texttt{justfile} lists them, and \texttt{just reproduce} is all a reviewer has to know.
+
+\paragraph{Recommended structure.} A layout that keeps paper, code and evidence apart:
+\begin{itemize}[noitemsep]
+  \item \texttt{paper/}: the Overleaf-synced paper repository, included in the code repository;
+  \item \texttt{src/} and \texttt{tests/}: the code;
+  \item \texttt{experiments/}: measurement scripts and their raw results;
+  \item \texttt{notes/}: notes, drawings and consultation summaries;
+  \item \texttt{README.md}, \texttt{LICENSE}, \texttt{.zenodo.json}, \texttt{justfile} at the root.
+\end{itemize}
+
+\paragraph{README structure.} What the project is, in two sentences; how to install it; how to reproduce each result of the paper, one command per table or figure; how to cite it (the Zenodo DOI badge); the license.
+\advisortodo{Drafted, as the starter-pack note on repository and README structure was empty; align it with the code repository template once that exists.}
+
+\subsection{Behaviour-driven tests}
+For behaviour-driven development (BDD), write the expected behaviour as scenarios with \href{https://cucumber.io/}{Cucumber}; the scenarios then double as evaluation cases that a reviewer can read.
+
+\subsection{AI tools}\label{app:code:ai}
+\paragraph{Disclose.} AI use must be disclosed in the appropriate form in both the TDK paper and the thesis.
+
+\paragraph{Tools, as of October 2026.} Advice on AI tools goes stale within months; this is what we recommend now.
+\begin{itemize}
+  \item Use the strongest models, as they are the best for research; we prefer Claude Fable and ChatGPT Astra. Ask us if we can help you set up a subscription.
+  \item Prefer an agentic harness working in your repository over a chat in the cloud: Claude Code or Codex, ideally with a good front end such as T3 Code, GitKraken Kepler or herdr. Working in a repository gives you the best features, and you \emph{need} version control when an AI edits your files.
+  \item Plugins and skills: the Matt Pocock and poetato plugins for productivity; caveman, ponytail, squeez and TRON if you want to spare tokens. We highly recommend the \href{https://www.aihero.dev/skills-grill-me}{grill-me skill} (\href{https://claudemarketplaces.com/skills/mattpocock/skills/grill-me}{marketplace page}); see also \href{https://github.com/cursor/plugins/blob/main/pstack/skills/unslop/SKILL.md}{unslop} and \href{https://github.com/DietrichGebert/ponytail/blob/main/skills/ponytail/SKILL.md}{ponytail}.
+  \item Do not overconstrain your model with excess instructions: bloated \texttt{AGENTS.md} files and memories degrade the performance of any model. Prefer skills with clear, broad descriptions of when to use them.
+\end{itemize}
+
+\input{content/appendix-zenodo}

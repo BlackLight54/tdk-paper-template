@@ -1,0 +1,87 @@
+%----------------------------------------------------------------------------
+\clearpage\section{Glossary}\label{app:glossary}
+%----------------------------------------------------------------------------
+Three lists: the words we use about the process (\cref{tab:glossary-process}), technical terms from our topics (\cref{tab:glossary-technical}), and English--Hungarian pairs for writing the Hungarian abstract and talking about your work in Hungarian (\cref{tab:glossary-hu}).
+
+\subsection{Process terms}
+{\small
+\begin{xltabular}{\linewidth}{>{\raggedright\arraybackslash}p{0.24\linewidth} X}
+  \caption{Process terms.}\label{tab:glossary-process}\\
+  \toprule \textbf{Term} & \textbf{Meaning} \\ \midrule \endfirsthead
+  \toprule \textbf{Term} & \textbf{Meaning} \\ \midrule \endhead
+  \bottomrule \endlastfoot
+  Topic manifest & One page approved before the semester: the problem, why it matters, the expected contribution. \\
+  Literature review (SLR) & A systematic literature review: searching sources with logged queries, screening them, and extracting what each says, so the gap claim rests on a known set of papers. \\
+  Gap analysis & Finding what no existing approach does; ends in the gap matrix and a one-sentence gap. \\
+  Gap matrix & The table of requirements against approaches in \cref{chap:related}; the gap is the column where every row is met. \\
+  Leading figure (vezérábra) & The one figure that explains the work; see \cref{app:writing:figure}. \\
+  Spine & One page fixing the paper's claims, terminology and notation; see \cref{app:writing:spine}. \\
+  Skeleton mind map & Every chapter as paragraph topic sentences with their evidence, before any prose. \\
+  Beats & The moves inside each paragraph of the skeleton. \\
+  Premortem & Imagining the paper has been rejected and writing the reviewer's reasons, to find fatal flaws before drafting. \\
+  Gate & A step where you stop for our approval; see \cref{app:lifecycle}. \\
+  Context upload & Putting our papers, notes and earlier work on the topic into your repository. \\
+  Grind & A sustained push to close one large piece of work, such as all proofs or the full implementation. \\
+  Review sheet hill climb & Scoring your own paper on the review sheet, fixing the weakest criterion, and repeating. \\
+  Mirror principle & Saying back what was agreed at the end of a consultation; see \cref{app:consult}. \\
+  Version DOI, concept DOI & The identifier of one archived release, and of all its versions together; see \cref{app:zenodo}. \\
+\end{xltabular}
+}
+\advisortodo{Confirm the process terms, especially \enquote{grind} and \enquote{mirror principle}.}
+
+\subsection{Technical terms}
+{\small
+\begin{xltabular}{\linewidth}{>{\raggedright\arraybackslash}p{0.24\linewidth} X}
+  \caption{Technical terms from our topics.}\label{tab:glossary-technical}\\
+  \toprule \textbf{Term} & \textbf{Meaning} \\ \midrule \endfirsthead
+  \toprule \textbf{Term} & \textbf{Meaning} \\ \midrule \endhead
+  \bottomrule \endlastfoot
+  Self-sovereign identity (SSI) & An identity model in which holders keep their own credentials and present them without asking the issuer each time. \\
+  Verifiable credential (VC) & A digitally signed statement about a subject, issued by an issuer, held by a holder, and checked by a verifier (W3C standard). \\
+  Verifiable data registry (VDR) & The shared registry that issuers, holders and verifiers trust for public data such as schemas, keys and revocation status. \\
+  Zero-knowledge proof (ZKP) & A proof that a statement is true which reveals nothing beyond the statement itself. \\
+  Hyperledger Fabric & A permissioned blockchain platform for consortia of known organisations. \\
+  BPMN & Business Process Model and Notation, the standard notation for business process models. \\
+  Tamarin & A prover for security protocols that searches for attacks under a symbolic adversary model. \\
+  Lean & A proof assistant and programming language for machine-checked proofs. \\
+  Refinery & A tool for partial modelling and graph generation over metamodels. \\
+  Liveness, safety & A safety property says nothing bad ever happens; a liveness property says something good eventually happens. \\
+  TOCTOU & Time-of-check to time-of-use: a race between checking a condition and acting on it. \\
+\end{xltabular}
+}
+\advisortodo{Each topic adds its own terms here; check the definitions against the topic's literature.}
+
+\subsection{English--Hungarian pairs}
+Use one Hungarian term per concept and keep it throughout the Hungarian abstract and talk. The pairs below come from earlier TDK abstracts; where those used variants, the variant is listed too.
+{\small
+\begin{xltabular}{\linewidth}{>{\raggedright\arraybackslash}p{0.36\linewidth} >{\raggedright\arraybackslash}X}
+  \caption{English--Hungarian pairs.}\label{tab:glossary-hu}\\
+  \toprule \textbf{English} & \textbf{Hungarian} \\ \midrule \endfirsthead
+  \toprule \textbf{English} & \textbf{Hungarian} \\ \midrule \endhead
+  \bottomrule \endlastfoot
+  Students' Scientific Conference & Tudományos Diákköri Konferencia (TDK) \\
+  advisor & konzulens \\
+  review sheet & bírálói lap \\
+  leading figure & vezérábra \\
+  abstract & kivonat, összefoglaló \\
+  appendix & függelék \\
+  verifiable credential (VC) & ellenőrizhető tanúsítvány \\
+  verifiable data registry (VDR) & ellenőrizhető adatregiszter (also: ellenőrizhető adatnyilvántartó) \\
+  self-sovereign identity (SSI) & önrendelkező identitás (also: önrendelkezésű identitás) \\
+  EU Business Wallet & EU üzleti tárca \\
+  permissionless & engedélyhez nem kötött \\
+  self-orchestrated & önorkesztrált (also: önszervező) \\
+  commitment & elköteleződés \\
+  threshold-signed & küszöbaláírással ellátott \\
+  race condition & versenyhelyzet \\
+  check-then-act & ellenőrzést követő cselekvés \\
+  liveness & elevenség \\
+  adversary-driven & támadó-központú \\
+  prover & bizonyító \\
+  folding & hajtogatás \\
+  timer event & időzítő esemény \\
+  contrary-to-duty obligation & jóvátételi kötelezettség \\
+  coordinated vulnerability disclosure (CVD) & koordinált sérülékenységközzététel \\
+\end{xltabular}
+}
+\advisortodo{Where earlier papers used variants, pick the preferred Hungarian term.}

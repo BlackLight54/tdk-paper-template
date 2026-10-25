@@ -139,6 +139,7 @@
 	aboveskip=10pt}
 
 \renewcommand{\captionlabelfont}{\bf}
+\captionsetup[sub]{justification=centering} % subfigure captions are narrow
 
 % Number column in the list of figures and tables, wide enough for A.3.1.
 \makeatletter
@@ -169,6 +170,12 @@
 \setlength{\marginparwidth}{2cm}
 \AtBeginDocument{\setlength{\marginparwidth}{13mm}}
 \newcommand{\todoinline}[1]{\todo[inline]{#1}}
+
+% Two kinds of notes: orange \todo for the student; blue \advisortodo for the advisors
+% (a draft to confirm, or a link to fill in). Both disappear with todonotes' disable option.
+% Marks a step where the student stops for the advisors' approval (lifecycle appendix).
+\newcommand{\gate}{\textcolor{red!70!black}{\textsc{gate}}}
+\newcommand{\advisortodo}[1]{\todo[inline, color=cyan!20, bordercolor=cyan!60!black]{\textbf{Advisor:} #1}}
 
 
 %--------------------------------------------------------------------------------------

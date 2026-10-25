@@ -1,0 +1,64 @@
+%----------------------------------------------------------------------------
+\clearpage\section{Getting started}\label{app:start}
+%----------------------------------------------------------------------------
+% TODO Delete this appendix and the other guide appendices (content/appendices.tex) before submission.
+The following appendices are the starter pack of the FTSRG advisors, Martin Farkas (\href{https://github.com/BlackLight54}{\texttt{BlackLight54}} on GitHub) and Imre Kocsis (\href{https://github.com/imrekocsis}{\texttt{imrekocsis}}): what to do before you write, how a TDK paper comes together, how we work together, and the tools we recommend.
+They are part of this template so that everything is in one place; delete them before you submit (\cref{app:lifecycle}).
+
+The template uses two kinds of notes. \todo[inline]{An orange note is for you: what a part of the paper must contain.}
+\advisortodo{A blue note is for us: a draft we still have to confirm, or a link we still have to add.}
+
+Work through the steps below in order in your first week. Each says who does it.
+
+%----------------------------------------------------------------------------
+\subsection{Share your identifiers}\label{app:start:ids}
+\emph{You.} Send us your Neptun code, your GitHub username, and your \texttt{@edu.bme.hu} email address, through the MS Teams form below. We use them to add you to the Overleaf project, the repositories and the Zotero group.
+\advisortodo{Add the link of the MS Teams form for identifiers.}
+
+%----------------------------------------------------------------------------
+\subsection{Accounts and access}\label{app:start:access}
+\paragraph{Overleaf project.} \emph{We} create an Overleaf project for your semester's work from this template, so that you get the features of our Overleaf Pro subscription. Ask us for it. The template is the current BME template, modified to the TDK form requirements (\cref{app:tdk:form}); check that it still matches the current call.
+
+\paragraph{Paper repository.} \emph{We} connect the Overleaf project to a new GitHub repository with Overleaf's GitHub integration. Only the owner of the Overleaf project can use this Pro feature, and only with a fresh repository, so we create it and add you. Clone it to your machine: you can then compile locally, use every GitHub feature, and work with agent-based AI tools on it (\cref{app:code:ai}). Overleaf and GitHub stay in sync through the GitHub dialog in Overleaf's menu.
+
+\paragraph{Code repository.} \emph{You} create the repository for your code from our template repository and add both of us. The paper repository is included in it, so one clone holds everything.
+\advisortodo{Link the code repository template once it exists, and decide where notes and drawings live: a notes folder in the code repository or a separate notes repository.}
+
+\paragraph{Zotero group.} \emph{We} add you to our Zotero group, where we collect the literature of the topic. \emph{You} install \href{https://www.zotero.org/}{Zotero} with its browser connector, save every source you read into the group library, and export the collection to \texttt{bib/references.bib} (the Better BibTeX plugin can keep the file up to date automatically).
+\advisortodo{Add the Zotero group link, and confirm the export setup (Better BibTeX auto-export into the paper repository).}
+
+\paragraph{GitHub Student Developer Pack.} Apply for the free \href{https://education.github.com/pack}{GitHub Student Developer Pack} with your \texttt{@edu.bme.hu} address; it includes GitHub Pro and GitHub Copilot.
+
+%----------------------------------------------------------------------------
+\subsection{Calendar}\label{app:start:calendar}
+\paragraph{Neptun timetable.} \emph{You.} In Neptun's calendar, choose \emph{Naptár kezelése}, then \emph{Feliratkozás link másolása} (\cref{fig:neptun-export}): this exports your timetable \emph{as a link}, so it stays up to date. Add the link to the calendar you use; in Google Calendar, it is \emph{Settings}, \emph{Add calendar}, \emph{From URL} (\cref{fig:google-calendar-url}).
+\begin{figure}[!ht]
+  \centering
+  \begin{subfigure}[b]{0.55\linewidth}
+    \centering
+    \includegraphics[width=\linewidth]{figures/neptun-calendar-export}
+    \caption{Neptun: copy the subscription link.}\label{fig:neptun-export}
+  \end{subfigure}\hfill
+  \begin{subfigure}[b]{0.3\linewidth}
+    \centering
+    \includegraphics[width=0.75\linewidth]{figures/google-calendar-add-by-url}
+    \caption{Google Calendar: add it from the URL.}\label{fig:google-calendar-url}
+  \end{subfigure}
+  \caption{Exporting the Neptun timetable to a calendar as a link.}\label{fig:neptun-calendar}
+\end{figure}
+
+\paragraph{Share it with your advisors.} In the Teams calendar, add your advisors' calendars: \emph{Add calendar}, type their name, add them. Ask them to give you permission to see their calendar, and share yours with them, so we can find a weekly slot (\cref{app:consult}).
+
+\paragraph{Keeping calendars in sync.} We recommend \href{https://reclaim.ai/}{Reclaim.ai} to manage your calendar. You will likely run into permission issues with the university account; if so, \href{https://www.outlookgooglecalendarsync.com/}{Outlook Google Calendar Sync} is a workaround.
+
+%----------------------------------------------------------------------------
+\subsection{Development environment}\label{app:start:env}
+\paragraph{Operating system.} Use Linux on bare metal if you can. We recommend \href{https://omarchy.org/}{Omarchy}, an easy-to-use distribution set up for development; ask Martin for his setup. Ubuntu and Pop!\_OS are good options too. Omarchy has a built-in Windows virtual machine; dual boot if you occasionally need Windows on bare metal. Use the Windows Subsystem for Linux (WSL) only as a last resort, if you really have to use Windows every day for a pressing reason, such as video editing.
+
+\paragraph{Virtual machine.} We can give you a virtual machine with 8 cores and 16\,GB of memory in the BME cloud. Use it to host your editor and repositories remotely, and to run AI agents that keep working while your laptop is closed. Reach it through SSH, RDP, VS Code Remote, or Tailscale, or run Claude Code, Codex, T3 Code or GitKraken Kepler on it directly.
+\advisortodo{Describe how a student requests the VM (whom to ask, what to send).}
+
+\paragraph{Workspace layout.} Keep one clone of the code repository, with the paper repository inside it (\cref{app:code:github}), on your machine or on the VM. Open it in one editor window with the \LaTeX{} build and an AI agent working in the same folder, so that code, paper and notes are edited, versioned and searched together.
+\advisortodo{Draft for the empty \enquote{Munkakörnyezet elrendezése} note; confirm or rewrite.}
+
+\paragraph{Do not overdo it.} Do not spend too much time on your environment setup. We learned this the hard way.
