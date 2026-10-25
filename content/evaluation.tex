@@ -17,25 +17,39 @@ TODO Hardware, software versions, datasets or workload generators, number of rep
 TODO
 
 \section{Scalability (RQ2)}
-TODO Describe \cref{fig:scalability}: what grows, how fast, and where the limit is.
+TODO Describe \cref{fig:scalability}: what grows, how fast, and where the limit is. Put the better result on top: plot a metric where higher is better (\cref{fig:scalability-throughput}), or reverse the axis of one where lower is better (\cref{fig:scalability-time}).
 
 \begin{figure}[!ht]
   \centering
-  \begin{tikzpicture}
-    \begin{axis}[
-        width=0.75\linewidth, height=55mm,
-        xlabel={Input size $n$}, ylabel={Time [ms]},
-        xmode=log, log basis x=10, ymajorgrids,
-        legend pos=north west, legend style={font=\footnotesize}]
-      \addplot+[mark=*, error bars/.cd, y dir=both, y explicit]
-        coordinates {(10,2) +- (0,0.3) (100,9) +- (0,1) (1000,85) +- (0,6) (10000,870) +- (0,40)};
-      \addlegendentry{This work}
-      \addplot+[mark=square*, dashed]
-        coordinates {(10,3) (100,30) (1000,800) (10000,9500)};
-      \addlegendentry{Baseline}
-    \end{axis}
-  \end{tikzpicture}
-  \caption{Scalability: mean of TODO runs, error bars show one standard deviation. Placeholder data, replace with your measurements.}
+  \begin{subfigure}[b]{0.48\linewidth}
+    \centering
+    \begin{tikzpicture}
+      \begin{axis}[width=\linewidth, height=55mm, xlabel={Input size $n$}, xmode=log, ymode=log, ymajorgrids, legend style={font=\footnotesize}, ylabel={Throughput [operations/s]}, legend pos=south west]
+        \addplot+[mark=*, error bars/.cd, y dir=both, y explicit]
+          coordinates {(10,5000) +- (0,300) (100,4800) +- (0,250) (1000,4500) +- (0,300) (10000,4100) +- (0,350)};
+        \addlegendentry{This work}
+        \addplot+[mark=square*, dashed]
+          coordinates {(10,3000) (100,1500) (1000,400) (10000,60)};
+        \addlegendentry{Baseline}
+      \end{axis}
+    \end{tikzpicture}
+    \caption{Throughput; higher is better.}\label{fig:scalability-throughput}
+  \end{subfigure}\hfill
+  \begin{subfigure}[b]{0.48\linewidth}
+    \centering
+    \begin{tikzpicture}
+      \begin{axis}[width=\linewidth, height=55mm, xlabel={Input size $n$}, xmode=log, ymode=log, ymajorgrids, legend style={font=\footnotesize}, ylabel={Time [ms]}, y dir=reverse, legend pos=south west]
+        \addplot+[mark=*, error bars/.cd, y dir=both, y explicit]
+          coordinates {(10,2) +- (0,0.3) (100,9) +- (0,1) (1000,85) +- (0,6) (10000,870) +- (0,40)};
+        \addlegendentry{This work}
+        \addplot+[mark=square*, dashed]
+          coordinates {(10,3) (100,30) (1000,800) (10000,9500)};
+        \addlegendentry{Baseline}
+      \end{axis}
+    \end{tikzpicture}
+    \caption{Time, axis reversed; lower is better, so better is still up.}\label{fig:scalability-time}
+  \end{subfigure}
+  \caption{Scalability as the input grows. Both panels put the better result on top. Mean of TODO runs; error bars show one standard deviation. Placeholder data, replace with your measurements.}
   \label{fig:scalability}
 \end{figure}
 

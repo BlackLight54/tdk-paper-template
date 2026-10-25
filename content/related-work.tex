@@ -1,26 +1,26 @@
 %----------------------------------------------------------------------------
 \chapter{Related Work and Gap Analysis}\label{chap:related}
 %----------------------------------------------------------------------------
-\todo[inline]{About 3--4 pages. Criteria B/2 (0--4) and D/1 (0--5). This chapter comes after the evaluation, as in research papers: the reader now knows what you built and measured, so each comparison can point to a concrete result instead of a promise. \textbf{Novelty}: compare the closest approaches along explicit criteria and end with the gap only your work fills. \textbf{Relevance}: include current industrial solutions and recent research, so the gap is visibly open today.}
+\todo[inline]{About 3--4 pages. Criteria B/2 (0--4) and D/1 (0--5). This chapter comes after the evaluation, as in research papers: the reader now knows what you built and measured, so each comparison can point to a concrete result instead of a promise. \textbf{Novelty}: compare the closest approaches against the requirements in a gap matrix (\cref{tab:related}) and end with the gap only your work fills. \textbf{Relevance}: include current industrial solutions and recent research, so the gap is visibly open today.}
 
 \section{Comparison criteria}
-TODO Name the criteria, derived from the problem in \cref{chap:intro}, and say why each matters.
+TODO The comparison uses \cref{req:first,req:second,req:third} from \cref{chap:intro}. Add criteria only if a reader would ask about them, such as maturity or license.
 
 \section{Existing approaches}
-TODO Group the related work into families and discuss each family against the criteria.
+TODO Group the related work into families and discuss each family against the requirements. \Cref{tab:related} summarises the comparison in a gap matrix: a reader should see the gap from the matrix alone, as the one column where every row is met.
 
 \begin{table}[!ht]
   \centering
-  \caption{Comparison of related approaches. \checkmark{} supported, $\circ$ partially supported, -- not supported. TODO Fill in.}
+  \caption{Gap matrix: each requirement against the closest approaches. \gaplegend. Cells for this work point to the evaluation result that backs them. TODO Fill in.}
   \label{tab:related}
-  \begin{tabularx}{\linewidth}{X c c c c}
+  \renewcommand{\arraystretch}{1.3}
+  \begin{tabularx}{\linewidth}{l X c c c c}
     \toprule
-    \textbf{Approach} & \textbf{Criterion 1} & \textbf{Criterion 2} & \textbf{Criterion 3} & \textbf{Open source} \\
+    & \textbf{Requirement} & \makecell{\textbf{Approach A}\\\cite{lamport1978time}} & \makecell{\textbf{Approach B}\\\cite{w3c2025vcdm}} & \makecell{\textbf{Approach C}\\TODO} & \textbf{This work} \\
     \midrule
-    TODO Approach A \cite{lamport1978time} & \checkmark & $\circ$ & -- & \checkmark \\
-    TODO Approach B \cite{w3c2025vcdm}    & -- & \checkmark & -- & -- \\
-    \midrule
-    \textbf{This work}                     & \checkmark & \checkmark & \checkmark & \checkmark \\
+    \ref{req:first}  & TODO short name & \gapyes     & \gappartial & \gapno & \gapyes\,(\cref{rq:correct}) \\
+    \ref{req:second} & TODO short name & \gapno      & \gapyes     & \gapna & \gapyes\,(\cref{rq:scale}) \\
+    \ref{req:third}  & TODO short name & \gappartial & \gapno      & \gapno & \gapyes\,(\cref{rq:robust}) \\
     \bottomrule
   \end{tabularx}
 \end{table}

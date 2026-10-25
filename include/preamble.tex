@@ -257,6 +257,14 @@
 \NewTagList{threats}{T}{Threat}{Threats}
 \NewTagList{limitations}{L}{Limitation}{Limitations}
 
+% Gap matrix cells: rows are requirements (\ref{req:x} prints "R1"), columns are approaches.
+% Put \gaplegend in the caption so every matrix explains the same symbols.
+\newcommand{\gapyes}{\textcolor{green!45!black}{\checkmark}}
+\newcommand{\gappartial}{\textcolor{orange!85!black}{$\circ$}}
+\newcommand{\gapno}{\textcolor{red!70!black}{$\times$}}
+\newcommand{\gapna}{--}
+\newcommand{\gaplegend}{\gapyes{} meets the requirement, \gappartial{} partially, \gapno{} does not, \gapna{} not applicable}
+
 % Research questions are referred to by tag alone: \cref{rq:scale} -> "RQ2".
 \NewTagList{rqlist}{RQ}{}{}
 \crefformat{rqlist}{#2#1#3}
