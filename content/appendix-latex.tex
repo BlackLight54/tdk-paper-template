@@ -260,7 +260,7 @@ Put one before a section whose text must not be preceded by stray floats.
 \end{sidewaystable}
 
 %----------------------------------------------------------------------------
-\subsection{Algorithms and code (algorithm, algpseudocode, listings)}\label{app:latex:code}
+\subsection{Algorithms (algorithm, algpseudocode)}\label{app:latex:alg}
 \begin{algorithm}[!ht]
   \caption{Revocation with a freshness check}\label{alg:latex:revoke}
   \begin{algorithmic}[1]
@@ -273,13 +273,184 @@ Put one before a section whose text must not be preceded by stray floats.
   \end{algorithmic}
 \end{algorithm}
 
-\begin{lstlisting}[language=Python, caption={A code listing.}, label={lst:latex:verify}]
+%----------------------------------------------------------------------------
+\subsection{Code with syntax highlighting (minted, listings)}\label{app:latex:code}
+Common languages go through minted, which uses the Pygments highlighter: wrap \texttt{\textbackslash begin\{minted\}\{<language>\}} in a \texttt{listing} float for a caption, or use \mintinline{python}{print("inline")} in running text.
+Pygments knows over 500 languages; \texttt{pygmentize -L lexers} lists their names.
+Languages Pygments does not know (Refinery, Tamarin, Lean) go through listings with the styles in \texttt{include/code-languages.tex}: \lstinline[style=lean]{theorem le_succ (n : Nat) : n <= n + 1 := by omega}.
+Inline listings must be ASCII under XeLaTeX; Unicode notation such as $\forall$ or $\mathbb{N}$ works in block listings (\cref{lst:latex:lean}).
+Both are numbered as listings in one sequence, from \cref{lst:latex:refinery} to \cref{lst:latex:sql}.
+
+\paragraph{Refinery, Tamarin and Lean (listings).}
+\Cref{lst:latex:refinery,lst:latex:tamarin,lst:latex:lean} use the listings styles \texttt{refinery}, \texttt{tamarin} and \texttt{lean}.
+\begin{lstlisting}[style=refinery, float=tbp, morekeywords={[2]Credential,Issuer,Holder}, caption={Refinery: a credential metamodel with an error predicate.}, label={lst:latex:refinery}]
+class Issuer.
+class Holder.
+class Credential {
+    Issuer[1] issuedBy
+    Holder[1] heldBy
+    contains Credential[0..1] revokes
+}
+
+pred selfRevoked(Credential c) <->
+    revokes(c, c).
+
+error unissued(Credential c) <->
+    !issuedBy(c, _).
+\end{lstlisting}
+
+\begin{lstlisting}[style=tamarin, float=tbp, caption={Tamarin: revocation as a multiset-rewriting rule and a lemma.}, label={lst:latex:tamarin}]
+theory Revocation
+begin
+builtins: signing
+
+rule Revoke:
+    [ !Issued($I, cred), Fr(~nonce) ]
+  --[ Revoked(cred) ]->
+    [ !RevokedFact(cred), Out(sign(<cred, ~nonce>, ~sk)) ]
+
+lemma revoked_never_accepted:
+  "All cred #i #j. Revoked(cred) @ i & Accepted(cred) @ j ==> j < i"
+end
+\end{lstlisting}
+
+\begin{lstlisting}[style=lean, float=tbp, caption={Lean 4: the registry only grows (\cref{inv:latex:monotone}).}, label={lst:latex:lean}]
+-- A registry is a list of revoked credential identifiers.
+def Registry := List Nat
+
+def revoke (r : Registry) (c : Nat) : Registry := c :: r
+
+theorem revoke_monotone (r : Registry) (c x : Nat) :
+    x ∈ r → x ∈ revoke r c := by
+  intro h
+  exact List.mem_cons_of_mem c h
+\end{lstlisting}
+
+\FloatBarrier
+\paragraph{Common languages (minted).}
+\Cref{lst:latex:verify} to \cref{lst:latex:sql} use the Pygments lexers \texttt{python}, \texttt{rust}, \texttt{go}, \texttt{java}, \texttt{typescript}, \texttt{solidity}, \texttt{json}, \texttt{yaml}, \texttt{bash} and \texttt{sql}.
+\begin{listing}[!ht]
+\begin{minted}{python}
 def verify(credential, registry):
     # Reject revoked credentials before checking the signature.
     if credential.id in registry.revoked:
         return False
     return credential.signature_valid()
-\end{lstlisting}
+\end{minted}
+\caption{Python.}\label{lst:latex:verify}
+\end{listing}
+
+\begin{listing}[!ht]
+\begin{minted}{rust}
+/// Appends a credential to the registry; revocation is final.
+pub fn revoke(registry: &mut HashSet<CredentialId>, id: CredentialId) -> bool {
+    registry.insert(id)
+}
+\end{minted}
+\caption{Rust.}\label{lst:latex:rust}
+\end{listing}
+
+\begin{listing}[!ht]
+\begin{minted}{go}
+// IsRevoked reports whether the chaincode state marks the credential as revoked.
+func (s *Registry) IsRevoked(ctx contractapi.TransactionContextInterface, id string) (bool, error) {
+	v, err := ctx.GetStub().GetState("revoked/" + id)
+	return v != nil, err
+}
+\end{minted}
+\caption{Go (a Hyperledger Fabric chaincode function).}\label{lst:latex:go}
+\end{listing}
+
+\begin{listing}[!ht]
+\begin{minted}{java}
+public record Credential(String id, String issuer, Instant expires) {
+    public boolean isValidAt(Instant t, Set<String> revoked) {
+        return t.isBefore(expires) && !revoked.contains(id);
+    }
+}
+\end{minted}
+\caption{Java.}\label{lst:latex:java}
+\end{listing}
+
+\begin{listing}[!ht]
+\begin{minted}{typescript}
+interface StatusEntry { id: string; revoked: boolean }
+
+export async function check(url: string, id: string): Promise<boolean> {
+  const list: StatusEntry[] = await (await fetch(url)).json();
+  return list.some((e) => e.id === id && e.revoked);
+}
+\end{minted}
+\caption{TypeScript.}\label{lst:latex:ts}
+\end{listing}
+
+\begin{listing}[!ht]
+\begin{minted}{solidity}
+contract RevocationRegistry {
+    mapping(bytes32 => bool) public revoked;
+    event Revoked(bytes32 indexed id);
+
+    function revoke(bytes32 id) external {
+        require(!revoked[id], "already revoked");
+        revoked[id] = true;
+        emit Revoked(id);
+    }
+}
+\end{minted}
+\caption{Solidity.}\label{lst:latex:solidity}
+\end{listing}
+
+\FloatBarrier
+\begin{listing}[!ht]
+\begin{minted}{json}
+{
+  "@context": ["https://www.w3.org/ns/credentials/v2"],
+  "type": ["VerifiableCredential"],
+  "issuer": "did:example:university",
+  "credentialStatus": { "type": "BitstringStatusListEntry", "statusListIndex": "94567" }
+}
+\end{minted}
+\caption{JSON (a verifiable credential).}\label{lst:latex:json}
+\end{listing}
+
+\begin{listing}[!ht]
+\begin{minted}{yaml}
+# docker-compose.yml: one registry node for the measurements
+services:
+  registry:
+    image: ghcr.io/example/registry:1.4
+    ports: ["8080:8080"]
+    environment:
+      LOG_LEVEL: info
+\end{minted}
+\caption{YAML.}\label{lst:latex:yaml}
+\end{listing}
+
+\begin{listing}[!ht]
+\begin{minted}{bash}
+#!/usr/bin/env bash
+# Run each benchmark size five times and collect the timings.
+for n in 10 100 1000 10000; do
+  for run in {1..5}; do
+    ./bench --credentials "$n" >> "results/$n.csv"
+  done
+done
+\end{minted}
+\caption{Bash.}\label{lst:latex:bash}
+\end{listing}
+
+\begin{listing}[!ht]
+\begin{minted}{sql}
+-- Credentials revoked in the last day, per issuer.
+SELECT issuer, COUNT(*) AS revoked
+FROM revocations
+WHERE revoked_at > NOW() - INTERVAL '1 day'
+GROUP BY issuer
+ORDER BY revoked DESC;
+\end{minted}
+\caption{SQL.}\label{lst:latex:sql}
+\end{listing}
+\FloatBarrier
 
 %----------------------------------------------------------------------------
 \subsection{Text (csquotes, ulem, xcolor, xspace, babel, setspace, lineno, comment)}\label{app:latex:text}
@@ -324,7 +495,8 @@ This sentence is in the source but not in the PDF.
   graphicx, svg, tikz, pgfplots, subcaption, wrapfig, placeins & \cref{app:latex:figures} \\
   tcolorbox & \cref{app:latex:boxes} \\
   booktabs, array, tabularx, xltabular, multirow, makecell, rotating & \cref{app:latex:tables} \\
-  algorithm, algpseudocode, listings & \cref{app:latex:code} \\
+  algorithm, algpseudocode & \cref{app:latex:alg} \\
+  listings, minted & \cref{app:latex:code} \\
   csquotes, ulem, xcolor, xspace, babel, setspace, lineno, comment & \cref{app:latex:text} \\
   caption & Every caption: bold labels, hanging indent \\
   anysize & Page margins, set with \texttt{\textbackslash marginsize} in \texttt{thesis.tex} \\

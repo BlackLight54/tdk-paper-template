@@ -1,0 +1,131 @@
+%--------------------------------------------------------------------------------------
+% Syntax highlighting
+%--------------------------------------------------------------------------------------
+% Two packages, one look:
+%  - minted (Pygments) for common languages: \begin{minted}{python} ... \end{minted}
+%    inside a listing float, or \mintinline{rust}{...} in text. Needs shell escape,
+%    which Overleaf enables; locally compile with -shell-escape.
+%  - listings for languages Pygments does not know: Refinery, Tamarin, Lean.
+%    \begin{lstlisting}[style=refinery, caption=..., label=lst:...] ... \end{lstlisting}
+% Both are numbered "Listing N" in one sequence and both work with \cref.
+
+% Colors of the Pygments default style, so listings and minted code look alike.
+\definecolor{codeKeyword}{HTML}{008000}
+\definecolor{codeType}{HTML}{B00040}
+\definecolor{codeString}{HTML}{BA2121}
+\definecolor{codeComment}{HTML}{3D7B7B}
+\definecolor{codeEmph}{HTML}{0000FF}
+
+% minted: the same frame, background and size as the listings in include/preamble.tex.
+\setminted{
+  style=default,
+  fontsize=\scriptsize,
+  frame=single,
+  bgcolor=lightgray,
+  breaklines=true,
+  tabsize=2,
+}
+\setmintedinline{bgcolor={}}
+
+% One counter for lstlisting and minted's listing float.
+\makeatletter
+\AtBeginDocument{%
+  \let\c@listing\c@lstlisting
+  \renewcommand{\thelisting}{\thelstlisting}%
+}
+\makeatother
+\crefname{listing}{Listing}{Listings}
+
+%--------------------------------------------------------------------------------------
+% Refinery (https://refinery.tools), after the SoSyM 2026 paper's definition.
+% Add the metamodel's own type names per listing: [style=refinery, morekeywords=[2]{Credential}]
+\lstdefinelanguage{refinery}{
+  morekeywords={class,abstract,extends,contains,refers,opposite,container,
+    enum,pred,error,shadow,propagation,rule,pattern,
+    must,may,true,false,unknown,count,exists,equals,default,
+    scope,node,import,int,real,string,boolean},
+  morekeywords=[2]{},
+  alsoletter={_},
+  sensitive=true,
+  morecomment=[l]{//}, morecomment=[s]{/*}{*/}, morecomment=[l]{\%},
+  morestring=[b]{"},
+}
+\lstdefinestyle{refinery}{
+  language=refinery,
+  keywordstyle=\color{codeKeyword}\bfseries,
+  keywordstyle=[2]\color{codeType}\bfseries,
+  literate=%
+    {==>}{$\Longrightarrow$}3
+    {<->}{$\longleftrightarrow$}3
+    {<=}{$\leqslant$}1
+    {>=}{$\geqslant$}1
+    {!=}{{$\neq$}}1,
+}
+
+%--------------------------------------------------------------------------------------
+% Tamarin prover theories (.spthy), after Smuk Ferenc's TDK definition.
+\lstdefinelanguage{tamarin}{
+  morekeywords={theory,begin,end,builtins,functions,equations,rule,lemma,restriction,
+    let,in,All,Ex,not,exists-trace,all-traces,reuse,use_induction,sources,
+    heuristic,tactic,predicates,macros,private},
+  morekeywords=[2]{Fr,In,Out,K},
+  alsoletter={-},
+  sensitive=true,
+  morecomment=[l]{//}, morecomment=[s]{/*}{*/},
+  morestring=[b]{"},
+}
+\lstdefinestyle{tamarin}{
+  language=tamarin,
+  keywordstyle=\color{codeKeyword}\bfseries,
+  keywordstyle=[2]\color{codeType}\itshape,
+  literate=%
+    {-->}{$\longrightarrow$}3
+    {==>}{$\Longrightarrow$}3
+    {--[}{{-\hspace{-0.2em}-[}}3
+    {]->}{{]\hspace{-0.2em}$\rightarrow$}}3
+    {@}{{$@$}}1
+    {<=>}{$\Leftrightarrow$}3,
+}
+
+%--------------------------------------------------------------------------------------
+% Lean 4. Unicode notation is typeset as math, so it renders with every engine.
+% Only in block listings: \lstinline with Unicode characters fails under XeLaTeX.
+\lstdefinelanguage{lean}{
+  morekeywords={theorem,lemma,def,example,abbrev,structure,inductive,class,instance,
+    where,deriving,namespace,section,end,open,variable,import,universe,noncomputable,
+    fun,match,with,if,then,else,let,have,show,from,by,at,calc,do,return,
+    Type,Prop,Sort},
+  morekeywords=[2]{intro,intros,exact,apply,refine,rw,simp,simp_all,omega,decide,
+    cases,induction,rcases,obtain,constructor,unfold,contradiction,assumption,
+    exfalso,left,right,use,linarith,norm_num,aesop,trivial,rfl,sorry},
+  alsoletter={_'.},
+  sensitive=true,
+  morecomment=[l]{--}, morecomment=[n]{/-}{-/},
+  morestring=[b]{"},
+}
+% XeLaTeX and LuaLaTeX print Lean's Unicode directly in DejaVu Sans Mono, which has the
+% glyphs (Latin Modern Mono does not); pdfLaTeX typesets them as math instead.
+\ifxetexorluatex
+\newfontfamily\leanfont{DejaVuSansMono.ttf}[Scale=MatchLowercase, BoldFont=DejaVuSansMono-Bold.ttf,
+  ItalicFont=DejaVuSansMono-Oblique.ttf, BoldItalicFont=DejaVuSansMono-BoldOblique.ttf]
+\lstdefinestyle{lean}{
+  language=lean,
+  basicstyle=\scriptsize\leanfont,
+  keywordstyle=\color{codeKeyword}\bfseries,
+  keywordstyle=[2]\color{codeEmph},
+  literate={},
+}
+\else
+\lstdefinestyle{lean}{
+  language=lean,
+  keywordstyle=\color{codeKeyword}\bfseries,
+  keywordstyle=[2]\color{codeEmph},
+  literate=%
+    {∀}{{$\forall$}}1 {∃}{{$\exists$}}1 {λ}{{$\lambda$}}1 {¬}{{$\neg$}}1
+    {→}{{$\to$}}1 {←}{{$\leftarrow$}}1 {↔}{{$\leftrightarrow$}}1
+    {∧}{{$\land$}}1 {∨}{{$\lor$}}1 {≤}{{$\le$}}1 {≥}{{$\ge$}}1 {≠}{{$\ne$}}1
+    {∈}{{$\in$}}1 {∉}{{$\notin$}}1 {⊆}{{$\subseteq$}}1 {∪}{{$\cup$}}1 {∩}{{$\cap$}}1
+    {⟨}{{$\langle$}}1 {⟩}{{$\rangle$}}1 {×}{{$\times$}}1 {·}{{$\cdot$}}1
+    {ℕ}{{$\mathbb{N}$}}1 {ℤ}{{$\mathbb{Z}$}}1 {⊢}{{$\vdash$}}1 {▸}{{$\triangleright$}}1,
+}
+\fi
