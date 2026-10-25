@@ -118,6 +118,12 @@
 \newcommand{\code}[1]{{\upshape\ttfamily\scriptsize\indent #1}}
 \newcommand{\doi}[1]{DOI: \href{http://dx.doi.org/\detokenize{#1}}{\raggedright{\texttt{\detokenize{#1}}}}} % A hivatkozások közt így könnyebb DOI-t megadni.
 
+% English abbreviations; include/thesis-en.tex defines the full set, these keep
+% Hungarian builds compiling when a text uses them.
+\providecommand{\eg}{e.g.\@\xspace}
+\providecommand{\ie}{i.e.\@\xspace}
+\providecommand{\etal}{et al.\@\xspace}
+
 \DeclareMathOperator*{\argmax}{arg\,max}
 %\DeclareMathOperator*[1]{\floor}{arg\,max}
 \DeclareMathOperator{\sign}{sgn}
