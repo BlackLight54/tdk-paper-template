@@ -1,0 +1,38 @@
+%----------------------------------------------------------------------------
+\chapter{Approach}\label{chap:approach}
+%----------------------------------------------------------------------------
+\todo[inline]{About 8--10 pages, the core of the paper. Criteria D/1 (originality) and D/2 (technical soundness, 0--5): every claim needs an argument, a proof, or a measurement. Rename the chapter after your method.}
+
+\section{Overview}
+TODO Walk through \cref{fig:architecture} with the running example.
+
+\begin{figure}[!ht]
+  \centering
+  \begin{tikzpicture}[
+      node distance=8mm and 14mm,
+      comp/.style={draw, rounded corners, fill=blue!8, minimum width=28mm, minimum height=10mm, align=center, font=\small},
+      ext/.style={comp, fill=gray!12, dashed}]
+    \node[ext]  (user) {Actor (TODO)};
+    \node[comp, right=of user] (core) {Component 1\\\footnotesize(contribution C1)};
+    \node[comp, right=of core] (store) {Component 2};
+    \node[comp, below=of core] (check) {Component 3};
+    \draw[-Stealth] (user) -- node[above, font=\footnotesize]{request} (core);
+    \draw[-Stealth] (core) -- node[above, font=\footnotesize]{write} (store);
+    \draw[-Stealth] (core) -- node[right, font=\footnotesize]{verify} (check);
+    \begin{scope}[on background layer]
+      \node[draw, dotted, inner sep=3mm, fit=(core)(store)(check), label={[font=\footnotesize]above right:System boundary}] {};
+    \end{scope}
+  \end{tikzpicture}
+  \caption{Architecture of the approach. TODO Replace with your own.}
+  \label{fig:architecture}
+\end{figure}
+
+\section{TODO Model or design}
+TODO The formal model or the design decisions, each with the alternative you rejected and why.
+
+\section{TODO Properties}
+TODO What your approach guarantees, stated precisely, with the argument for each.
+
+\begin{theorem}[TODO]\label{thm:main}
+TODO
+\end{theorem}

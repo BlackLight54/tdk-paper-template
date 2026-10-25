@@ -119,3 +119,66 @@
 
 \author{\vikszerzo}
 \title{\viktitle}
+
+%--------------------------------------------------------------------------------------
+% Todo notes
+%--------------------------------------------------------------------------------------
+% The page margins are narrow (see \marginsize in thesis.tex), so margin notes get
+% squeezed. Prefer \todo[inline]{...} for anything longer than a few words.
+\setlength{\marginparwidth}{13mm}
+\newcommand{\todoinline}[1]{\todo[inline]{#1}}
+
+
+%--------------------------------------------------------------------------------------
+% Acronyms (acro)
+%--------------------------------------------------------------------------------------
+\acsetup{
+  make-links = true,     % \ac links to the list of acronyms
+  list/heading = chapter*,
+}
+\input{content/acronyms}
+
+
+%--------------------------------------------------------------------------------------
+% Colored boxes (tcolorbox)
+%--------------------------------------------------------------------------------------
+% theo: top-ruled box with a detached title, from Bertalan's BPM paper.
+% Usage: \begin{tcolorbox}[theo=blue, title={Key insight}] ... \end{tcolorbox}
+\tcbset{%
+    theo/.style={%
+        enhanced,
+        breakable = true,
+        sharp corners,
+        before skip=20pt,
+        toprule=1pt, rightrule=0pt, bottomrule=0pt, leftrule=0pt,
+        colback=#1!15, colframe=#1!50, coltitle=#1!60!black,
+        detach title,
+        overlay unbroken and first ={
+            \node[minimum width=1cm, anchor=south west, font=\bfseries]
+               at (frame.north west) {\tcbtitle};
+        }
+    }
+}
+
+% Ready-made boxes for the common cases. The optional argument is the title.
+\newtcolorbox{infobox}[1][]{enhanced, breakable, colback=blue!5, colframe=blue!50!black, fonttitle=\bfseries, title={#1}}
+\newtcolorbox{warnbox}[1][]{enhanced, breakable, colback=orange!8, colframe=orange!70!black, fonttitle=\bfseries, title={#1}}
+\newtcolorbox{keybox}[1][]{theo=teal, title={#1}}
+
+
+%--------------------------------------------------------------------------------------
+% Cross-references (cleveref)
+%--------------------------------------------------------------------------------------
+% Write \cref{fig:overview} instead of Figure~\ref{fig:overview}; \Cref at sentence start.
+% Names for the ntheorem environments defined above; cleveref knows the standard ones.
+\crefname{definition}{Definition}{Definitions}
+\crefname{theorem}{Theorem}{Theorems}
+\crefname{example}{Example}{Examples}
+\crefname{lstlisting}{Listing}{Listings}
+\crefname{rq}{RQ}{RQs}
+
+% Research questions: \begin{rqlist} \item\label{rq:scale} ... \end{rqlist}, then \cref{rq:scale}.
+\newlist{rqlist}{enumerate}{1}
+\setlist[rqlist]{label=\textbf{RQ\arabic*}, ref=\arabic*, leftmargin=*}
+\crefalias{rqlisti}{rq}
+\creflabelformat{rq}{#2#1#3}

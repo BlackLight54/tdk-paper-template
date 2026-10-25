@@ -15,27 +15,87 @@
 \fi
 
 \usepackage[english,magyar]{babel} % Alapértelmezés szerint utoljára definiált nyelv lesz aktív, de később külön beállítjuk az aktív nyelvet.
+\usepackage[autostyle=true]{csquotes} % \enquote{...}
 
-%\usepackage{cmap}
+%--------------------------------------------------------------------------------------
+% Math and theorems
+%--------------------------------------------------------------------------------------
 \usepackage{amsfonts,amsmath,amssymb} % Mathematical symbols.
-%\usepackage[ruled,boxed,resetcount,linesnumbered]{algorithm2e} % For pseudocodes. % beware: this is not compatible with LuaLaTeX, see http://tex.stackexchange.com/questions/34814/lualatex-and-algorithm2e
-\usepackage{booktabs} % For publication quality tables for LaTeX
-\usepackage{graphicx}
+\usepackage[amsmath,thmmarks]{ntheorem} % Theorem-like environments. Do not load amsthm next to it.
 
-%\usepackage{fancyhdr}
-%\usepackage{lastpage}
-
+%--------------------------------------------------------------------------------------
+% Page layout and typography
+%--------------------------------------------------------------------------------------
 \usepackage{anysize}
-%\usepackage{sectsty}
 \usepackage{setspace} % For setting line spacing
+\usepackage{emptypage} % No page number on empty pages.
+\usepackage{microtype}
+\usepackage{xspace}
+\usepackage[normalem]{ulem} % \uline, \sout; normalem keeps \emph italic.
+\usepackage{lineno} % \linenumbers for review drafts.
+
+%--------------------------------------------------------------------------------------
+% Colors, figures, diagrams
+%--------------------------------------------------------------------------------------
+\usepackage[table]{xcolor} % Load before tikz, todonotes and tcolorbox so the options stick.
+\usepackage{graphicx}
+\usepackage[hang]{caption}
+\usepackage{subcaption}
+\usepackage{wrapfig}
+\usepackage{rotating}
+\usepackage{placeins} % \FloatBarrier
+
+% SVG figures: \includesvg[width=\linewidth]{figures/foo}. Needs shell escape and Inkscape,
+% both available on Overleaf. Locally run the compiler with -shell-escape.
+\usepackage[inkscapearea=drawing,inkscapelatex=false]{svg}
+
+\usepackage{tikz}
+\usetikzlibrary{
+  arrows.meta, automata, backgrounds, calc, decorations.pathreplacing, fit,
+  patterns, positioning, quotes, shadows, shapes.geometric, shapes.misc,
+  shapes.multipart, babel}
+\usepackage{pgfplots}
+\pgfplotsset{compat=1.18}
+
+% Colored boxes. [most] loads skins, breakable, listings, theorems, etc.
+\usepackage[most]{tcolorbox}
+
+%--------------------------------------------------------------------------------------
+% Tables and lists
+%--------------------------------------------------------------------------------------
+\usepackage{booktabs} % For publication quality tables for LaTeX
+\usepackage{array}
+\usepackage{tabularx}
+\usepackage{xltabular} % tabularx across pages; loads longtable.
+\usepackage{multirow}
+\usepackage{makecell}
+\usepackage[inline]{enumitem} % enumerate*, itemize* for inline lists.
+
+%--------------------------------------------------------------------------------------
+% Code and algorithms
+%--------------------------------------------------------------------------------------
+\usepackage{listings} % For source code snippets.
+\usepackage{algorithm}
+\usepackage{algpseudocode}
+\usepackage{comment}
+
+%--------------------------------------------------------------------------------------
+% Notes, acronyms, citations, links
+%--------------------------------------------------------------------------------------
+% Add `disable` (or `final` to \documentclass) to hide every todo in the submitted version.
+\usepackage[colorinlistoftodos]{todonotes}
+
+\usepackage{acro} % Acronyms: define them in content/acronyms.tex, use \ac{key}.
+
+% Citations: natbib + BibTeX. \cite{a,b,c} prints [1-3]; \citet{a} prints "Lamport [1]".
+\usepackage[numbers,sort&compress]{natbib}
+
+\usepackage{fontawesome5}
 
 \usepackage[unicode]{hyperref} % For hyperlinks in the generated document.
-\usepackage{xcolor}
-\usepackage{listings} % For source code snippets.
-
-\usepackage[amsmath,thmmarks]{ntheorem} % Theorem-like environments.
-
-\usepackage[hang]{caption}
+\usepackage{bookmark}
+\usepackage{orcidlink} % Loads hyperref itself, so it must come after the line above.
+\usepackage[nameinlink,noabbrev,capitalise]{cleveref} % \cref{fig:x} -> "Figure 1.1". Keep after hyperref and ntheorem.
 
 
 \newcommand{\selecthungarian}{
@@ -58,6 +118,3 @@
 	\renewcommand{\subsectionautorefname}{Section}
 	\renewcommand{\subsubsectionautorefname}{Section}
 }
-
-\usepackage[numbers]{natbib}
-\usepackage{xspace}

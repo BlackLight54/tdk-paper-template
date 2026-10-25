@@ -1,7 +1,43 @@
 %----------------------------------------------------------------------------
-\chapter{\bevezetes}
+\chapter{Introduction}\label{chap:intro}
 %----------------------------------------------------------------------------
+\todo[inline]{About 3--4 pages. Reviewer criteria C (relevance, 0--8) and E (introduction and evaluation, 0--8): the introduction must give an overview of the field, state the problem, and state the main contribution. A reviewer who reads only this chapter and \cref{fig:overview} should be able to say what you did and why it matters.}
 
-A bevezető tartalmazza a diplomaterv-kiírás elemzését, történelmi előzményeit, a feladat indokoltságát (a motiváció leírását), az eddigi megoldásokat, és ennek tükrében a hallgató megoldásának összefoglalását.
+\paragraph{Context.}
+TODO One paragraph: the setting and why it matters now. Who has the problem, and what is changing (a new regulation, a new platform, a new attack)?
 
-A bevezető szokás szerint a diplomaterv felépítésével záródik, azaz annak rövid leírásával, hogy melyik fejezet mivel foglalkozik.
+\paragraph{Problem.}
+TODO One paragraph: the concrete problem, illustrated with a running example that later chapters reuse. End with a one-sentence problem statement.
+
+\paragraph{Gap.}
+TODO One paragraph: what existing approaches do and the specific thing none of them does. Point to \cref{chap:related} for the full comparison.
+
+\begin{figure}[!ht]
+  \centering
+  \begin{tikzpicture}[
+      node distance=6mm and 10mm,
+      col/.style={draw, rounded corners, minimum width=38mm, minimum height=26mm, align=center, font=\small},
+      lbl/.style={font=\small\bfseries, above=1mm}]
+    \node[col, fill=red!8]   (problem) {Running example\\[1mm]\footnotesize what goes wrong today\\\footnotesize(TODO)};
+    \node[col, fill=blue!8, right=of problem]  (approach) {Approach\\[1mm]\footnotesize C1: TODO\\\footnotesize C2: TODO\\\footnotesize C3: TODO};
+    \node[col, fill=green!8, right=of approach] (result) {Result\\[1mm]\footnotesize the guarantee or number\\\footnotesize you can claim (TODO)};
+    \node[lbl] at (problem.north)  {Problem};
+    \node[lbl] at (approach.north) {This work};
+    \node[lbl] at (result.north)   {Evaluation};
+    \draw[-Stealth, thick] (problem) -- (approach);
+    \draw[-Stealth, thick] (approach) -- (result);
+  \end{tikzpicture}
+  \caption{Leading figure: the problem, the contributions, and the headline result in one picture. TODO Replace with your own; it should be understandable without reading the text.}
+  \label{fig:overview}
+\end{figure}
+
+\paragraph{Contributions.}
+TODO The contributions, as a numbered list. Each item is a claim a reviewer can check, with a pointer to where it is supported.
+\begin{enumerate}[label=\textbf{C\arabic*}]
+  \item TODO A model or method (\cref{chap:approach}).
+  \item TODO An implementation (\cref{chap:implementation}).
+  \item TODO An evaluation, including scalability measurements (\cref{chap:evaluation}).
+\end{enumerate}
+
+\paragraph{Structure.}
+\Cref{chap:background} introduces the background, \cref{chap:related} compares related work and identifies the gap, \cref{chap:approach} presents the approach, \cref{chap:implementation} the implementation, \cref{chap:evaluation} the evaluation, and \cref{chap:conclusion} concludes with future work.
