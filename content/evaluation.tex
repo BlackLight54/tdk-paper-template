@@ -11,12 +11,18 @@
 \end{rqlist}
 
 \section{Setup}
-TODO Hardware, software versions, datasets or workload generators, number of repetitions, and how to rerun the measurements from the repository.
-
-\section{Correctness (RQ1)}
+\beat{how the measurements were made, so that each can be checked}{hardware, software versions, workloads, repetitions, the rerun command}{the example as the base workload, scaled up for \cref{rq:scale}}{the results}
 TODO
 
+\section{Correctness (RQ1)}
+\beat{that the approach is correct on the example and on every requirement case}{test, proof or model-checking results}{the scenario's outcome, before and after}{scalability}
+TODO
+\begin{runningexample}[solved]
+TODO What happens in the scenario with this work, compared with what went wrong in \cref{chap:intro}.
+\end{runningexample}
+
 \section{Scalability (RQ2)}
+\beat{how the cost grows with the input}{\cref{fig:scalability}}{the example multiplied to $n$ participants or items}{robustness}
 TODO Describe \cref{fig:scalability}: what grows, how fast, and where the limit is. Put the better result on top: plot a metric where higher is better (\cref{fig:scalability-throughput}), or reverse the axis of one where lower is better (\cref{fig:scalability-time}).
 
 \begin{figure}[!ht]
@@ -54,7 +60,9 @@ TODO Describe \cref{fig:scalability}: what grows, how fast, and where the limit 
 \end{figure}
 
 \section{Robustness (RQ3)}
+\beat{how the system behaves under faults, attacks or load spikes}{fault-injection or attack results}{the example under \cref{thr:example}}{the threats to validity}
 TODO
 
 \section{Threats to validity}
-TODO What could make the results wrong or not generalise, and what you did about each.
+\beat{what could make the results wrong or not generalise, and what was done about each}{the mitigations}{whether the example is representative of real use}{related work}
+TODO

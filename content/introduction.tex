@@ -5,13 +5,19 @@
 \todo[inline]{About 3--4 pages. Criteria C and E. \textbf{Relevance}: open with why the problem matters now and to whom. \textbf{Non-triviality}: show why the obvious solutions fail. \textbf{Novelty}: state the contributions as checkable claims. A reviewer who reads only this chapter and \cref{fig:overview} should be able to say what you did and why it matters.}
 
 \paragraph{Context.}
-TODO One paragraph: the setting and why it matters now. Who has the problem, and what is changing (a new regulation, a new platform, a new attack)?
+\beat{why the field matters now}{a trend, a regulation or an incident, cited}{not yet introduced}{the problem}
+TODO
 
 \paragraph{Problem.}
-TODO One paragraph: the concrete problem, illustrated with a running example that later chapters reuse. End with a one-sentence problem statement.
+\beat{the concrete problem, ending in a one-sentence problem statement}{the running example}{introduced here: who the actors are, what they want to do, and what goes wrong}{the requirements}
+TODO
+\begin{runningexample}
+TODO Two or three sentences: the actors, what they want to do, and what goes wrong today. Every chapter returns to this scenario, so choose one small enough to follow and rich enough to show every requirement.
+\end{runningexample}
 
 \paragraph{Requirements.}
-TODO The requirements a solution must meet, each derived from the running example. They are the rows of the gap matrix in \cref{chap:related} and the yardstick of \cref{chap:evaluation}.
+\beat{what a solution must do}{one requirement per failure of the example; they are the rows of the gap matrix (\cref{chap:related}) and the yardstick of \cref{chap:evaluation}}{the part of the scenario each requirement comes from}{the gap}
+TODO
 \begin{requirements}
   \item\label{req:first} TODO A property the running example needs, stated so it can be checked.
   \item\label{req:second} TODO A second requirement.
@@ -19,7 +25,8 @@ TODO The requirements a solution must meet, each derived from the running exampl
 \end{requirements}
 
 \paragraph{Gap.}
-TODO One paragraph: what existing approaches do and which requirements none of them meets together. The full comparison comes after the evaluation (\cref{chap:related}), so this paragraph has to carry the novelty claim on its own.
+\beat{that no existing approach meets the requirements together; the full comparison comes after the evaluation (\cref{chap:related}), so this paragraph carries the novelty claim on its own}{the closest approaches, cited}{what the closest approach does with the example, and where it fails}{the contributions}
+TODO
 
 \begin{figure}[!ht]
   \centering
@@ -27,7 +34,7 @@ TODO One paragraph: what existing approaches do and which requirements none of t
       node distance=6mm and 10mm,
       col/.style={draw, rounded corners, minimum width=38mm, minimum height=26mm, align=center, font=\small},
       lbl/.style={font=\small\bfseries, above=1mm}]
-    \node[col, fill=red!8]   (problem) {Running example\\[1mm]\footnotesize what goes wrong today\\\footnotesize(TODO)};
+    \node[col, fill=red!8]   (problem) {\exname\\[1mm]\footnotesize what goes wrong today\\\footnotesize(TODO)};
     \node[col, fill=blue!8, right=of problem]  (approach) {Approach\\[1mm]\footnotesize C1: TODO\\\footnotesize C2: TODO\\\footnotesize C3: TODO};
     \node[col, fill=green!8, right=of approach] (result) {Result\\[1mm]\footnotesize the guarantee or number\\\footnotesize you can claim (TODO)};
     \node[lbl] at (problem.north)  {Problem};
@@ -41,7 +48,8 @@ TODO One paragraph: what existing approaches do and which requirements none of t
 \end{figure}
 
 \paragraph{Contributions.}
-TODO The contributions, as a numbered list. Each item is a claim a reviewer can check, with a pointer to where it is supported.
+\beat{what this work claims, as checkable items with pointers to their support}{the chapters behind each contribution}{\cref{fig:overview} shows the example solved}{the structure of the paper}
+TODO
 \begin{contributions}
   \item\label{c:method} TODO A model or method (\cref{chap:approach}).
   \item\label{c:impl} TODO An implementation (\cref{chap:implementation}).

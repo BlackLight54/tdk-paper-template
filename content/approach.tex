@@ -4,7 +4,11 @@
 \todo[inline]{About 8--10 pages, the core of the paper. Criteria D/1 and D/2 (0--10 together). \textbf{Correctness}: every claim needs a proof, a mechanised proof, or a measurement; state assumptions explicitly. \textbf{Novelty}: separate what you built from what you reused. \textbf{Non-triviality}: name the hard part and explain why the simple design does not work. Rename the chapter after your method.}
 
 \section{Overview}
-TODO Walk through \cref{fig:architecture} with the running example.
+\beat{how the approach works end to end}{\cref{fig:architecture}}{the example walked through the figure, component by component}{the model}
+TODO
+\begin{runningexample}[through the approach]
+TODO The scenario step by step: which component handles which part of it, and what each produces.
+\end{runningexample}
 
 \begin{figure}[!ht]
   \centering
@@ -28,14 +32,20 @@ TODO Walk through \cref{fig:architecture} with the running example.
 \end{figure}
 
 \section{TODO Model or design}
-TODO The formal model or the design decisions, each with the alternative you rejected and why.
+\beat{the formal model or the design decisions}{each decision with the alternative rejected and why}{the example as an instance of the model}{the threat model}
+TODO
 
 \section{Threat model and guarantees}
-TODO Who the adversary is and what they can do, what you assume, and what your approach guarantees under those assumptions. Every guarantee needs an argument: a proof, a mechanised proof, or a measurement in \cref{chap:evaluation}.
+\beat{who the adversary is, what is assumed, and what the approach guarantees under those assumptions}{a proof, a mechanised proof, or a measurement in \cref{chap:evaluation} for every guarantee}{the attack on the example that the threat describes}{the implementation}
+TODO
 
 \begin{threats}
   \item\label{thr:example} TODO A malicious participant who ...
 \end{threats}
+
+\begin{runningexample}[under attack]
+TODO How \cref{thr:example} plays out in the scenario, and which guarantee stops it.
+\end{runningexample}
 
 \begin{assumptions}
   \item\label{asm:example} TODO The underlying signature scheme is unforgeable.

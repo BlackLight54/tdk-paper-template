@@ -173,6 +173,16 @@
 
 % Two kinds of notes: orange \todo for the student; blue \advisortodo for the advisors
 % (a draft to confirm, or a link to fill in). Both disappear with todonotes' disable option.
+% A beat: the plan of one paragraph (see the writing appendix). Prints as a student todo.
+%   \beat{what it establishes}{its evidence}{what the running example shows here}{what it leads to}
+\newcommand{\beat}[4]{\todo[inline, caption={Beat: #1}]{\textbf{Beat.} \textit{Establishes:} #1. \textit{Evidence:} #2. \textit{Running example:} #3. \textit{Leads to:} #4.}}
+
+% The running example, named once in thesis.tex (\exname) and revisited in every chapter.
+%   \begin{runningexample}[what this chapter adds] ... \end{runningexample}
+\newtcolorbox{runningexample}[1][]{enhanced, breakable, sharp corners, frame hidden,
+  colback=teal!5, borderline west={2pt}{0pt}{teal!60!black}, left=6pt, right=4pt, top=3pt, bottom=3pt,
+  before upper={{\raggedright\textbf{Running example, \exname\if\relax\detokenize{#1}\relax\else: #1\fi}\par}\smallskip}}
+
 % Marks a step where the student stops for the advisors' approval (lifecycle appendix).
 \newcommand{\gate}{\textcolor{red!70!black}{\textsc{gate}}}
 \newcommand{\advisortodo}[1]{\todo[inline, color=cyan!20, bordercolor=cyan!60!black]{\textbf{Advisor:} #1}}
