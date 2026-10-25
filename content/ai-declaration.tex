@@ -1,0 +1,45 @@
+%----------------------------------------------------------------------------
+\section{Hallgatói nyilatkozat generatív mesterséges intelligencia alkalmazásáról}\label{app:ai}
+%----------------------------------------------------------------------------
+% The faculty's form (docs/VIK_Generativ_MI_Hallgatoi_Nyilatkozat.docx), from
+% https://vik.bme.hu/page/1346/ ; a filled-in example is in docs/VIK_Generativ_MI_Pelda_Nyilatkozat_Szakdolgozathoz.pdf.
+% Keep the faculty's Hungarian wording; it is the form the faculty asks for.
+\todo[inline, caption={Fill in and sign the AI declaration.}]{Fill in the faculty's declaration on generative AI use. It is required for every thesis and the supervisor cannot waive it; the TDK call says nothing about AI, and we require it for the TDK too. Mark one box. For each use: the tool with its version, the affected parts (chapter, page, figure), the estimated share, and the essential part of the prompt; use -- for unused rows. Then give the overall share of the substantive work and justify it. The faculty's \href{https://vik.bme.hu/document/7193/original/Generativ_MI_P\%C3\%A9lda_Nyilatkozat_Szakdolgozathoz.pdf}{filled-in example} (also in \texttt{docs/}) adds a \emph{Magyarázat} row under a prompt to explain how a percentage was counted; do the same. Facts and conclusions taken from an AI answer must also be cited in the text (\cref{app:writing:ai}). Sign the printed page.}
+
+\selecthungarian
+\newcommand{\aibox}{$\square$}        % unmarked box
+\newcommand{\aiboxmarked}{$\boxtimes$} % marked box: swap it in for \aibox
+
+\noindent\aibox\enspace Nem használtam semmilyen generatív MI segédeszközt.
+
+\noindent\aibox\enspace Használtam generatív MI segédeszközt. Az MI-vel generált tartalmakat ellenőriztem, a generált kimenetek valóságtartalmáról meggyőződtem, az alábbi táblázatban megfelelően jelöltem minden használatot.
+
+\newcommand{\aiuse}[1]{#1 & -- & -- & -- \\* \textit{Prompt lényegi része} & \multicolumn{3}{>{\raggedright\arraybackslash}p{\dimexpr0.66\linewidth+4\tabcolsep\relax}}{--} \\ \midrule}
+{\small
+\begin{longtable}{>{\raggedright\arraybackslash}p{0.24\linewidth} >{\raggedright\arraybackslash}p{0.17\linewidth} >{\raggedright\arraybackslash}p{0.31\linewidth} >{\raggedright\arraybackslash}p{0.14\linewidth}}
+  \toprule
+  \textbf{Felhasználási módok} & \textbf{Generatív MI eszköz(ök) neve} & \textbf{Érintett részek (fejezet, oldalszám, hivatkozás)} & \textbf{Használat becsült aránya (felhasználási módonként)} \\
+  \midrule
+  \endhead
+  \aiuse{Irodalomkutatás}
+  \aiuse{Programkód generálása}
+  \aiuse{Új ötletek, megoldási javaslatok generálása}
+  \aiuse{Vázlat létrehozása (szövegstruktúra, vázlatpontok)}
+  \aiuse{Szövegblokkok létrehozása}
+  \aiuse{Képek generálása illusztrációs célból}
+  \aiuse{Adatvizualizáció, grafikonok generálása adatpontok alapján}
+  \aiuse{Prezentáció készítése}
+  \aiuse{Egyéb (nevezze meg)}
+  \multicolumn{3}{l}{\textbf{Összesített százalékos érték (a feladat érdemi részére nézve)}} & -- \\
+  \midrule
+  \multicolumn{4}{>{\raggedright\arraybackslash}p{\dimexpr0.86\linewidth+6\tabcolsep\relax}}{\textbf{Összesített érték rövid, szöveges indoklása:} TODO} \\
+  \bottomrule
+\end{longtable}
+}
+
+\noindent\textbf{Figyelem:} a fenti százalékértékektől függetlenül az MI-vel generált minden tartalomért a szerző a felelős!
+
+\bigskip
+\noindent Kelt: Budapest, \today\hfill\begin{tabular}[t]{c}\rule{5cm}{0.4pt}\\\szerzo\end{tabular}
+
+\selectthesislanguage
