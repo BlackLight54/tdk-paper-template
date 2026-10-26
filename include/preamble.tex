@@ -221,6 +221,13 @@
 \newcommand{\anchor}{\textcolor{red!70!black}{\textsc{anchor}}}
 \definecolor{official}{RGB}{255,243,205}
 \definecolor{anchorrow}{RGB}{252,228,228} % lifecycle rows that are anchors
+\definecolor{department}{RGB}{224,242,226} % lifecycle rows that are the department's own sessions
+% What is yours, in every figure: the FTSRG TDK Howto asks to keep your own contribution visibly apart
+% from prior work, and the leading figure is where the reviewer looks for it first. Use the `ours`
+% TikZ style on the nodes that are your contribution and say so in the caption.
+\definecolor{ours}{RGB}{200,60,20}
+\tikzset{ours/.style={draw=ours, line width=1.4pt, fill=ours!8}, prior/.style={draw=gray!70, fill=gray!10}}
+\newcommand{\department}{\textcolor{green!45!black}{\textsc{department}}}
 \newcommand{\official}{\textcolor{orange!80!black}{\textsc{official}}}
 \newcommand{\advisortodo}[1]{\todo[inline, color=cyan!20, bordercolor=cyan!60!black]{\textbf{Advisor:} #1}}
 

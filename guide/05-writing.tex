@@ -38,9 +38,11 @@ Write the argument before the prose. We plan papers in this order, and each step
       ]
       [{\textbf{3 Approach}}
         [{Booking as online colouring: a request is an interval, a room is a colour \textit{[Def. 3.1]}}]
+        [{Threat model: a front end may replay or reorder requests, the store is trusted, clocks drift by at most $\delta$; what is out of scope \textit{[A1--A3, T1--T2]}}]
         [{Theorem 3.1: the service never double-books \textit{[proof; Alloy model]}}]
         [{Theorem 3.2: rooms used $\le$ max overlap $+ 1$ \textit{[proof]}}]
         [{Theorem 3.3: liveness under crash and recovery \textit{[TLA+ model, TLC]}}]
+        [{Theorem 3.4: no booking is lost or duplicated under a replaying front end \textit{[TLA+ model; A1--A3]}}]
         [{Example: a conflicting request pair and how the service rejects it}]
       ]
       [{\textbf{4 Implementation}}
@@ -99,7 +101,7 @@ Write the argument before the prose. We plan papers in this order, and each step
       [{\textbf{3 Approach}}
         [{Overview: how it works end to end \textit{[the architecture figure]}}]
         [{The formal model or the design decisions \textit{[each decision with the alternative rejected]}}]
-        [{Threat model: the adversary, the assumptions, the guarantees \textit{[a proof, a mechanised proof or a measurement per guarantee]}}]
+        [{Threat model: the adversary's capabilities, who is trusted, the cryptographic assumptions, what is out of scope, and the guarantees \textit{[a proof, a mechanised proof or a measurement per guarantee]}}]
       ]
       [{\textbf{4 Implementation}}
         [{What was built and how it realises the approach \textit{[components mapped to code; the archived artifact]}}]
@@ -127,7 +129,7 @@ Write the argument before the prose. We plan papers in this order, and each step
 \end{figure}
 
 \section{The leading figure (vezérábra)}\label{app:writing:figure}
-The leading figure (\tplref{fig:overview}) explains the central idea in one picture: the problem, the contributions, and the result. Decide what a reader should take away from it, draw that, and write the caption so that the figure stands without the text. Draft it early, in the research phase, and treat it as exploratory until the spine is agreed: many papers find their argument while drawing it. \Cref{fig:collage} shows the leading figures of four papers from our group.
+The leading figure (\tplref{fig:overview}) explains the central idea in one picture: the problem, the contributions, and the result. Decide what a reader should take away from it, draw that, and write the caption so that the figure stands without the text. Make what is yours visible at a glance: the template's \texttt{ours} TikZ style outlines a node in the accent colour and \texttt{prior} greys one out, the leading figure and the architecture figure use them, and the caption says which is which. A reviewer who cannot tell your contribution from the surrounding system in the first figure will assume the smaller part is yours. Draft it early, in the research phase, and treat it as exploratory until the spine is agreed: many papers find their argument while drawing it. \Cref{fig:collage} shows the leading figures of four papers from our group.
 
 \begin{figure}[!ht]
   \centering

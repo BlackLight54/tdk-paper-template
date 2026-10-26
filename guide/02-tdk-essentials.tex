@@ -6,17 +6,20 @@ If you are working on a hard topic, show your hard work in a TDK paper: the \hre
 \section{Where to look}
 \begin{itemize}
   \item The \href{https://tdk.bme.hu/}{BME TDK portal} and the \href{https://tdk.bme.hu/conference/VIK/2026}{faculty's page for the current year}: check the call, the templates, the FAQ, and the review sheet. Calls change from year to year.
-  \item The research group's own guide: \href{https://github.com/ftsrg/cheat-sheets/wiki/TDK-Howto}{TDK Howto} in the FTSRG cheat-sheets wiki.
+  \item The research group's own guide: \href{https://github.com/ftsrg/cheat-sheets/wiki/TDK-Howto}{TDK Howto} in the FTSRG cheat-sheets wiki, with the portal steps, the group's slide template and the presentation advice. Its page ranges per chapter predate the call's 30--35 page limit; the call wins.
+  \advisortodo{Link the group's slide template (Beamer and PowerPoint) here and in the Talk row of \cref{tab:lifecycle}.}
   \item Past first-place papers of the research group and of neighbouring groups at the faculty (\cref{app:tdk:papers}), for structure and tone.
 \end{itemize}
 
 \section{Official dates}\label{app:tdk:dates}
 The portal publishes the dates each year; these are the 2026 ones, \cref{fig:timeline} draws them on the semester, and \cref{tab:lifecycle} plans the semester backwards from them.
 \begin{itemize}
-  \item \textbf{1--30 September:} registration on the portal, with the one-page summary in Hungarian and English. Without it there is no paper.
+  \item \textbf{1--30 September:} registration on the portal, with the abstract in Hungarian and English: the Kivonat and the Abstract of the paper, written first as a promise (\cref{app:writing:abstract}). Without it there is no paper.
   \item \textbf{1 October -- 1 November:} paper upload on the portal. The deadline is the last day; the portal closes.
   \item \textbf{2--16 November:} the reviewers read and score the paper. The code can still be polished in this window (\cref{app:zenodo:versions}).
   \item \textbf{18 November:} the conference. A plenary at 8:00, section talks from 8:30, fifteen minutes of talk and five of questions each; the awards ceremony is the same evening.
+  \item \textbf{Placements.} Each section awards several first, second and third places, and special prizes on top; the section jury ranks the papers on the day, from the reviews and the talk together, so the talk is worth as much care as the paper. First and second places are nominated to the OTDK, the national round held every two years (until recently only the first place was). The placement goes on your CV and counts in applications for scholarships and the doctoral school.
+  \advisortodo{Placements: confirm the current nomination rule (first and second place) against this year's call, and add what else a placement brings that students ask about: the prize money or company awards of the section, and how the faculty's own awards relate to the TDK placements.}
 \end{itemize}
 
 
@@ -36,7 +39,7 @@ The portal publishes the dates each year; these are the 2026 ones, \cref{fig:tim
     % lane 1: the faculty's dates
     \node[anchor=east, font=\footnotesize\bfseries, text=orange!80!black] at (-1,-0.3) {Faculty};
     \fill[official, rounded corners=1.5pt] (0,-0.62) rectangle (29,-0.02);
-    \node[font=\footnotesize] at (14.5,-0.32) {registration + summary};
+    \node[font=\footnotesize] at (14.5,-0.32) {registration + abstract};
     \fill[official, rounded corners=1.5pt] (30,-0.62) rectangle (61,-0.02);
     \node[font=\footnotesize] at (45.5,-0.32) {paper upload};
     \fill[official, rounded corners=1.5pt] (62,-0.62) rectangle (76,-0.02);
@@ -54,7 +57,7 @@ The portal publishes the dates each year; these are the 2026 ones, \cref{fig:tim
       \node[font=\footnotesize] at ({(\a+\b)/2},-1.45) {\t};
     }
     \fill[teal!12, rounded corners=1.5pt] (79,-1.75) rectangle (111,-1.15);
-    \node[font=\footnotesize] at (95,-1.45) {OTDK, paper or thesis};
+    \node[font=\footnotesize] at (95,-1.45) {paper or thesis};
     \foreach \d/\t/\p in {-0.5/manifest/west, 29/spine/east, 52/full draft/east} {
       \draw[red!70!black, very thick] (\d,-1.85) -- (\d,-1.05);
       \node[font=\footnotesize\bfseries, text=red!70!black, anchor=north \p] at (\d,-1.85) {\t};
@@ -62,17 +65,18 @@ The portal publishes the dates each year; these are the 2026 ones, \cref{fig:tim
     % lane 3: the semester and the department
     \node[anchor=east, font=\footnotesize\bfseries, text=gray!70!black] at (-1,-2.95) {Semester};
     \fill[gray!14, rounded corners=1.5pt] (6,-3.25) rectangle (100,-2.65);
-    \node[font=\footnotesize] at (36,-2.95) {fourteen teaching weeks, a consultation in each};
+    \node[font=\footnotesize] at (29,-2.95) {fourteen teaching weeks, a consultation in each};
     \fill[gray!30, rounded corners=1.5pt] (103,-3.25) rectangle (108,-2.65);
     \node[font=\footnotesize, anchor=north, align=center] at (105.5,-3.3) {pótlási\\hét};
     \draw[-Stealth, gray!70!black] (108.5,-2.95) -- (111,-2.95);
     \node[font=\footnotesize, anchor=north, align=center] at (6,-3.3) {semester\\starts};
-    \foreach \d/\t in {58/writing session, 76/rehearsal} {
-      \draw[teal!60!black, very thick] (\d,-3.35) -- (\d,-2.55);
-      \node[font=\footnotesize, text=teal!60!black, anchor=north, align=center] at (\d,-3.35) {\t};
+    \foreach \d/\t in {58/{writing session}, 76/{talk rehearsal}} {
+      \fill[department, draw=green!45!black, rounded corners=1.5pt] (\d-2.2,-3.3) rectangle (\d+2.2,-2.6);
+      \draw[green!45!black, line width=1.6pt] (\d,-3.3) -- (\d,-2.6);
+      \node[font=\footnotesize\bfseries, text=green!45!black, anchor=north, align=center] at (\d,-3.35) {department\\\t};
     }
   \end{tikzpicture}
-  \caption{The semester on one line: the faculty's windows and deadlines in yellow, our phases in teal with the three anchors in red, and the department's two events, the writing session with pizza in the last days before the upload and the talk rehearsal two days before the conference. The deadlines are the fixed points; everything to their left is planned backwards from them.}\label{fig:timeline}
+  \caption{The semester on one line: the faculty's windows and deadlines in yellow, our phases in teal with the three anchors in red, and the department's two sessions in green: the writing session with pizza in the last days before the upload and the talk rehearsal two days before the conference. The deadlines are the fixed points; everything to their left is planned backwards from them.}\label{fig:timeline}
 \end{figure}
 
 \section{Form requirements}\label{app:tdk:form}
