@@ -16,6 +16,7 @@ lint-checks.tex
 *.thm
 *.toc
 *.xdv
+_minted/
 _minted-*/
 svg-inkscape/
 thesis.pdf
