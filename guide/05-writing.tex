@@ -6,7 +6,7 @@ Write the argument before the prose. We plan papers in this order, and each step
 \begin{description}
   \item[Problem] The entry point, and the only step you need to start. One paragraph: who has what problem, what goes wrong for them today, and one concrete scenario in which it goes wrong. The scenario becomes the running example, and the paragraph becomes the first page of \tplref{chap:intro}. If you can write it, you can start the literature review; if you cannot, bring what you have to the next consultation and we write it together.
   \item[Spine] One page that fixes the claims, the terminology and the notation of the whole paper. Every chapter, figure and review is checked against it. Its worst enemy is drift: terms, symbols and claims quietly changing between chapters.
-  \item[Skeleton mind map] The argument made explicit before any prose: each chapter broken into paragraphs, each paragraph reduced to its topic sentence and a pointer to the evidence that backs it. Drafting then means filling in sentences around a skeleton already known to be sound. A mind map, on paper or in a tool, is the quickest way to draw it; \cref{fig:mindmap} shows one for a made-up paper, at the level of detail we expect.
+  \item[Skeleton mind map] The argument made explicit before any prose: each chapter broken into paragraphs, each paragraph reduced to its topic sentence and a pointer to the evidence that backs it. Drafting then means filling in sentences around a skeleton already known to be sound. A mind map, on paper or in a tool, is the quickest way to draw it; \cref{fig:mindmap} shows one for a made-up paper, at the level of detail we expect. \Cref{fig:template-skeleton} is the same picture for this template's own beats: the generic argument every chapter file starts from. Your skeleton is built per topic and will not look like either; what carries over is the shape.
   \item[Running example] One concrete scenario that every chapter returns to. Name it once with \texttt{\textbackslash exname} in \texttt{thesis.tex}, introduce it in \tplref{chap:intro}, and revisit it in every chapter in a \texttt{runningexample} box: what each concept, component, measurement or competitor does with it. A reader who follows only the boxes should understand the paper.
   \item[Beats] The moves inside each paragraph of the skeleton: what it establishes, which evidence it uses, what the running example shows there, and how it leads to the next one. The chapters of this template start every paragraph with a \texttt{\textbackslash beat\{establishes\}\{evidence\}\{running example\}\{leads to\}}; it prints as a todo, so it disappears from the final version.
 \end{description}
@@ -69,6 +69,61 @@ Write the argument before the prose. We plan papers in this order, and each step
     ]
   \end{forest}
   \caption{A skeleton mind map for a made-up paper: a room-booking service whose correctness rests on interval graph colouring. Every leaf is one paragraph's topic sentence, and the bracketed italics name the evidence behind it: a theorem, a model, a table, a figure or a citation. A skeleton at this level of detail shows whether the argument holds before a sentence of prose exists, and it is what the spine anchor of \cref{tab:lifecycle} is checked against. Copy the shape, not the topic: one leaf per paragraph, evidence on every leaf that makes a claim, and the running example visible in every chapter.}\label{fig:mindmap}
+\end{figure}
+
+
+\begin{figure}[p]
+  \centering
+  \begin{forest}
+    for tree={
+      grow'=0, child anchor=west, parent anchor=east, anchor=west,
+      font=\scriptsize, edge={gray!60},
+      l sep=6mm, s sep=1.2pt, inner sep=1.5pt,
+      edge path={\noexpand\path[\forestoption{edge}](!u.parent anchor) -- +(3mm,0) |- (.child anchor)\forestoption{edge label};},
+    },
+    where level=0{text width=2.4cm, font=\footnotesize}{},
+    where level=1{text width=2.5cm}{},
+    where level=2{text width=9.3cm}{},
+    [{\textbf{The template's beats}}
+      [{\textbf{1 Introduction}}
+        [{Context: why the field matters now \textit{[a trend, a regulation or an incident, cited]}}]
+        [{Problem: the concrete problem, ending in a one-sentence statement \textit{[the running example]}}]
+        [{Requirements: what a solution must do \textit{[one requirement per failure of the example; the rows of the gap matrix]}}]
+        [{Gap: no existing approach meets them together \textit{[the closest approaches, cited]}}]
+        [{Contributions: what this work claims, as checkable items \textit{[the chapters behind each]}}]
+      ]
+      [{\textbf{2 Background}}
+        [{The first concept the approach relies on; notation defined once \textit{[a definition and a citation]}}]
+        [{The second concept \textit{[a definition and a citation]}}]
+      ]
+      [{\textbf{3 Approach}}
+        [{Overview: how it works end to end \textit{[the architecture figure]}}]
+        [{The formal model or the design decisions \textit{[each decision with the alternative rejected]}}]
+        [{Threat model: the adversary, the assumptions, the guarantees \textit{[a proof, a mechanised proof or a measurement per guarantee]}}]
+      ]
+      [{\textbf{4 Implementation}}
+        [{What was built and how it realises the approach \textit{[components mapped to code; the archived artifact]}}]
+        [{Design decisions and the problems a straightforward build runs into \textit{[each with the alternative rejected]}}]
+        [{The part that did not exist before \textit{[the key listing and the tests that cover it]}}]
+      ]
+      [{\textbf{5 Evaluation}}
+        [{Setup: how the measurements were made \textit{[hardware, versions, workloads, repetitions, the rerun command]}}]
+        [{Correctness on the example and on every requirement case \textit{[test, proof or model-checking results]}}]
+        [{How the cost grows with the input \textit{[the scalability figure]}}]
+        [{Behaviour when the assumptions are stressed \textit{[the robustness table, with each perturbation's setup]}}]
+        [{Threats to validity and what was done about each \textit{[the mitigations]}}]
+      ]
+      [{\textbf{6 Related work}}
+        [{How each family of approaches works and where it falls short \textit{[citations and the gap matrix]}}]
+        [{The gap in one sentence, closed by this work \textit{[the gap matrix and the evaluation results]}}]
+      ]
+      [{\textbf{7 Conclusion}}
+        [{Each contribution and its evidence \textit{[the chapters behind C1--C3]}}]
+        [{What is still open, and the next step for each limitation \textit{[the threats to validity]}}]
+      ]
+    ]
+  \end{forest}
+  \caption{The template's own beats drawn as a skeleton: one leaf per \texttt{\textbackslash beat} in the chapter files, the topic it establishes first and its evidence in brackets. This is the generic argument the template starts you from, not a skeleton to copy: \cref{fig:mindmap} shows what a topic's own skeleton looks like once the claims, examples and evidence are specific, and yours will have more leaves where your contribution is and fewer elsewhere.}\label{fig:template-skeleton}
 \end{figure}
 
 \section{The leading figure (vezérábra)}\label{app:writing:figure}
