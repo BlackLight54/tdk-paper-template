@@ -9,9 +9,11 @@ Three steps are \anchor{}s: the topic manifest, the spine and the full draft. An
 Anchor rows are shaded red. Rows marked \official{} and shaded yellow are the official steps of the faculty's TDK: the portal dates of \cref{app:tdk:dates} are fixed, and missing one ends the semester's TDK. Rows marked \department{} and shaded green are the department's own sessions: we organise them, every TDK student of the department comes, and they are where the last problems get fixed in company.
 
 \newcommand{\lcphase}[2]{\midrule\multicolumn{4}{l}{\textbf{#1}\quad\textit{#2}}\\\midrule}
+% Support cells are links with a name, not references with a number: \lcref{label}{name}.
+\newcommand{\lcref}[2]{\hyperref[#1]{#2}}
 {\small
-\begin{xltabular}{\linewidth}{>{\raggedright\arraybackslash}p{0.2\linewidth} >{\raggedright\arraybackslash}p{0.09\linewidth} >{\raggedright\arraybackslash}X >{\raggedright\arraybackslash}p{0.21\linewidth}}
-  \caption{The TDK lifecycle. Owner: you, we (the advisors), or both.}\label{tab:lifecycle}\\
+\begin{xltabular}{\linewidth}{>{\raggedright\arraybackslash}p{0.2\linewidth} >{\raggedright\arraybackslash}p{0.07\linewidth} >{\raggedright\arraybackslash}X >{\raggedright\arraybackslash}p{0.19\linewidth}}
+  \caption{The TDK lifecycle. Owner: you, we (the advisors), or both. The support column links to where the step is explained.}\label{tab:lifecycle}\\
   \toprule
   \textbf{Step} & \textbf{Owner} & \textbf{Done when} & \textbf{Support} \\
   \endfirsthead
@@ -22,57 +24,57 @@ Anchor rows are shaded red. Rows marked \official{} and shaded yellow are the of
   \endlastfoot
   \lcphase{0. Topic}{before the semester}
   \rowcolor{anchorrow}
-  Topic manifest \anchor & both & One page: the problem, why it matters, the expected contribution; agreed with us & TDK topic page \\
+  Topic manifest \anchor & both & One page, agreed with us: the problem, why it matters, the expected contribution & the TDK topic page \\
   \lcphase{1. Setup}{first week}
-  Identifiers & you & We have your Neptun code, GitHub username and e-mail & \cref{app:start:ids} \\
-  Overleaf project and paper repository & we & You can edit in Overleaf and push to the synced GitHub repository & \cref{app:start:access} \\
-  Repositories & you & The notes repository with \texttt{paper/} and \texttt{code/} as submodules, the code repository from the template, both advisors added to all three & \cref{app:start:access} \\
-  Zotero & both & You are in the group, the connector is installed, and \texttt{bib/zotero.bib} is linked to the group through Overleaf's Zotero integration & \cref{app:start:access} \\
-  Calendar and weekly slot & you & Neptun timetable synced, calendars shared, recurring Teams event set & \cref{app:start:calendar,app:consult} \\
-  Virtual machine & both & You asked us for a VM, and you can reach it over SSH & \cref{app:start:env} \\
-  Context upload & we & Our papers, notes and earlier work on the topic are in \texttt{notes/} of your notes repository; we commit them once you add us & --- \\
+  Identifiers & you & We have your Neptun code, GitHub username and e-mail & \lcref{app:start:ids}{Share your identifiers} \\
+  Overleaf and paper repository & we & You can edit in Overleaf and push to the synced GitHub repository & \lcref{app:start:access}{Accounts and access} \\
+  Repositories & you & Notes repository with \texttt{paper/} and \texttt{code/} as submodules; both advisors added to all three & \lcref{app:start:access}{Accounts and access} \\
+  Zotero & both & You are in the group, the connector is installed, \texttt{bib/zotero.bib} is linked to the group & \lcref{app:start:access}{Accounts and access} \\
+  Calendar and weekly slot & you & Neptun timetable synced, calendars shared, a recurring Teams event & \lcref{app:start:calendar}{Calendar}, \lcref{app:consult}{Weekly consultations} \\
+  Virtual machine & both & You asked for the VM and can reach it over SSH & \lcref{app:start:env}{Development environment} \\
+  Context upload & we & Our papers and notes on the topic are in your notes repository & --- \\
   \lcphase{2. Research}{first half of September}
-  Problem & you & The problem stated with a running example & \tplref{chap:intro} \\
-  Literature review (SLR) and gap analysis & you & Sources found systematically are in Zotero; the gap matrix is filled; the gap is one sentence & Gap matrix in \tplref{chap:related}; \cref{app:writing} \\
-  Research questions and contributions & you & RQ1--RQ3 and C1--C3 written as checkable claims & \texttt{rqlist}, \texttt{contributions} \\
-  Threats and requirements & you & Threat model, assumptions, requirements listed & \tplref{chap:intro} and \tplref{chap:approach} \\
-  Leading figure draft (vezérábra) & you & \Tplref{fig:overview} explains the work without the text & \cref{app:writing:figure} \\
-  Proof-of-concept implementation & you & The core idea runs end to end on the running example; shortcuts and hard-coded parts are fine & \texttt{code/} \\
+  Problem & you & The problem is stated, with a running example & \lcref{chap:intro}{Introduction} \\
+  Literature review and gap & you & Sources found systematically are in Zotero; the gap matrix is filled; the gap is one sentence & \lcref{tab:related}{gap matrix}, \lcref{app:writing}{Writing} \\
+  Research questions and contributions & you & RQ1--RQ3 and C1--C3 are written as checkable claims & \lcref{chap:intro}{Introduction}, \lcref{chap:evaluation}{Evaluation} \\
+  Threats and requirements & you & Threat model, assumptions and requirements are listed & \lcref{chap:approach}{Approach} \\
+  Leading figure draft & you & The figure explains the work without the text & \lcref{app:writing:figure}{The leading figure} \\
+  Proof of concept & you & The core idea runs end to end on the running example; shortcuts are fine & the code repository \\
   \lcphase{3. Plan}{second half of September}
-  Running example and validation plan & you & The running example is named (\texttt{\textbackslash exname}) and appears in every chapter's beats; how each claim will be verified or measured is written down & \cref{app:writing:spine} \\
+  Running example and validation plan & you & The example is named and appears in every chapter; how each claim will be checked is written down & \lcref{app:writing:spine}{Plan before you write} \\
   \rowcolor{anchorrow}
-  Spine \anchor & both & One page of claims, terminology and notation; agreed with us & \cref{app:writing:spine} \\
-  Skeleton mind map & you & Every chapter broken into paragraph topic sentences with their evidence & \cref{app:writing:spine}, \cref{fig:mindmap} \\
-  Premortem & both & The paper imagined as scored low: for each criterion of the review sheet the reviewer's likely objection is written down, and the plan is changed to answer it & \cref{app:writing:spine}; \cref{app:tdk:sheet} \\
+  Spine \anchor & both & One page of claims, terms and notation, agreed with us & \lcref{app:writing:spine}{Plan before you write} \\
+  Skeleton mind map & you & Every chapter is paragraph topic sentences with their evidence & \lcref{fig:mindmap}{the example skeleton} \\
+  Premortem & both & For each criterion of the review sheet, the likely objection is written down and the plan answers it & \lcref{app:tdk:sheet}{The review sheet} \\
   \rowcolor{official}
-  Registration with the abstract \official & you & Registered on the TDK portal with the Hungarian and English abstract, between 1 and 30 September & \cref{app:tdk:dates}; \cref{app:writing:abstract} \\
-  Complete, testable implementation & you & By 30 September: every component of the approach exists, the evaluation workloads run on it, and a test suite runs, even if not every test passes yet & \tplref{chap:implementation} \\
+  Registration with the abstract \official & you & Registered on the portal with the Hungarian and English abstract, by 30 September & \lcref{app:tdk:dates}{Official dates}, \lcref{app:writing:abstract}{The abstract} \\
+  Complete, testable implementation & you & By 30 September every component exists, the evaluation workloads run, and a test suite runs & \lcref{chap:implementation}{Implementation} \\
   \lcphase{4. Draft}{October}
-  Outline check & we & The skeleton fits the template's chapters and the review sheet & Chapter todos \\
-  Proofs (a hill climb) & you & Every claim of the approach has its proof, mechanised proof, or measurement & \tplref{chap:approach} \\
-  Tested implementation (a hill climb) & you & All tests pass, and \texttt{just reproduce} regenerates every result from the README; the release is ready for Zenodo & \cref{app:code:github} \\
-  Scalability and robustness & you & Measurements beyond small examples, with setup and repetitions, and a robustness analysis that perturbs the system on purpose & \tplref{fig:scalability} and \tplref{tab:robustness} \\
+  Outline check & we & The skeleton fits the template's chapters and the review sheet & the chapter todos \\
+  Proofs (a hill climb) & you & Every claim has its proof, mechanised proof or measurement & \lcref{chap:approach}{Approach} \\
+  Tested implementation (a hill climb) & you & All tests pass; \texttt{just reproduce} regenerates every result; the release is ready for Zenodo & \lcref{app:code:github}{GitHub} \\
+  Scalability and robustness & you & Measurements beyond small examples, with setup and repetitions, and a robustness analysis & \lcref{fig:scalability}{scalability figure}, \lcref{tab:robustness}{robustness table} \\
   \rowcolor{anchorrow}
-  Full draft \anchor & both & Every chapter written; handed to us about ten days before the deadline & --- \\
-  \lcphase{5. Polish}{the last ten days of October; see \cref{tab:polish}}
-  Advisor review and todos & both & Our comments are resolved; the list of todos is empty & \texttt{\textbackslash listoftodos} \\
-  Review sheet hill climb & you & You scored the paper on criteria A--E yourself, fixed the weakest, and repeated until nothing cheap is left & Review sheet in \texttt{docs/}; \cref{app:tdk:sheet} \\
-  Last week's checklist & you & Every row of \cref{tab:polish} is checked; \texttt{make check-reviewer} is clean & \cref{tab:polish} \\
-  Code archive & you & The code is on Zenodo and cited by its concept DOI; the tag the results came from is named in the paper & \cref{app:zenodo} \\
+  Full draft \anchor & both & Every chapter is written and in our hands ten days before the deadline & --- \\
+  \lcphase{5. Polish}{the last ten days of October}
+  Advisor review & both & Our comments are resolved and the list of todos is empty & \lcref{app:latex:todo}{Todo notes} \\
+  Review sheet hill climb & you & You scored the paper on A--E, fixed the weakest, and repeated until nothing cheap is left & \lcref{app:tdk:sheet}{The review sheet} \\
+  Last week's checklist & you & Every row is checked and \texttt{make check-reviewer} is clean & \lcref{tab:polish}{the checklist} \\
+  Code archive & you & The code is on Zenodo, cited by its concept DOI, and the results tag is named in the paper & \lcref{app:zenodo}{Zenodo} \\
   \rowcolor{department}
-  Writing session \department & both & You came to the department's writing session in the last days before the deadline, with pizza, and left with the last todos closed and the reviewer PDF checked by an advisor & \cref{tab:polish} \\
+  Writing session \department & both & You came, with pizza, and left with the last todos closed and the reviewer PDF checked by an advisor & \lcref{tab:polish}{the checklist} \\
   \rowcolor{official}
-  Paper upload \official & you & The AI declaration, after the bibliography, is filled in, the main text is 30--35 pages, and the reviewer PDF is uploaded on the portal, under \emph{Dolgozataim}, by 1 November & \cref{app:tdk:form} \\
+  Paper upload \official & you & AI declaration filled in, main text 30--35 pages, the reviewer PDF uploaded under \emph{Dolgozataim} by 1 November & \lcref{app:tdk:form}{Form requirements} \\
   \lcphase{6. After the deadline}{2--16 November, while the reviewers read}
-  Code polish & you & The README meets \cref{app:code:readme}, the Docker images build (\cref{app:code:docker}), and a new Zenodo version is published; the results tag named in the paper is untouched & \cref{app:zenodo:versions} \\
-  Talk & you & Slides in the group's template; the leading figure is on the second slide; the talk tells one story, fits fifteen minutes with time to spare, and has been rehearsed about ten times, the opening and the timing most of all & FTSRG TDK Howto \\
-  Reviews and questions & you & The reviews are read when they arrive, and every question or doubt in them has a prepared answer and, where it helps, a backup slide & \cref{app:tdk:sheet} \\
+  Code polish & you & README complete, Docker images build, a new Zenodo version published; the results tag untouched & \lcref{app:zenodo:versions}{Release a new version} \\
+  Talk & you & Slides in the group's template, the leading figure second, one story in fifteen minutes, rehearsed about ten times & \href{https://github.com/ftsrg/cheat-sheets/wiki/TDK-Howto}{FTSRG TDK Howto} \\
+  Reviews and questions & you & Every question or doubt in the reviews has a prepared answer, and a backup slide where it helps & \lcref{app:tdk:sheet}{The review sheet} \\
   \rowcolor{department}
-  Talk rehearsal \department & both & The talk given in the department's rehearsal two days before the conference, with the reviewers' questions asked back at you; what broke is fixed before the day & --- \\
+  Talk rehearsal \department & both & The talk given two days before the conference, the reviewers' questions asked back at you, what broke fixed & --- \\
   \lcphase{7. Conference}{18 November}
   \rowcolor{official}
-  Conference \official & you & Fifteen minutes of talk and five of questions in your section; the awards are the same evening & \cref{app:tdk:dates} \\
-  After the TDK & both & Decided together: the OTDK if the placement nominated you, a conference paper, or a thesis built on the work & \cref{app:tdk:dates} \\
+  Conference \official & you & Fifteen minutes of talk and five of questions in your section; the awards the same evening & \lcref{app:tdk:dates}{Official dates} \\
+  After the TDK & both & Decided together: the OTDK if nominated, a conference paper, or a thesis & \lcref{app:tdk:dates}{Placements} \\
 \end{xltabular}
 }
 
@@ -90,7 +92,7 @@ The polish phase is a checklist, not a phase of writing: if a row needs more tha
   Traceability [traceability] & Every requirement is a row of the gap matrix and of the correctness table, every threat is met by a guarantee, every guarantee is checked in the evaluation, and the conclusion restates every contribution with its evidence. \\
   Outline [outline] & Chapters are renamed where the template says so, no heading is a TODO, the running example is named and appears in every chapter. \\
   Figures are vector & Every figure is TikZ in the paper repository, or has a written reason not to be; a draw.io draft was redrawn or exported as PDF only as a last resort (\cref{app:writing:figure}). \\
-  Yours is visible & In the leading figure and every architecture-like figure, your contribution is outlined with the \texttt{ours} style and the caption says so (\cref{app:writing:figure}). \\
+  Yours is visible & In the leading figure and every architecture-like figure, every component of yours is in the one blue of the \texttt{ours} style and the caption says so (\cref{app:writing:figure}). \\
   Axes and legends & Every axis has a label with a unit; every legend entry names a thing the text also names. \\
   Captions & Every caption explains the figure in the sense of \cref{app:writing:captions}: a claim first, then context. \\
   Readable in print & No text in a figure is below 10\,pt when printed; colour pairs are distinguishable in greyscale. \\

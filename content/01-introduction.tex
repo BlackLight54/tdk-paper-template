@@ -43,17 +43,21 @@ TODO
   \begin{tikzpicture}[
       node distance=6mm and 10mm,
       col/.style={draw, rounded corners, minimum width=38mm, minimum height=26mm, align=center, font=\small},
+      part/.style={ours, rounded corners=1pt, minimum width=34mm, minimum height=7mm, align=center, font=\footnotesize},
       lbl/.style={font=\small\bfseries, above=1mm}]
-    \node[col, prior]   (problem) {\exname\\[1mm]\footnotesize what goes wrong today\\\footnotesize(TODO)};
-    \node[col, ours, right=of problem]  (approach) {Approach\\[1mm]\footnotesize C1: TODO\\\footnotesize C2: TODO\\\footnotesize C3: TODO};
-    \node[col, prior, right=of approach] (result) {Result\\[1mm]\footnotesize the guarantee or number\\\footnotesize you can claim (TODO)};
+    \node[col, problem]   (problem) {\exname\\[1mm]\footnotesize what goes wrong today\\\footnotesize(TODO)};
+    \node[part, right=12mm of problem, yshift=9mm] (c1) {C1: TODO};
+    \node[part, below=1.5mm of c1] (c2) {C2: TODO};
+    \node[part, below=1.5mm of c2] (c3) {C3: TODO};
+    \node[draw=none, fit=(c1)(c3), inner sep=2mm] (approach) {};
+    \node[col, result, right=of approach] (result) {Result\\[1mm]\footnotesize the guarantee or number\\\footnotesize you can claim (TODO)};
     \node[lbl] at (problem.north)  {Problem};
     \node[lbl] at (approach.north) {This work};
     \node[lbl] at (result.north)   {Evaluation};
     \draw[-Stealth, thick] (problem) -- (approach);
     \draw[-Stealth, thick] (approach) -- (result);
   \end{tikzpicture}
-  \caption{Leading figure: the problem, the contributions, and the headline result in one picture. The outlined part is this work; grey is what exists. TODO Replace with your own; it should be understandable without reading the text, and what is yours must be visible at a glance.}
+  \caption{Leading figure: the problem, the contributions, and the headline result in one picture. Blue is this work, every component of it in the same blue; the problem is red, the result green. TODO Replace with your own; it should be understandable without reading the text, and what is yours must be visible at a glance.}
   \label{fig:overview}
 \end{figure}
 \todo[inline, caption={Leading figure: criterion B/1}]{\textbf{Criterion B/1} is scored on figures like this one. Well thought out means: the reader takes away one thing, the caption explains it (\guideref{Captions}), and it is vector (\guideref{Figures}).\\

@@ -20,7 +20,7 @@ TODO The scenario step by step: which component handles which part of it, and wh
   \begin{tikzpicture}[
       node distance=8mm and 14mm,
       comp/.style={draw, rounded corners, fill=blue!8, minimum width=28mm, minimum height=10mm, align=center, font=\small},
-      ext/.style={comp, fill=gray!12, dashed}]
+      ext/.style={comp, prior, dashed}]
     \node[ext]  (user) {Actor (TODO)};
     \node[comp, ours, right=of user] (core) {Component 1\\\footnotesize(contribution C1)};
     \node[comp, right=of core] (store) {Component 2};
@@ -32,7 +32,7 @@ TODO The scenario step by step: which component handles which part of it, and wh
       \node[draw, dotted, inner sep=3mm, fit=(core)(store)(check), label={[font=\footnotesize]above right:System boundary}] {};
     \end{scope}
   \end{tikzpicture}
-  \caption{Architecture of the approach; the outlined component is this work, the rest is reused or external. TODO Replace with your own, and keep what is yours outlined.}
+  \caption{Architecture of the approach; blue components are this work, grey ones are reused or external. TODO Replace with your own, and keep what is yours blue.}
   \label{fig:architecture}
 \end{figure}
 
