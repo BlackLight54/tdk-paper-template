@@ -1,18 +1,20 @@
 # Builds the draft and the reviewer PDF on every push and runs every lint rule as its own step,
 # so the run page lists the rules with a check or a cross each, findings appear as annotations
-# on the files, and the job summary ends with one table. Gates fail the run; the burn-down
-# rules only report. The paper repository is created by Overleaf per project, so this file
-# travels with the Overleaf project; see "Paper CI" in the guide.
+# on the files, and the job summary ends with one table. Gates fail the run; report rules only
+# report. The paper repository is created by Overleaf per project, so this file travels with the
+# Overleaf project; see "Paper CI" in the guide. The steps below mirror `texlua scripts/lint.lua list`.
 name: paper
 on: [push, pull_request, workflow_dispatch]
+env:
+  LINT_PROFILE: tdk   # thesis: the faculty's thesis guide instead of the TDK call
 jobs:
   paper:
     runs-on: ubuntu-latest
     container: texlive/texlive:latest
     steps:
       - uses: actions/checkout@v4
-      - name: Inkscape for SVG figures
-        run: apt-get update -qq && apt-get install -y -qq --no-install-recommends inkscape >/dev/null
+      - name: Inkscape for SVG figures, poppler for the PDF rules, hunspell for spelling
+        run: apt-get update -qq && apt-get install -y -qq --no-install-recommends inkscape poppler-utils hunspell hunspell-en-gb hunspell-en-us >/dev/null
       - name: Build the draft
         run: make all
       - name: Build the reviewer PDF
@@ -26,38 +28,118 @@ jobs:
             thesis.pdf
             reviewer.pdf
       - name: Lint header
-        run: printf '\n## Lint on the reviewer build\n\n| Rule | Status | Errors | Warnings | Counts |\n|---|---|---|---|---|\n' >> "$GITHUB_STEP_SUMMARY"
-      - name: build log
+        if: always()
+        run: printf '\n## Lint (profile %s)\n\n| Rule | Status | Errors | Warnings | Counts |\n|---|---|---|---|---|\n' "$LINT_PROFILE" >> "$GITHUB_STEP_SUMMARY"
+      - name: source / structure
+        if: always()
+        run: texlua scripts/lint.lua structure
+      - name: source / build
         if: always()
         run: texlua scripts/lint.lua build --doc reviewer
-      - name: overfull boxes
+      - name: source / overfull
         if: always()
         run: texlua scripts/lint.lua overfull --doc reviewer
-      - name: page count
+      - name: source / pages
         if: always()
         continue-on-error: ${{ github.ref_name != 'main' }}
         run: texlua scripts/lint.lua pages --doc reviewer
-      - name: traceability
+      - name: source / traceability
         if: always()
         run: texlua scripts/lint.lua traceability
-      - name: outline
+      - name: source / gapmatrix
+        if: always()
+        run: texlua scripts/lint.lua gapmatrix
+      - name: source / outline
         if: always()
         run: texlua scripts/lint.lua outline
-      - name: figures
+      - name: source / figures
         if: always()
         run: texlua scripts/lint.lua figures
-      - name: acronyms
+      - name: source / captions
+        if: always()
+        run: texlua scripts/lint.lua captions
+      - name: source / axes
+        if: always()
+        run: texlua scripts/lint.lua axes
+      - name: source / tables
+        if: always()
+        run: texlua scripts/lint.lua tables
+      - name: source / labels
+        if: always()
+        run: texlua scripts/lint.lua labels
+      - name: source / crefs
+        if: always()
+        run: texlua scripts/lint.lua crefs
+      - name: source / acronyms
         if: always()
         run: texlua scripts/lint.lua acronyms
-      - name: bibliography
+      - name: source / code
         if: always()
-        run: texlua scripts/lint.lua bib
-      - name: placeholders (burn-down)
+        run: texlua scripts/lint.lua code
+      - name: source / typography
+        if: always()
+        run: texlua scripts/lint.lua typography
+      - name: source / terms
+        if: always()
+        run: texlua scripts/lint.lua terms
+      - name: source / numbers
+        if: always()
+        run: texlua scripts/lint.lua numbers
+      - name: source / aidecl
+        if: always()
+        run: texlua scripts/lint.lua aidecl
+      - name: source / titlepage
+        if: always()
+        run: texlua scripts/lint.lua titlepage
+      - name: source / placeholders (report)
         if: always()
         run: texlua scripts/lint.lua placeholders
-      - name: beats and notes (burn-down)
+      - name: source / beats (report)
         if: always()
         run: texlua scripts/lint.lua beats
+      - name: pdf / pdf-file
+        if: always()
+        run: texlua scripts/lint.lua pdf-file --doc reviewer
+      - name: pdf / pdf-font
+        if: always()
+        run: texlua scripts/lint.lua pdf-font --doc reviewer
+      - name: pdf / pdf-spacing
+        if: always()
+        run: texlua scripts/lint.lua pdf-spacing --doc reviewer
+      - name: pdf / pdf-margins
+        if: always()
+        run: texlua scripts/lint.lua pdf-margins --doc reviewer
+      - name: pdf / pdf-smalltext (report)
+        if: always()
+        run: texlua scripts/lint.lua pdf-smalltext --doc reviewer
+      - name: pdf / pdf-pages
+        if: always()
+        continue-on-error: ${{ github.ref_name != 'main' }}
+        run: texlua scripts/lint.lua pdf-pages --doc reviewer
+      - name: pdf / pdf-parts
+        if: always()
+        run: texlua scripts/lint.lua pdf-parts --doc reviewer
+      - name: tools / chktex (report)
+        if: always()
+        run: texlua scripts/lint.lua chktex
+      - name: tools / lacheck (report)
+        if: always()
+        run: texlua scripts/lint.lua lacheck
+      - name: tools / words (report)
+        if: always()
+        run: texlua scripts/lint.lua words
+      - name: tools / checkcites (report)
+        if: always()
+        run: texlua scripts/lint.lua checkcites --doc reviewer
+      - name: tools / bibtex-log (report)
+        if: always()
+        run: texlua scripts/lint.lua bibtex-log --doc reviewer
+      - name: tools / spelling (report)
+        if: always()
+        run: texlua scripts/lint.lua spelling
+      - name: tools / links (report)
+        if: always()
+        run: texlua scripts/lint.lua links
       - name: burn-down record
         if: always()
         run: texlua scripts/lint.lua burndown --doc reviewer | tail -1 | tee burndown.json
