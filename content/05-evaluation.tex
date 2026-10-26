@@ -1,18 +1,54 @@
 %----------------------------------------------------------------------------
 \chapter{Evaluation}\label{chap:evaluation}
 %----------------------------------------------------------------------------
-\todo[inline]{Criteria E (0--8) and D/2. \textbf{Correctness}: report setup, versions and repetitions so every number can be checked; D/2 penalises results that cannot be. E gives 7--8 points only for evaluation beyond small examples: scalability and robustness measurements showing the system holds up in an industrial setting. \textbf{Novelty}: compare against the closest existing approach named in the introduction; \cref{chap:related} then places the results in the wider literature. D/2 gives \enquote{3--4: jó (színvonalas kidolgozás, de esetleg egyes eredmények helyessége nincs kellőképpen alátámasztva)} when a result is reported without the setup that supports it, and E gives \enquote{3--4: pontatlan -- ha a dolgozat bevezetése megfelelő és a dolgozatban szerepel az eredmények kis mintapéldákon túlmenő értékelése is, de az utóbbi hiányos, pontatlan} or \enquote{5--6: pontos, de hiányos} when the evaluation stops at small examples.}
+\todo[inline, caption={Evaluation: criteria E and D/2}]{\textbf{Criteria E (0--8) and D/2.}\\
+\textbf{Correctness:} report setup, versions and repetitions so every number can be checked; D/2 penalises results that cannot be.\\
+\textbf{Novelty:} compare against the closest existing approach named in the introduction; \cref{chap:related} then places the results in the wider literature.\\
+\textbf{Beyond small examples:} E gives 7--8 points only for evaluation beyond small examples: scalability and robustness measurements showing the system holds up in an industrial setting. What that means for a formal or an analysis topic is in \cref{tab:eval-tracks}.\\
+\textbf{In the sheet's words.} D/2 gives \enquote{3--4: jó (színvonalas kidolgozás, de esetleg egyes eredmények helyessége nincs kellőképpen alátámasztva)} when a result is reported without the setup that supports it, and E gives \enquote{3--4: pontatlan -- ha a dolgozat bevezetése megfelelő és a dolgozatban szerepel az eredmények kis mintapéldákon túlmenő értékelése is, de az utóbbi hiányos, pontatlan} or \enquote{5--6: pontos, de hiányos} when the evaluation stops at small examples.}
+
+\todo[inline, caption={Three kinds of work, one chapter}]{\textbf{Three kinds of work, one chapter.} The sections below are written for a system that is run and measured (track S). Formal work (track F: a Tamarin or ProVerif model, a Lean or Coq proof, a model checker) and an analysis tool evaluated on a benchmark (track T: a detector, a static analyser, a generator) answer the same three questions with different evidence. \Cref{tab:eval-tracks} translates each section, every placeholder figure and table has a sibling for the other tracks, and the research questions below have their track F and T wording in the source. Keep the siblings of your track and delete the others.}
+
+\begin{table}[!ht]
+  \centering
+  \caption{The evaluation by kind of work: what each section shows and the placeholder that holds it. Track S is a system that is run and measured; track F is formal work (a protocol model, a mechanised proof, a model checker); track T is an analysis tool evaluated on a benchmark.}
+  \label{tab:eval-tracks}
+  {\small
+  \begin{tabularx}{\linewidth}{>{\raggedright\arraybackslash}p{0.13\linewidth} >{\raggedright\arraybackslash}X >{\raggedright\arraybackslash}X >{\raggedright\arraybackslash}X}
+    \toprule
+    & \textbf{S: system} & \textbf{F: formal} & \textbf{T: analysis tool} \\
+    \midrule
+    Setup & Hardware, software versions, workloads, repetitions, the rerun command & Prover and version, heuristics and oracles, time limit, machine; which parts of the model are hand-written and which generated & Benchmark origin and size, how the ground truth was built, tool versions, the rerun command \\
+    \addlinespace
+    Correctness (\cref{rq:correct}) & Test suite and model-checked properties per requirement; the running example before and after (\cref{tab:correctness}, \cref{fig:example-trace}) & Every property of the threat model proved, or an attack found: per lemma, proved, falsified with the trace, or timed out; the attack on the running example reconstructed (\cref{tab:correctness}, one row per lemma) & Precision and recall against the ground truth, every false positive and false negative explained (\cref{tab:precision}); the running example's verdict (\cref{fig:example-trace}) \\
+    \addlinespace
+    Scalability (\cref{rq:scale}) & Throughput and latency as the input grows (\cref{fig:scalability}) & Verification time and memory as the model grows: sessions, agents, bound, lemma count; where the prover times out, and what helper lemmas buy (\cref{fig:scalability-formal}) & Analysis time as the input grows: circuit size, lines, model elements; the largest real instance it handles (\cref{fig:scalability}) \\
+    \addlinespace
+    Robustness (\cref{rq:robust}) & Faults, load spikes and parameter sensitivity, with degradation and recovery (\cref{tab:robustness}, \cref{fig:robustness}) & The properties re-verified under a stronger adversary and with each assumption dropped: which hold, which break and how (\cref{tab:robustness-formal}) & Thresholds and parameters varied, mutated or adversarial inputs, benchmark instances from another source (\cref{tab:robustness}) \\
+    \bottomrule
+  \end{tabularx}
+  }
+\end{table}
 
 \section{Research questions}
 \begin{rqlist}
   \item\label{rq:correct} TODO Does the approach handle the running example and the cases in \cref{chap:intro} correctly?
+    % Track F: Does the model satisfy every property of the threat model, and does it find the known attacks?
+    % Track T: Does the tool find the real instances in the benchmark, and only those?
   \item\label{rq:scale} TODO How do time and resource use grow with input size?
+    % Track F: How do verification time and memory grow with the size of the model, and where does the prover stop?
+    % Track T: How does analysis time grow with input size, and what is the largest real instance it handles?
   \item\label{rq:robust} TODO How does the system behave under faults, adversarial input, or load spikes?
+    % Track F: Which properties survive a stronger adversary and each dropped assumption, and how do the others break?
+    % Track T: How do the results change under parameter changes, mutated inputs, and a benchmark from another source?
 \end{rqlist}
 
 \section{Setup}
 \beat{how the measurements were made, so that each can be checked}{hardware, software versions, workloads, repetitions, the rerun command}{the example as the base workload, scaled up for \cref{rq:scale}}{the results}
 TODO
+
+\paragraph{Artifact availability.}
+TODO The code, the models and the measurement scripts are archived on Zenodo~\cite{artifact}; every number in this chapter comes from tag \texttt{v1.0.0} of that archive, and \texttt{just reproduce} regenerates every figure and table from it (\guideref{Archiving the code on Zenodo}).
 
 \section{Correctness (RQ1)}
 \beat{that the approach is correct on the example and on every requirement case}{test, proof or model-checking results}{the scenario's outcome, before and after}{scalability}
@@ -21,7 +57,7 @@ TODO
 TODO What happens in the scenario with this work, compared with what went wrong in \cref{chap:intro} (\cref{fig:example-trace}).
 \end{runningexample}
 
-\todo[inline]{Show correctness in two ways. \Cref{tab:correctness} lists every guarantee and requirement with how it was checked: a proof (Tamarin, Lean, \dots), model checking, or a test suite, for this work and the baseline. Keep the rows that fit your contribution: formal topics fill it with proofs and counterexamples, empirical ones with test and benchmark outcomes. \Cref{fig:example-trace} shows the running example concretely: what goes wrong with the baseline and what this work does instead; for a protocol, a sequence chart, otherwise the corresponding before-and-after picture.}
+\todo[inline, caption={Correctness in two ways}]{\textbf{Show correctness in two ways.} \Cref{tab:correctness} lists every guarantee and requirement with how it was checked: a proof (Tamarin, Lean, \dots), model checking, or a test suite, for this work and the baseline. Keep the rows that fit your contribution: formal topics fill it with proofs and counterexamples, empirical ones with test and benchmark outcomes; an analysis tool adds \cref{tab:precision}. \Cref{fig:example-trace} shows the running example concretely: what goes wrong with the baseline and what this work does instead; for a protocol, a sequence chart, otherwise the corresponding before-and-after picture.}
 
 \begin{table}[!ht]
   \centering
@@ -35,6 +71,23 @@ TODO What happens in the scenario with this work, compared with what went wrong 
     \ref{g:example} & TODO The guarantee, as a lemma (\cref{thm:main}) & Tamarin & \gapyes & \gapno & TODO\,s \\
     \ref{req:first} & TODO The requirement's test cases & test suite & \gapyes\,42/42 & \gappartial\,30/42 & TODO\,s \\
     \ref{req:second} & TODO & TODO & \gapyes & \gapno & TODO\,s \\
+    \bottomrule
+  \end{tabularx}
+  }
+\end{table}
+
+\begin{table}[!ht]
+  \centering
+  \caption{Track T sibling of \cref{tab:correctness}: precision and recall against the ground truth, per benchmark family. Every false positive and false negative is explained in the text. Placeholder rows, replace with your own.}
+  \label{tab:precision}
+  {\small
+  \begin{tabularx}{\linewidth}{>{\raggedright\arraybackslash}X r r r r r r r}
+    \toprule
+    \textbf{Benchmark family} & \textbf{Instances} & \textbf{TP} & \textbf{FP} & \textbf{FN} & \textbf{Precision} & \textbf{Recall} & \textbf{Baseline recall} \\
+    \midrule
+    TODO Hand-written cases from \cref{chap:intro} & 12 & 12 & 0 & 0 & 1.00 & 1.00 & 0.75 \\
+    TODO Mutated real instances & 40 & 37 & 2 & 3 & 0.95 & 0.93 & 0.60 \\
+    TODO Real instances from another source & 25 & 21 & 1 & 4 & 0.95 & 0.84 & 0.52 \\
     \bottomrule
   \end{tabularx}
   }
@@ -109,8 +162,27 @@ TODO Describe \cref{fig:scalability}: what grows, how fast, and where the limit 
   \label{fig:scalability}
 \end{figure}
 
+\begin{figure}[!ht]
+  \centering
+  \begin{tikzpicture}
+    \begin{axis}[width=0.7\linewidth, height=55mm, xlabel={Sessions in the model}, ylabel={Verification time [s]}, ymode=log, ymajorgrids, legend style={font=\footnotesize}, legend pos=north west, xmin=0.5, xmax=6.5, xtick={1,...,6}, ymax=20000]
+      \draw[dashed, red!70!black] (axis cs:0.5,3600) -- (axis cs:6.5,3600) node[pos=0.85, above, font=\scriptsize] {time limit};
+      \addplot+[mark=*] coordinates {(1,4) (2,21) (3,140) (4,1100)};
+      \addlegendentry{all lemmas}
+      \addplot+[mark=square*, dashed] coordinates {(1,3) (2,9) (3,30) (4,95) (5,310) (6,1200)};
+      \addlegendentry{with helper lemmas}
+      \node[font=\scriptsize, text=red!70!black, anchor=west] at (axis cs:4.12,1100) {timeout at 5};
+    \end{axis}
+  \end{tikzpicture}
+  \caption{Track F sibling of \cref{fig:scalability}: verification time as the model grows, with the time limit and the point where the prover stops. What grows is whatever your model is parametrised by: sessions, agents, the bound of a bounded check, or the number of lemmas. Placeholder data, replace with your measurements.}
+  \label{fig:scalability-formal}
+\end{figure}
+
 \section{Robustness analysis (RQ3)}
-\todo[inline]{The review sheet gives 7--8 points on criterion E only if \enquote{a szerző skálázhatósági, robosztussági vizsgálatokat is elvégzett, mellyel igazolta, hogy rendszere ipari környezetben is megállja a helyét}: scalability \emph{and} robustness studies showing the system holds up in an industrial setting. Scalability alone does not earn it. Perturb the system on purpose and report what happens: \cref{tab:robustness} lists the perturbations and their outcomes, \cref{fig:robustness} shows how the system degrades and recovers during a fault, and how sensitive it is to its main parameter.}
+\todo[inline, caption={Robustness is scored separately from scalability}]{\textbf{Robustness is scored separately from scalability.} The review sheet gives 7--8 points on criterion E only if \enquote{a szerző skálázhatósági, robosztussági vizsgálatokat is elvégzett, mellyel igazolta, hogy rendszere ipari környezetben is megállja a helyét}: scalability \emph{and} robustness studies showing the system holds up in an industrial setting. Scalability alone does not earn it.\\
+\textbf{Track S:} perturb the system on purpose and report what happens: \cref{tab:robustness} lists the perturbations and their outcomes, \cref{fig:robustness} shows how the system degrades and recovers during a fault, and how sensitive it is to its main parameter.\\
+\textbf{Track F:} \cref{tab:robustness-formal}: re-verify every property under a stronger adversary and with each assumption dropped, and report which still hold, which break, and the attack that breaks them.\\
+\textbf{Track T:} \cref{tab:robustness} with the tool's own perturbations: thresholds and parameters varied around their defaults, mutated or adversarial inputs (bugs injected on purpose: does the tool still find them), and benchmark instances from another source than the one it was developed on.}
 \beat{how the system behaves when its assumptions are stressed: faults, attacks, load spikes, parameter changes}{\cref{tab:robustness}, with the setup of each perturbation}{the example under \cref{thr:example}}{the threats to validity}
 TODO
 
@@ -127,6 +199,22 @@ TODO
     Adversarial input & The attack of \cref{thr:example} on the running example & TODO & TODO & TODO \\
     Load spike & TODO$\times$ the nominal load for TODO seconds & TODO & TODO & TODO \\
     Parameter sensitivity & Timeouts, batch sizes, thresholds varied around their defaults & TODO & TODO & TODO \\
+    \bottomrule
+  \end{tabularx}
+  }
+\end{table}
+
+\begin{table}[!ht]
+  \centering
+  \caption{Track F sibling of \cref{tab:robustness}: each property re-verified under a stronger adversary and with each assumption of \cref{chap:approach} dropped. \gapyes{} proved, \gapno{} attack found (the trace is in the appendix), \gappartial{} timed out. Placeholder rows, replace with your own.}
+  \label{tab:robustness-formal}
+  {\small
+  \begin{tabularx}{\linewidth}{l >{\raggedright\arraybackslash}X *{4}{>{\centering\arraybackslash}p{0.13\linewidth}}}
+    \toprule
+    & \textbf{Property} & \textbf{Base threat model} & \textbf{Key leaked} & \textbf{\ref{asm:example} dropped} & \textbf{Weaker primitive} \\
+    \midrule
+    \ref{g:example} & TODO The guarantee, as a lemma (\cref{thm:main}) & \gapyes & \gapyes & \gapno & \gappartial \\
+    \ref{req:first} & TODO A requirement stated as a property & \gapyes & \gapno & \gapyes & \gapyes \\
     \bottomrule
   \end{tabularx}
   }
