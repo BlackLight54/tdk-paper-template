@@ -108,7 +108,7 @@
 % Bibliography
 %~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 \addcontentsline{toc}{chapter}{\bibname}
-\bibliography{bib/references,bib/zotero} % zotero.bib: linked to the Zotero group by Overleaf
+\bibliography{bib/references,bib/zotero,bib/mybib} % zotero.bib: linked to the Zotero group by Overleaf; mybib.bib: cited by the guide
 
 
 % Declaration on generative AI use (required by the faculty)
@@ -119,6 +119,29 @@
 % Appendix
 %~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 \include{content/10-appendices}
+
+
+% The guide: how we work, the TDK lifecycle, and how to use this template
+%~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+%TODO Delete from here to \selectthesislanguage before submission.
+\part*{Guide}\addcontentsline{toc}{part}{Guide}
+\renewcommand{\exname}{the credential revocation registry} % the guide's own running example
+\include{guide/01-getting-started}
+\include{guide/02-tdk-essentials}
+\include{guide/03-weekly-consultations}
+\include{guide/04-lifecycle}
+\include{guide/05-writing}
+\include{guide/06-code-tools-ai}
+\include{guide/07-zenodo}
+\include{guide/08-glossary}
+\include{guide/09-latex-template}
+\include{guide/10-bme-guide-note}
+\selecthungarian
+\include{guide/10-bme-latex-tools}
+\include{guide/11-bme-thesis-format}
+\include{guide/12-bme-template-usage}
+\include{guide/13-bme-examples}
+\selectthesislanguage
 
 %\label{page:last}
 \end{document}

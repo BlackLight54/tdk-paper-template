@@ -11,12 +11,12 @@ A margin note sits next to the line it refers to.\todo{A margin note.}
 The margins are narrow, so prefer inline notes:
 \todo[inline]{An inline note: a block across the text width.}
 \todoinline{The same, with the \texttt{\textbackslash todoinline} shortcut.}
-A margin comment from the supervisor.\atodo{Cite this.}
 \atodo[inline]{A longer review comment: \texttt{\textbackslash atodo} pre-fills the color and the author, and takes every \texttt{\textbackslash todo} option, here \texttt{inline}.}
 \atodo[inline, author=IK, color=yellow!30]{The same with another author and color, given as options.}
 \missingfigure{A placeholder for a figure that does not exist yet.}
 \beat{what a paragraph establishes}{its evidence}{what the running example shows in it}{the next paragraph}
 \advisortodo{A note for the advisors: a draft to confirm or a link to add.}
+A margin comment from the supervisor.\atodo{Cite this.}
 \begin{runningexample}[a box]
 The running example's appearance in a chapter; \texttt{\textbackslash exname} is set in \texttt{thesis.tex}.
 \end{runningexample}
@@ -33,7 +33,7 @@ Declare acronyms in \texttt{content/acronyms.tex}; the list of acronyms is print
 %----------------------------------------------------------------------------
 \section{Citations, links and icons (natbib, hyperref, bookmark, orcidlink, fontawesome5)}\label{app:latex:cite}
 Numeric citations are sorted and compressed~\cite{w3c2025vcdm,lamport1978time}.
-\texttt{\textbackslash citet} names the author: \citet{lamport1978time} introduced logical clocks.
+\ifnamedcitations\texttt{\textbackslash citet} names the author: \citet{lamport1978time} introduced logical clocks.\else\texttt{\textbackslash citet} names the author with \texttt{plainnat}; the Hungarian \texttt{huplain} style has no author data for it.\fi
 \texttt{\textbackslash citep} brackets the reference~\citep{lamport1978time}.
 
 Links: \url{https://github.com/ftsrg} prints the address, \href{https://ftsrg.mit.bme.hu}{the research group} hides it.

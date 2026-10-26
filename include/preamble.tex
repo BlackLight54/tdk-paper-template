@@ -186,9 +186,9 @@
   colback=teal!5, borderline west={2pt}{0pt}{teal!60!black}, left=6pt, right=4pt, top=3pt, bottom=3pt,
   before upper={{\raggedright\textbf{Running example, \exname\if\relax\detokenize{#1}\relax\else: #1\fi}\par}\smallskip}}
 
-% The guide (guide.tex) is a separate document, so the paper names its sections instead of
+% The guide is deleted before submission, so the paper names its sections instead of
 % referencing them, and the guide names the paper's files.
-\newcommand{\guideref}[1]{\enquote{#1} in the guide (\texttt{guide.pdf})}
+\newcommand{\guideref}[1]{\enquote{#1} in the guide}
 \makeatletter
 % File paths break after / and - (\path from the url package), so they fit narrow table columns.
 \g@addto@macro\UrlBreaks{\do\-}
