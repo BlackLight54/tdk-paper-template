@@ -108,8 +108,6 @@
 % makes todonotes honour it) or `disable` here.
 \usepackage[colorinlistoftodos,obeyFinal,textsize=footnotesize]{todonotes}
 
-\usepackage{acro} % Acronyms: define them in content/acronyms.tex, use \ac{key}.
-
 % Citations: natbib + BibTeX. \cite{a,b,c} prints [1-3]; \citet{a} prints "Lamport [1]".
 \usepackage[numbers,sort&compress]{natbib}
 
@@ -118,6 +116,11 @@
 \usepackage[unicode]{hyperref} % For hyperlinks in the generated document.
 \usepackage{bookmark}
 \usepackage{orcidlink} % Loads hyperref itself, so it must come after the line above.
+
+% Abbreviations, notation and terms: glossaries-extra, after hyperref so entries link to their
+% lists. One workflow only: \makenoidxglossaries sorts in TeX, so no makeglossaries, no bib2gls,
+% no Java. Entries live in content/glossary.tex; the lists are printed in thesis.tex.
+\usepackage[abbreviations,symbols,toc,section=section,nopostdot,nonumberlist,nogroupskip,nolangwarn,stylemods={longbooktabs}]{glossaries-extra}
 \usepackage[nameinlink,noabbrev,capitalise]{cleveref} % \cref{fig:x} -> "Figure 1.1". Keep after hyperref and ntheorem.
 
 

@@ -25,10 +25,14 @@ All notes are collected in the list of todos after the table of contents.
 The submitted version is built from \texttt{reviewer.tex}, a four-line root file that sets the \texttt{final} class option, disables todonotes, defines \texttt{\textbackslash reviewermode}, and inputs \texttt{thesis.tex}: every note disappears, and \texttt{thesis.tex} skips the list of todos and the guide. On Overleaf, open \texttt{reviewer.tex} and choose \emph{Recompile from this file}; locally, \texttt{make reviewer}. Look at it every week, not only in the last one: it is the paper the reviewer gets.
 
 %----------------------------------------------------------------------------
-\section{Acronyms (acro)}\label{app:latex:acro}
-The first use expands: \ac{vc}. Later uses stay short: \ac{vc}. The plural: \acp{vc}.
-Short and long forms on demand: \acs{zkp}, \acl{zkp}.
-Declare acronyms in \texttt{content/acronyms.tex}; the list of acronyms is printed after the acknowledgements.
+\section{Abbreviations, notation and terms (glossaries-extra)}\label{app:latex:acro}
+One file, \texttt{content/glossary.tex}, declares the three things a paper keeps lists of, and one command in each case uses them; the three tables are printed after the acknowledgements, only with the entries the text used, and every use links to its row.
+\begin{itemize}[noitemsep]
+  \item \textbf{Abbreviations.} The first use expands: \glsreset{vc}\gls{vc}. Later uses stay short: \gls{vc}. The plural: \glspl{vc}. One form on demand: \glsxtrshort{zkp}, \glsxtrlong{zkp}. Declared with \texttt{\textbackslash newabbreviation\{vc\}\{VC\}\{verifiable credential\}}.
+  \item \textbf{Notation.} A symbol is declared once, with a description that points at the definition introducing it, and the table collects them: \gls{Rt} is the registry, and $\gls{valid}$ works inside math too. Typing \texttt{\$R\_t\$} directly is fine as well; the entry is what puts the symbol in the table, so declare every symbol of \cref{app:latex:theorems} and use \texttt{\textbackslash gls} at least where it is introduced.
+  \item \textbf{Terms.} A word the paper uses in one fixed sense: an \gls{issuer} signs, a \gls{holder} presents, a \gls{verifier} checks. Use \texttt{\textbackslash gls} at the first use in a chapter, so the reader who forgot can click.
+\end{itemize}
+The template pins one workflow, \texttt{\textbackslash makenoidxglossaries}: the sorting is done by TeX, nothing else has to run, on Overleaf or locally. Give symbols a plain \texttt{sort} key. The internet will offer \texttt{makeglossaries} and \texttt{bib2gls} as well; neither is needed, and mixing them in breaks the build. The \href{https://ctan.org/pkg/glossaries-extra}{package documentation} is large; the \texttt{glossaries-extra} user manual's first chapter covers everything used here.
 
 %----------------------------------------------------------------------------
 \section{Citations, links and icons (natbib, hyperref, bookmark, orcidlink, fontawesome5)}\label{app:latex:cite}
@@ -500,7 +504,7 @@ This sentence is in the source but not in the PDF.
   \midrule
   \endhead
   \ctan{todonotes} & \cref{app:latex:todo} \\
-  \ctan{acro} & \cref{app:latex:acro} \\
+  \ctan{glossaries-extra} & \cref{app:latex:acro}, and the three lists after the acknowledgements \\
   \ctan{natbib}, \ctan{hyperref}, \ctan{bookmark}, \ctan{orcidlink}, \ctan{fontawesome5} & \cref{app:latex:cite} \\
   \ctan{cleveref} & \cref{app:latex:cref}, and every reference in this chapter \\
   \ctan{amsmath}, \ctan{unicode-math} (\ctan{newtx} under pdfLaTeX), \ctan{ntheorem} & \cref{app:latex:theorems} \\

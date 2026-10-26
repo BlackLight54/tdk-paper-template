@@ -1,0 +1,24 @@
+% The three lists of the paper, declared here and printed after the acknowledgements:
+%   abbreviations  \newabbreviation{key}{SHORT}{long form}
+%                  use \gls{key} (first use: "long form (SHORT)", later: "SHORT"), \glspl{key} for the
+%                  plural, \glsxtrshort{key} and \glsxtrlong{key} for one form on demand
+%   notation       \glsxtrnewsymbol[description={...}, sort=...]{key}{\ensuremath{symbol}}
+%                  use \gls{key} in text and math, or type the symbol; the entry is what matters
+%   terms          \newglossaryentry{key}{name={term}, description={...}}
+%                  use \gls{key} at the first use in each chapter at least, so the reader can click
+% Only entries that are used appear in the lists. Keys are lower case; sort keys are plain ASCII.
+
+% Abbreviations ------------------------------------------------------------------------
+\newabbreviation{vc}{VC}{verifiable credential}
+\newabbreviation{zkp}{ZKP}{zero-knowledge proof}
+
+% Notation -------------------------------------------------------------------------------
+% The description says what the symbol is and points at the definition that introduces it.
+\glsxtrnewsymbol[description={Revocation registry at time $t$: the set of revoked credential identifiers (TODO \cref{def:example})}, sort=R]{Rt}{\ensuremath{R_t}}
+\glsxtrnewsymbol[description={Credential $c$ is valid at time $t$: issued, not expired, not in $R_t$}, sort=valid]{valid}{\ensuremath{\mathit{valid}(c,t)}}
+
+% Terms ----------------------------------------------------------------------------------
+% Words the paper uses in one fixed sense; the description is the sense, one sentence.
+\newglossaryentry{issuer}{name={issuer}, description={The party that signs and issues a credential, and alone may revoke it}}
+\newglossaryentry{holder}{name={holder}, description={The party that keeps a credential and presents it}}
+\newglossaryentry{verifier}{name={verifier}, description={The party that checks a presented credential against the registry}}

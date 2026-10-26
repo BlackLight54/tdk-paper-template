@@ -234,13 +234,28 @@
 
 
 %--------------------------------------------------------------------------------------
-% Acronyms (acro)
+% Abbreviations, notation and terms (glossaries-extra)
 %--------------------------------------------------------------------------------------
-\acsetup{
-  make-links = true,     % \ac links to the list of acronyms
-  list/heading = chapter*,
+\setabbreviationstyle{long-short}          % first use "long form (SHORT)", then "SHORT"
+\glssetcategoryattribute{abbreviation}{nohyperfirst}{true}
+\renewcommand*{\glsnamefont}[1]{\textbf{#1}} % the first column in bold, as a table head would be
+\setlength{\glsdescwidth}{0.74\linewidth}
+\makenoidxglossaries
+\loadglsentries{content/glossary}
+% The three lists on one page, as booktabs tables with their own column heads, each with a sentence
+% that says what the table is for. \printlists goes after the acknowledgements in thesis.tex.
+\newcommand{\printlists}{%
+  \chapter*{Abbreviations, notation and terms}\addcontentsline{toc}{chapter}{Abbreviations, notation and terms}%
+  {\renewcommand*{\entryname}{Abbreviation}\renewcommand*{\descriptionname}{Meaning}%
+   \printnoidxglossary[type=abbreviations, style=long-booktabs, title={Abbreviations},
+     preamble={Every abbreviation is spelled out where it first appears in the text; this table repeats the expansions for a reader who starts in the middle, and each use in the text links here.}]}%
+  {\renewcommand*{\entryname}{Symbol}\renewcommand*{\descriptionname}{Meaning}%
+   \printnoidxglossary[type=symbols, style=long-booktabs, title={Notation},
+     preamble={The symbols of the formal model, in one place. Each is introduced once, in the definition the description points at, and keeps that meaning in every chapter; nothing is overloaded.}]}%
+  {\renewcommand*{\entryname}{Term}\renewcommand*{\descriptionname}{Meaning}%
+   \printnoidxglossary[type=main, style=long-booktabs, title={Terms},
+     preamble={Words this paper uses in one fixed sense, often narrower than everyday or vendor usage. The description is that sense; where the literature uses the word differently, the background chapter says so.}]}%
 }
-\input{content/acronyms}
 
 
 %--------------------------------------------------------------------------------------
@@ -275,6 +290,7 @@
 %--------------------------------------------------------------------------------------
 % Write \cref{fig:overview} instead of Figure~\ref{fig:overview}; \Cref at sentence start.
 % Label prefixes: chap: sec: fig: tab: eq: lst: alg: app: def: thm: lem: prop: cor: inv:
+% Glossary keys (content/glossary.tex) have no prefix; they are a separate name space.
 % prty: claim: rem: not: ex: c: rq: req: asm: g: thr: lim:
 \crefname{definition}{Definition}{Definitions}
 \crefname{theorem}{Theorem}{Theorems}

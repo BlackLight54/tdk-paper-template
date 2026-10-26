@@ -7,7 +7,7 @@ local MAIN, CONTENT = C.MAIN, C.CONTENT
 
 -- template structure --------------------------------------------------------------------
 rule("structure", "source", true, "what the template provides is still there: the files, the tag lists, the running example, the gap matrix, the leading figure; a paper that replaced the template sees here what it lost", function()
-  for _, f in ipairs({ "thesis.tex", "reviewer.tex", "include/packages.tex", "include/preamble.tex", "include/thesis-en.tex", "include/titlepage-tdk.tex", "content/acronyms.tex", "content/00-abstract.tex", "content/09-ai-declaration.tex", "bib/references.bib", "scripts/lint.lua", "docs/TDK2025_biralati_pontozolap_hallgatoi.pdf" }) do
+  for _, f in ipairs({ "thesis.tex", "reviewer.tex", "include/packages.tex", "include/preamble.tex", "include/thesis-en.tex", "include/titlepage-tdk.tex", "content/glossary.tex", "content/00-abstract.tex", "content/09-ai-declaration.tex", "bib/references.bib", "scripts/lint.lua", "docs/TDK2025_biralati_pontozolap_hallgatoi.pdf" }) do
     if not C.exists(f) then fail(nil, nil, "missing from the template: " .. f) end
   end
   if #MAIN == 0 then fail(nil, nil, "no chapter files content/01-...tex to content/07-...tex: the main text is not where the template keeps it"); return end
@@ -29,7 +29,7 @@ rule("structure", "source", true, "what the template provides is still there: th
     if not pre:find(m, 1, true) then fail("include/preamble.tex", nil, "the preamble no longer defines " .. m) end
   end
   local pk = C.readfile("include/packages.tex") or ""
-  for _, m in ipairs({ "TeX Gyre Termes", "cleveref", "natbib", "todonotes", "acro", "minted", "booktabs", "pgfplots" }) do
+  for _, m in ipairs({ "TeX Gyre Termes", "cleveref", "natbib", "todonotes", "glossaries-extra", "minted", "booktabs", "pgfplots" }) do
     if not pk:find(m, 1, true) then fail("include/packages.tex", nil, "packages.tex no longer sets up " .. m) end
   end
   local th = C.readfile("thesis.tex") or ""
@@ -311,31 +311,43 @@ rule("crefs", "source", true, "references go through \\cref: no 'Figure~\\ref', 
   end)
 end)
 
-rule("acronyms", "source", true, "every acronym used is declared, every declared one is used, and none is typed by hand where \\ac would expand it", function()
-  local declared, short, used = {}, {}, {}
-  C.each_line({ "content/acronyms.tex" }, function(f, n, l)
-    local k = l:match("\\DeclareAcronym{([^}]*)}"); if k then declared[k] = { file = f, line = n } end
+rule("acronyms", "source", true, "glossary entries: every \\gls key is declared in content/glossary.tex, every abbreviation declared is used, no abbreviation is typed by hand, and every symbol of a definition has a notation entry", function()
+  local G = "content/glossary.tex"
+  local declared, short, used, kind = {}, {}, {}, {}
+  C.each_line({ G }, function(f, n, l)
+    local k, sh = l:match("\\newabbreviation%b[]{([^}]*)}{([^}]*)}")
+    if not k then k, sh = l:match("\\newabbreviation{([^}]*)}{([^}]*)}") end
+    if k then declared[k] = { file = f, line = n }; kind[k] = "abbreviation"; short[sh] = k end
+    local s1 = l:match("\\glsxtrnewsymbol%b[]{([^}]*)}") or l:match("\\glsxtrnewsymbol{([^}]*)}")
+    if s1 then declared[s1] = { file = f, line = n }; kind[s1] = "symbol" end
+    local t1 = l:match("\\newglossaryentry{([^}]*)}")
+    if t1 then declared[t1] = { file = f, line = n }; kind[t1] = "term" end
   end)
-  -- short forms: the "short = X," lines, in order of declaration
-  do
-    local keys = {}
-    local s = C.readfile("content/acronyms.tex") or ""
-    for k, body in s:gmatch("\\DeclareAcronym{([^}]*)}%s*(%b{})") do
-      local sh = body:match("short%s*=%s*([^,\n}]+)"); if sh then short[C.trim(sh)] = k end
-    end
-  end
-  if next(declared) == nil then fail("content/acronyms.tex", nil, "no acronyms declared: content/acronyms.tex is missing or empty") end
+  if next(declared) == nil then fail(G, nil, "no glossary entries: content/glossary.tex is missing or empty") end
   C.each_line(MAIN, function(f, n, l)
-    for k in l:gmatch("\\[Aa]c[slpf]*%*?{([^}]*)}") do
+    for k in l:gmatch("\\[Gg]ls[%a]*%*?{([^}]*)}") do
       used[k] = true
-      if not declared[k] then fail(f, n, "acronym " .. k .. " is not declared in content/acronyms.tex") end
+      if not declared[k] then fail(f, n, "glossary key " .. k .. " is not declared in " .. G) end
     end
     local p = C.prose(l)
     for w in p:gmatch("%f[%w][%u][%u%d]+[%u]%f[%W]") do
-      if short[w] and not l:match("\\ac[slpf]*%*?{" .. C.escape(short[w]) .. "}") then fail(f, n, string.format("%s typed by hand: write \\ac{%s}", w, short[w])) end
+      if short[w] and not l:match("\\[Gg]ls[%a]*%*?{" .. C.escape(short[w]) .. "}") then fail(f, n, string.format("%s typed by hand: write \\gls{%s}", w, short[w])) end
     end
   end)
-  for k, at in pairs(declared) do if not used[k] then warn(at.file, at.line, "acronym " .. k .. " is declared but never used: remove it") end end
+  for k, at in pairs(declared) do
+    if not used[k] and kind[k] == "abbreviation" then warn(at.file, at.line, "abbreviation " .. k .. " is declared but never used: remove it") end
+    if not used[k] and kind[k] ~= "abbreviation" then note(at.file, at.line, kind[k] .. " " .. k .. " is declared but never used with \\gls, so it will not print") end
+  end
+  -- a definition that introduces a symbol should have a notation entry: look for $...$ in definition environments
+  for _, f in ipairs(MAIN) do
+    local indef = false
+    for n, raw in ipairs(C.lines(f)) do
+      local l = C.strip_comment(raw)
+      if l:match("\\begin{definition}") or l:match("\\begin{notation}") then indef = true end
+      if indef and l:match("%$") and not l:match("\\gls") and not l:match("TODO") then note(f, n, "a definition with math and no \\gls: does it introduce a symbol that belongs in the notation table?") end
+      if l:match("\\end{definition}") or l:match("\\end{notation}") then indef = false end
+    end
+  end
   -- undeclared all-caps words that look like acronyms, counted once each
   local seen = {}
   C.each_line(MAIN, function(f, n, l)

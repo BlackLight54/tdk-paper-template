@@ -143,7 +143,7 @@ function M.prose(l)
   l = l:gsub("\\url%b{}", " "):gsub("\\href%b{}", " "):gsub("\\path%b{}", " ")
   l = l:gsub("\\[cC]?ref%b{}", " "):gsub("\\label%b{}", " "):gsub("\\cite[tp]?%*?%b[]?%b{}", " "):gsub("\\cite[tp]?%*?%b{}", " ")
   l = l:gsub("\\texttt%b{}", " "):gsub("\\verb(.)(.-)%1", " "):gsub("\\lstinline%b[]%b{}", " "):gsub("\\lstinline%b{}", " "):gsub("\\mintinline%b{}%b{}", " ")
-  l = l:gsub("\\ac[slpf]*%*?%b{}", " "):gsub("\\begin%b{}", " "):gsub("\\end%b{}", " ")
+  l = l:gsub("\\ac[slpf]*%*?%b{}", " "):gsub("\\[Gg]ls[%a]*%*?%b{}", " "):gsub("\\begin%b{}", " "):gsub("\\end%b{}", " ")
   l = l:gsub("\\[%a@]+%*?", " ")
   return l
 end
