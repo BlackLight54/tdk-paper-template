@@ -206,6 +206,11 @@
 \deftplref{tab:robustness}{the robustness table}{The robustness table}{05-evaluation}
 \deftplref{aidecl}{the AI declaration}{The AI declaration}{09-ai-declaration}
 
+% A web link that looks like one: underlined, in the link color. Links set with \href or \url
+% stay black, as the faculty template prints them (see \hypersetup above).
+\definecolor{weblinkcolor}{RGB}{31,86,156}
+\newcommand{\weblink}[2]{\href{#1}{\textcolor{weblinkcolor}{\uline{#2}}}}
+
 % Marks a step where the student stops for the advisors' approval (lifecycle appendix).
 \newcommand{\gate}{\textcolor{red!70!black}{\textsc{gate}}}
 \newcommand{\advisortodo}[1]{\todo[inline, color=cyan!20, bordercolor=cyan!60!black]{\textbf{Advisor:} #1}}
