@@ -1,11 +1,11 @@
 %----------------------------------------------------------------------------
-\chapter{Approach}\label{chap:approach}
+\chapter{Approach}\label{ch:approach}
 %----------------------------------------------------------------------------
-\todo[inline, caption={Approach: criteria D/1 and D/2}]{\textbf{Criteria D/1 and D/2 (0--10 together).} The core of the paper: your theoretical contributions, such as a model, formalisation, algorithm or protocol, and what it guarantees; \cref{chap:implementation} holds the technical ones. Rename the chapter after your method.\\
+\todo[inline, caption={Approach: criteria D/1 and D/2}]{\textbf{Criteria D/1 and D/2 (0--10 together).} The core of the paper: your theoretical contributions, such as a model, formalisation, algorithm or protocol, and what it guarantees; \cref{ch:implementation} holds the technical ones. Rename the chapter after your method.\\
 \textbf{Correctness:} every claim needs a proof, a mechanised proof, or a measurement; state assumptions explicitly.\\
 \textbf{Novelty:} separate what is new from what you adopted from the literature.\\
 \textbf{Non-triviality:} name the hard part and explain why the simple design does not work.\\
-\textbf{Describe here, evaluate later.} This chapter states what the approach is and what it guarantees, objectively; how well it works is \cref{chap:evaluation}'s job, and praise here reads as a claim without evidence.\\
+\textbf{Describe here, evaluate later.} This chapter states what the approach is and what it guarantees, objectively; how well it works is \cref{ch:evaluation}'s job, and praise here reads as a claim without evidence.\\
 \textbf{In the sheet's words.} The top of D/1: \enquote{5: újszerű (legalább hazánkban újszerű, vagy eddig még nem létező megoldás)}; the top of D/2: \enquote{5: kiváló (kimagasló színvonalú kidolgozás, a közölt eredmények helyessége kétségkívül megalapozott)}.}
 
 \section{Overview}
@@ -41,7 +41,7 @@ TODO The scenario step by step: which component handles which part of it, and wh
 TODO
 
 \section{Threat model and guarantees}
-\beat{who the adversary is and what it can do, who is trusted, which cryptographic assumptions hold, what is out of scope, and what the approach guarantees under all that}{a proof, a mechanised proof, or a measurement in \cref{chap:evaluation} for every guarantee}{the attack on the example that the threat describes}{the implementation}
+\beat{who the adversary is and what it can do, who is trusted, which cryptographic assumptions hold, what is out of scope, and what the approach guarantees under all that}{a proof, a mechanised proof, or a measurement in \cref{ch:evaluation} for every guarantee}{the attack on the example that the threat describes}{the implementation}
 \todo[inline, caption={Threat model: the four parts}]{\textbf{A threat model has four parts, and a reviewer of a security topic looks for each.} \textbf{Adversary:} what it controls (the network, some participants, a key), what it can do (read, replay, reorder, drop, forge within its keys), and what it cannot. Name the standard model where one fits: Dolev--Yao for a protocol, honest-but-curious or malicious participants, a computational adversary with a security parameter for a cryptographic construction. \textbf{Trust:} which parties are assumed honest, and what happens if one is not. \textbf{Cryptographic assumptions:} the primitives and the properties relied on, as items of the assumptions list, so a proof can cite them. \textbf{Out of scope:} the attacks the work does not address, said once, here, so the reviewer does not raise them as gaps. The guarantees then read \enquote{under these assumptions, against this adversary, the following holds}, and \cref{tab:correctness} shows how each was checked.}
 
 \paragraph{Adversary.}

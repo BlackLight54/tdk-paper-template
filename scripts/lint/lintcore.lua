@@ -25,16 +25,44 @@ function M.trim(s) return (s:gsub("^%s+", ""):gsub("%s+$", "")) end
 function M.median(t) if #t == 0 then return nil end; table.sort(t); return t[math.ceil(#t / 2)] end
 function M.count(s, pat) return select(2, s:gsub(pat, "")) end
 
--- the content files; the main-text chapters are the ones with a numbered \chapter; chapters are
--- found by role through their label (chap:intro, chap:approach, ...), never by file name, so a
--- student may rename or merge files
-M.CONTENT, M.MAIN, M.ROLE, M.FILES = {}, {}, {}, {}
-M.ROLE_LABEL = { intro = "chap:intro", background = "chap:background", approach = "chap:approach", implementation = "chap:implementation", evaluation = "chap:evaluation", related = "chap:related", conclusion = "chap:conclusion" }
+-- the content files are the ones thesis.tex reaches through \include, \input and
+-- \loadglsentries, in the order it reaches them; the frame under include/ is followed but not
+-- counted, the guide is skipped, and commented-out lines do not count. M.BIB holds the .bib
+-- files of \bibliography. A paper without a thesis.tex that includes anything falls back to the
+-- files in content/. The main-text chapters are the ones with a numbered \chapter; chapters are
+-- found by role through their label (ch:intro, ch:approach, ...), never by file name or
+-- folder, so a student may rename, move or merge files
+M.CONTENT, M.MAIN, M.ROLE, M.FILES, M.BIB = {}, {}, {}, {}, {}
+M.ROLE_LABEL = { intro = "ch:intro", background = "ch:background", approach = "ch:approach", implementation = "ch:implementation", evaluation = "ch:evaluation", related = "ch:related", conclusion = "ch:conclusion" }
 M.ROLE_NAME = { intro = "introduction", background = "background chapter", approach = "approach chapter", implementation = "implementation chapter", evaluation = "evaluation chapter", related = "related-work chapter", conclusion = "conclusion" }
 M.MANDATORY = { "intro", "approach", "evaluation", "related", "conclusion" }
-if M.exists("content") then
-  for f in lfs.dir("content") do if f:match("%.tex$") then M.CONTENT[#M.CONTENT + 1] = "content/" .. f end end
-  table.sort(M.CONTENT)
+do
+  local seen = {}
+  local function under(p, dir) return p:sub(1, #dir) == dir end
+  local function follow(f)
+    if seen[f] then return end
+    seen[f] = true
+    local s = M.readfile(f)
+    if not s then return end
+    if f ~= "thesis.tex" and not under(f, "include/") then M.CONTENT[#M.CONTENT + 1] = f end
+    for l in s:gmatch("[^\n]*") do
+      for cmd, arg in M.strip_comment(l):gmatch("\\(%a+)%s*(%b{})") do
+        arg = M.trim(arg:sub(2, -2))
+        if cmd == "bibliography" then
+          for b in arg:gmatch("[^,%s]+") do M.BIB[#M.BIB + 1] = b:match("%.bib$") and b or b .. ".bib" end
+        elseif (cmd == "include" or cmd == "input" or cmd == "loadglsentries") and arg ~= "" and not arg:find("\\", 1, true) then
+          local p = arg:match("%.tex$") and arg or arg .. ".tex"
+          if not under(p, "guide/") then follow(p) end
+        end
+      end
+    end
+  end
+  follow("thesis.tex")
+  if #M.CONTENT == 0 and M.exists("content") then
+    for f in lfs.dir("content") do if f:match("%.tex$") then M.CONTENT[#M.CONTENT + 1] = "content/" .. f end end
+    table.sort(M.CONTENT)
+  end
+  if #M.BIB == 0 then M.BIB = { "bib/references.bib", "bib/zotero.bib", "bib/guide.bib" } end
   for _, f in ipairs(M.CONTENT) do
     local s = M.readfile(f) or ""
     local body = s:gsub("%%[^\n]*", "")
@@ -90,13 +118,15 @@ end
 local function finding(level, file, line, msg)
   if ignored(file, line) then return end
   M.findings[#M.findings + 1] = { level = level, file = file, line = line, msg = msg }
-  if M.opts.tex then return end
+end
+-- findings are printed by M.report, after sorting, so the output is the same on every run
+local function print_finding(f)
   if gh then
-    local loc = file and ("file=" .. file .. (line and (",line=" .. line) or "")) or ""
-    io.write(string.format("::%s %s::%s\n", level, loc, msg))
+    local loc = f.file and ("file=" .. f.file .. (f.line and (",line=" .. f.line) or "")) or ""
+    io.write(string.format("::%s %s::%s\n", f.level, loc, f.msg))
   else
-    local tag = ({ error = " FAIL", warning = " warn", notice = "     " })[level]
-    io.write(string.format("%s%s %s\n", file and (file .. (line and (":" .. line) or "") .. ":") or "", tag, msg))
+    local tag = ({ error = " FAIL", warning = " warn", notice = "     " })[f.level]
+    io.write(string.format("%s%s %s\n", f.file and (f.file .. (f.line and (":" .. f.line) or "") .. ":") or "", tag, f.msg))
   end
 end
 function M.fail(file, line, msg) finding("error", file, line, msg) end
@@ -106,6 +136,14 @@ function M.note(file, line, msg) finding("notice", file, line, msg) end
 M.results = {}
 -- severity: check (fails on errors once its phase is reached), advice (warns, never fails), count (numbers)
 function M.report(rule, r, counts)
+  -- a stable order: pairs() differs between runs, and the Checks page that lists these findings
+  -- is input by the build, so an unstable order kept latexmk recompiling
+  table.sort(M.findings, function(a, b)
+    if (a.file or "") ~= (b.file or "") then return (a.file or "") < (b.file or "") end
+    if (a.line or 0) ~= (b.line or 0) then return (a.line or 0) < (b.line or 0) end
+    return a.msg < b.msg
+  end)
+  if not M.opts.tex then for _, f in ipairs(M.findings) do print_finding(f) end end
   local errors, warnings = 0, 0
   for _, f in ipairs(M.findings) do
     if f.level == "error" then errors = errors + 1 elseif f.level == "warning" then warnings = warnings + 1 end
@@ -165,6 +203,8 @@ end
 
 -- the prose lines of a file: comments, todo/beat/advisor notes (brace-balanced, across lines),
 -- tikzpicture and axis blocks, and listings removed; line numbers preserved as empty lines
+-- environments that hold no prose: pictures, code and display maths
+M.NONPROSE = { "tikzpicture", "lstlisting", "minted", "forest", "equation", "equation*", "align", "align*", "gather", "gather*", "multline", "multline*", "displaymath" }
 function M.prose_lines(file)
   local out, depth, intodo, inblock = {}, 0, false, nil
   for _, raw in ipairs(M.lines(file)) do
@@ -175,16 +215,21 @@ function M.prose_lines(file)
       if not intodo and not inblock then
         local s, e, name = l:find("\\(%a*todo)%s*%[?", i)
         local bs = l:find("\\beat{", i, true)
-        local blk = l:match("\\begin{(tikzpicture)}", i) or l:match("\\begin{(lstlisting)}", i) or l:match("\\begin{(minted)}", i) or l:match("\\begin{(forest)}", i)
-        local bstart = blk and l:find("\\begin{" .. blk .. "}", i, true)
+        local blk, bstart
+        for _, b in ipairs(M.NONPROSE) do
+          local p = l:find("\\begin{" .. b .. "}", i, true)
+          if p and (not bstart or p < bstart) then blk, bstart = "\\end{" .. b .. "}", p end
+        end
+        local dm = l:find("\\[", i, true) -- display maths \[ ... \], but not the line break \\[2pt]
+        if dm and l:sub(dm - 1, dm - 1) ~= "\\" and (not bstart or dm < bstart) then blk, bstart = "\\]", dm end
         local first = math.min(s or math.huge, bs or math.huge, bstart or math.huge)
         if first == math.huge then keep[#keep + 1] = l:sub(i); break end
         keep[#keep + 1] = l:sub(i, first - 1)
         if first == bstart then inblock = blk; i = first + 1
         else intodo = true; depth = 0; i = first + 1 end
       elseif inblock then
-        local e = l:find("\\end{" .. inblock .. "}", i, true)
-        if e then i = e + #("\\end{" .. inblock .. "}"); inblock = nil else break end
+        local e = l:find(inblock, i, true)
+        if e then i = e + #inblock; inblock = nil else break end
       else -- inside a todo or beat: skip until its braces close (the optional [..] and 1-4 {..} groups)
         local c = l:sub(i, i)
         if c == "{" or c == "[" then depth = depth + 1 elseif c == "}" or c == "]" then depth = depth - 1 end
@@ -205,9 +250,11 @@ function M.each_prose_line(files, fn) for _, f in ipairs(files) do for n, l in i
 function M.prose(l)
   l = l:gsub("%$[^$]*%$", " ")
   l = l:gsub("\\url%b{}", " "):gsub("\\href%b{}", " "):gsub("\\path%b{}", " ")
-  l = l:gsub("\\[cC]?ref%b{}", " "):gsub("\\label%b{}", " "):gsub("\\cite[tp]?%*?%b[]?%b{}", " "):gsub("\\cite[tp]?%*?%b{}", " ")
+  l = l:gsub("\\[cC]?ref%b{}", " "):gsub("\\[aA]utoref%b{}", " "):gsub("\\pageref%b{}", " "):gsub("\\nameref%b{}", " "):gsub("\\label%b{}", " ")
+  l = l:gsub("\\includegraphics%b[]%b{}", " "):gsub("\\includegraphics%b{}", " "):gsub("\\includesvg%b[]%b{}", " "):gsub("\\includesvg%b{}", " "):gsub("\\input%b{}", " "):gsub("\\cite[tp]?%*?%b[]?%b{}", " "):gsub("\\cite[tp]?%*?%b{}", " ")
   l = l:gsub("\\texttt%b{}", " "):gsub("\\verb(.)(.-)%1", " "):gsub("\\lstinline%b[]%b{}", " "):gsub("\\lstinline%b{}", " "):gsub("\\mintinline%b{}%b{}", " ")
-  l = l:gsub("\\ac[slpf]*%*?%b{}", " "):gsub("\\[Gg]ls[%a]*%*?%b{}", " "):gsub("\\begin%b{}", " "):gsub("\\end%b{}", " ")
+  l = l:gsub("\\ac[slpf]*%*?%b{}", " "):gsub("\\[Gg]ls[%a]*%*?%b{}", " "):gsub("\\begin{tabularx}%b{}%b{}", " "):gsub("\\begin{xltabular}%b{}%b{}", " "):gsub("\\begin{tabular%*}%b{}%b{}", " "):gsub("\\begin{tabular}%b[]%b{}", " "):gsub("\\begin{tabular}%b{}", " "):gsub("\\begin{longtable}%b{}", " ")
+  l = l:gsub("\\begin%b{}%b[]", " "):gsub("\\begin%b{}", " "):gsub("\\end%b{}", " ")
   l = l:gsub("\\[%a@]+%*?", " ")
   return l
 end

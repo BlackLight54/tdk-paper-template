@@ -47,6 +47,7 @@
 \input{include/thesis-en}
 
 \input{include/preamble}
+\input{include/macros} % your own packages and macros; a template update leaves this file alone
 
 \singlespacing
 \marginsize{15mm}{15mm}{15mm}{15mm}
@@ -56,7 +57,7 @@
 \begin{document}
 
 \pagenumbering{gobble}
-\hypersetup{pageanchor=false} % unnumbered pages get no PDF page anchors; content/00-abstract.tex turns them back on
+\hypersetup{pageanchor=false} % unnumbered pages get no PDF page anchors; they come back on with the abstract
 
 %TODO These includes define guidelines -- remove these
 %~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -81,6 +82,7 @@
 % Declaration and Abstract
 %~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 %\include{include/declaration} %TODO Hallgatói nyilatkozat -- TDK és OTDK esetén törlendő!
+\clearpage\pagenumbering{roman}\hypersetup{pageanchor=true} % from the abstract on, pages are numbered and anchored
 \include{content/00-abstract}    %TODO Összefoglaló -- TDK és OTDK esetén nem kötelező
 
 
@@ -89,7 +91,7 @@
 \pagenumbering{arabic}
 
 %TODO import your own content
-\include{content/01-introduction} % the main text starts here (page:main:start)
+\include{content/01-introduction} % the main text starts here; the lint counts its pages from the .toc
 \include{content/02-background}
 \include{content/03-approach}
 \include{content/04-implementation}

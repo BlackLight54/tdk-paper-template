@@ -1,9 +1,9 @@
 %----------------------------------------------------------------------------
-\chapter{Evaluation}\label{chap:evaluation}
+\chapter{Evaluation}\label{ch:evaluation}
 %----------------------------------------------------------------------------
 \todo[inline, caption={Evaluation: criteria E and D/2}]{\textbf{Criteria E (0--8) and D/2.}\\
 \textbf{Correctness:} report setup, versions and repetitions so every number can be checked; D/2 penalises results that cannot be.\\
-\textbf{Novelty:} compare against the closest existing approach named in the introduction; \cref{chap:related} then places the results in the wider literature.\\
+\textbf{Novelty:} compare against the closest existing approach named in the introduction; \cref{ch:related} then places the results in the wider literature.\\
 \textbf{Beyond small examples:} E gives 7--8 points only for evaluation beyond small examples: scalability and robustness measurements showing the system holds up in an industrial setting. What that means for a formal or an analysis topic is in \cref{tab:eval-tracks}.\\
 \textbf{In the sheet's words.} D/2 gives \enquote{3--4: jó (színvonalas kidolgozás, de esetleg egyes eredmények helyessége nincs kellőképpen alátámasztva)} when a result is reported without the setup that supports it, and E gives \enquote{3--4: pontatlan -- ha a dolgozat bevezetése megfelelő és a dolgozatban szerepel az eredmények kis mintapéldákon túlmenő értékelése is, de az utóbbi hiányos, pontatlan} or \enquote{5--6: pontos, de hiányos} when the evaluation stops at small examples.}
 
@@ -32,7 +32,7 @@
 
 \section{Research questions}
 \begin{rqlist}
-  \item\label{rq:correct} TODO Does the approach handle the running example and the cases in \cref{chap:intro} correctly?
+  \item\label{rq:correct} TODO Does the approach handle the running example and the cases in \cref{ch:intro} correctly?
     % Track F: Does the model satisfy every property of the threat model, and does it find the known attacks?
     % Track T: Does the tool find the real instances in the benchmark, and only those?
   \item\label{rq:scale} TODO How do time and resource use grow with input size?
@@ -54,7 +54,7 @@ TODO The code, the models and the measurement scripts are archived on Zenodo~\ci
 \beat{that the approach is correct on the example and on every requirement case}{test, proof or model-checking results}{the scenario's outcome, before and after}{scalability}
 TODO
 \begin{runningexample}[solved]
-TODO What happens in the scenario with this work, compared with what went wrong in \cref{chap:intro} (\cref{fig:example-trace}).
+TODO What happens in the scenario with this work, compared with what went wrong in \cref{ch:intro} (\cref{fig:example-trace}).
 \end{runningexample}
 
 \todo[inline, caption={Correctness in two ways}]{\textbf{Show correctness in two ways.} \Cref{tab:correctness} lists every guarantee and requirement with how it was checked: a proof (Tamarin, Lean, \dots), model checking, or a test suite, for this work and the baseline. Keep the rows that fit your contribution: formal topics fill it with proofs and counterexamples, empirical ones with test and benchmark outcomes; an analysis tool adds \cref{tab:precision}. \Cref{fig:example-trace} shows the running example concretely: what goes wrong with the baseline and what this work does instead; for a protocol, a sequence chart, otherwise the corresponding before-and-after picture.}
@@ -86,7 +86,7 @@ TODO What happens in the scenario with this work, compared with what went wrong 
     \toprule
     \textbf{Benchmark family} & \textbf{Instances} & \textbf{TP} & \textbf{FP} & \textbf{FN} & \textbf{Precision} & \textbf{Recall} & \textbf{Baseline recall} \\
     \midrule
-    TODO Hand-written cases from \cref{chap:intro} & 12 & 12 & 0 & 0 & 1.00 & 1.00 & 0.75 \\
+    TODO Hand-written cases from \cref{ch:intro} & 12 & 12 & 0 & 0 & 1.00 & 1.00 & 0.75 \\
     TODO Mutated real instances & 40 & 37 & 2 & 3 & 0.95 & 0.93 & 0.60 \\
     TODO Real instances from another source & 25 & 21 & 1 & 4 & 0.95 & 0.84 & 0.52 \\
     \bottomrule
@@ -207,7 +207,7 @@ TODO
 
 \begin{table}[!ht]
   \centering
-  \caption{Track F sibling of \cref{tab:robustness}: each property re-verified under a stronger adversary and with each assumption of \cref{chap:approach} dropped. \gapyes{} proved, \gapno{} attack found (the trace is in the appendix), \gappartial{} timed out. Placeholder rows, replace with your own.}
+  \caption{Track F sibling of \cref{tab:robustness}: each property re-verified under a stronger adversary and with each assumption of \cref{ch:approach} dropped. \gapyes{} proved, \gapno{} attack found (the trace is in the appendix), \gappartial{} timed out. Placeholder rows, replace with your own.}
   \label{tab:robustness-formal}
   {\small
   \begin{tabularx}{\linewidth}{l >{\raggedright\arraybackslash}X *{4}{>{\centering\arraybackslash}p{0.13\linewidth}}}

@@ -202,11 +202,11 @@
 \newcommand{\tplref}[1]{\@nameuse{tpl@#1}}
 \newcommand{\Tplref}[1]{\@nameuse{Tpl@#1}}
 \makeatother
-\deftplref{chap:intro}{the introduction}{The introduction}{01-introduction}
-\deftplref{chap:approach}{the approach chapter}{The approach chapter}{03-approach}
-\deftplref{chap:implementation}{the implementation chapter}{The implementation chapter}{04-implementation}
-\deftplref{chap:evaluation}{the evaluation chapter}{The evaluation chapter}{05-evaluation}
-\deftplref{chap:related}{the related-work chapter}{The related-work chapter}{06-related-work}
+\deftplref{ch:intro}{the introduction}{The introduction}{01-introduction}
+\deftplref{ch:approach}{the approach chapter}{The approach chapter}{03-approach}
+\deftplref{ch:implementation}{the implementation chapter}{The implementation chapter}{04-implementation}
+\deftplref{ch:evaluation}{the evaluation chapter}{The evaluation chapter}{05-evaluation}
+\deftplref{ch:related}{the related-work chapter}{The related-work chapter}{06-related-work}
 \deftplref{fig:overview}{the leading figure}{The leading figure}{01-introduction}
 \deftplref{fig:scalability}{the scalability figure}{The scalability figure}{05-evaluation}
 \deftplref{tab:robustness}{the robustness table}{The robustness table}{05-evaluation}
@@ -257,6 +257,7 @@
 \setlength{\glsdescwidth}{0.62\linewidth} % with the name column the tables come to about three quarters of the text width, centred
 \makenoidxglossaries
 \loadglsentries{content/glossary}
+\ifdefined\reviewermode\else\loadglsentries{guide/glossary}\fi % the guide's own examples, only when the guide is built
 % The three lists on one page, as booktabs tables with their own column heads, each with a sentence
 % that says what the table is for. \printlists goes after the acknowledgements in thesis.tex.
 \newcommand{\printlists}{%
@@ -304,7 +305,7 @@
 % Cross-references (cleveref)
 %--------------------------------------------------------------------------------------
 % Write \cref{fig:overview} instead of Figure~\ref{fig:overview}; \Cref at sentence start.
-% Label prefixes: chap: sec: fig: tab: eq: lst: alg: app: def: thm: lem: prop: cor: inv:
+% Label prefixes: ch: sec: fig: tab: eq: lst: alg: app: def: thm: lem: prop: cor: inv:
 % Glossary keys (content/glossary.tex) have no prefix; they are a separate name space.
 % prty: claim: rem: not: ex: c: rq: req: asm: g: thr: lim:
 \crefname{definition}{Definition}{Definitions}

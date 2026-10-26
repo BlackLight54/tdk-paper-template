@@ -34,10 +34,10 @@ Anchor rows are shaded red. Rows marked \official{} and shaded yellow are the of
   Virtual machine & both & You asked for the VM and can reach it over SSH & \lcref{app:start:env}{Development environment} \\
   Context upload & we & Our papers and notes on the topic are in your notes repository & --- \\
   \lcphase{2. Research}{first half of September}
-  Problem & you & The problem is stated, with a running example & \lcref{chap:intro}{Introduction} \\
+  Problem & you & The problem is stated, with a running example & \lcref{ch:intro}{Introduction} \\
   Literature review and gap & you & Sources found systematically are in Zotero; the gap matrix is filled; the gap is one sentence & \lcref{tab:related}{gap matrix}, \lcref{app:writing}{Writing} \\
-  Research questions and contributions & you & RQ1--RQ3 and C1--C3 are written as checkable claims & \lcref{chap:intro}{Introduction}, \lcref{chap:evaluation}{Evaluation} \\
-  Threats and requirements & you & Threat model, assumptions and requirements are listed & \lcref{chap:approach}{Approach} \\
+  Research questions and contributions & you & RQ1--RQ3 and C1--C3 are written as checkable claims & \lcref{ch:intro}{Introduction}, \lcref{ch:evaluation}{Evaluation} \\
+  Threats and requirements & you & Threat model, assumptions and requirements are listed & \lcref{ch:approach}{Approach} \\
   Leading figure draft & you & The figure explains the work without the text & \lcref{app:writing:figure}{The leading figure} \\
   Proof of concept & you & The core idea runs end to end on the running example; shortcuts are fine & \lcref{app:code:github}{GitHub} \\
   \lcphase{3. Plan}{second half of September}
@@ -48,10 +48,10 @@ Anchor rows are shaded red. Rows marked \official{} and shaded yellow are the of
   Premortem & both & For each criterion of the review sheet, the likely objection is written down and the plan answers it & \lcref{app:tdk:sheet}{The review sheet} \\
   \rowcolor{official}
   Registration with the abstract \official & you & Registered on the portal with the Hungarian and English abstract, by 30 September & \lcref{app:tdk:dates}{Official dates}, \lcref{app:writing:abstract}{The abstract} \\
-  Complete, testable implementation & you & By 30 September every component exists, the evaluation workloads run, and a test suite runs & \lcref{chap:implementation}{Implementation} \\
+  Complete, testable implementation & you & By 30 September every component exists, the evaluation workloads run, and a test suite runs & \lcref{ch:implementation}{Implementation} \\
   \lcphase{4. Draft}{October}
   Outline check & we & The skeleton fits the template's chapters and the review sheet & the chapter todos \\
-  Proofs (a hill climb) & you & Every claim has its proof, mechanised proof or measurement & \lcref{chap:approach}{Approach} \\
+  Proofs (a hill climb) & you & Every claim has its proof, mechanised proof or measurement & \lcref{ch:approach}{Approach} \\
   Tested implementation (a hill climb) & you & All tests pass; \texttt{just reproduce} regenerates every result; the release is ready for Zenodo & \lcref{app:code:github}{GitHub} \\
   Scalability and robustness & you & Measurements beyond small examples, with setup and repetitions, and a robustness analysis & \lcref{fig:scalability}{scalability figure}, \lcref{tab:robustness}{robustness table} \\
   \rowcolor{anchorrow}
@@ -87,7 +87,7 @@ The polish phase is a checklist, not a phase of writing: if a row needs more tha
   \toprule \textbf{Check} & \textbf{Done when} \\ \midrule \endfirsthead
   \toprule \textbf{Check} & \textbf{Done when} \\ \midrule \endhead
   \bottomrule \endlastfoot
-  Page count [pages] & The main text, from the first page of \tplref{chap:intro} to the last page of \tplref{chap:conclusion}, is 30--35 pages; appendices, the bibliography, the abstract and the title page do not count. \\
+  Page count [pages] & The main text, from the first page of \tplref{ch:intro} to the last page of \tplref{ch:conclusion}, is 30--35 pages; appendices, the bibliography, the abstract and the title page do not count. \\
   Build log [build, overfull] & No undefined or multiply defined labels, no undefined citations, no overfull boxes, no missing fonts or files. \\
   Cross-references [figures] & Every reference uses \texttt{\textbackslash cref}; every figure, table, listing and equation is referenced from the text (\cref{app:latex:cref}). \\
   Traceability [traceability] & Every requirement is a row of the gap matrix and of the correctness table, every threat is met by a guarantee, every guarantee is checked in the evaluation, and the conclusion restates every contribution with its evidence. \\

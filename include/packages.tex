@@ -33,6 +33,10 @@
   \usepackage{unicode-math}
   \setmathfont{TeX Gyre Termes Math}
   \providecommand{\square}{\mdlgwhtsquare} % amssymb's name, used by the proof end mark and the AI declaration's boxes
+  % The modal operators under amssymb's names, which unicode-math leaves undefined (newtxmath has
+  % them). Termes has no white diamond (U+25C7), so \Diamond is its lozenge, the height of \Box.
+  \renewcommand{\Box}{\mdlgwhtsquare}
+  \renewcommand{\Diamond}{\mdlgwhtlozenge}
 \else
   \usepackage{newtxmath}
 \fi

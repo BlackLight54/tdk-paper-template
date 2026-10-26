@@ -37,7 +37,8 @@ rule("words", "tools", "count", "polish", "texcount: words per chapter and in th
     local out = C.run_quiet("texcount -q -1 -sum " .. f) or ""
     local w = tonumber(out:match("^%s*(%d+)")) or 0
     total = total + w
-    parts[#parts + 1] = f:match("content/%d%d%-([^.]+)") .. "=" .. w
+    local name = f:match("([^/]+)%.tex$") or f
+    parts[#parts + 1] = (name:match("^%d%d%-(.+)$") or name) .. "=" .. w
   end
   -- the English abstract: the text after \chapter*{Abstract}, with the todo and the bracketed placeholders removed
   local abs = C.readfile(C.FILES.abstract or "content/00-abstract.tex") or ""
@@ -75,7 +76,7 @@ rule("bibtex-log", "tools", "count", "always", "the BibTeX log: empty fields and
   local n = 0
   for _, l in ipairs(C.lines(blg)) do
     local msg = l:match("^Warning%-%-(.*)$")
-    if msg then n = n + 1; if n <= 40 then warn("bib/references.bib", nil, "bibtex: " .. msg) end end
+    if msg then n = n + 1; if n <= 40 then warn(nil, nil, "bibtex: " .. msg) end end
   end
   return string.format("warnings=%d", n)
 end)
@@ -86,9 +87,10 @@ rule("spelling", "tools", "advice", "always", "hunspell on the detexed chapters:
   local have_gb, have_us = dicts:match("en_GB") ~= nil, dicts:match("en_US") ~= nil
   if not (have_gb or have_us) then warn(nil, nil, "no English hunspell dictionary: skipped"); return end
   local personal = C.exists("scripts/words.txt") and (" -p scripts/words.txt") or ""
-  -- the prose only: todos, beats and tikz removed, written to a temporary file for detex
+  -- the prose only: todos, beats, pictures, code and maths removed, and the arguments that are not
+  -- words (labels, references, citations, glossary keys, file names), written to a file for detex
   local tmp = os.tmpname()
-  do local h = io.open(tmp, "w"); for _, f in ipairs(C.MAIN) do h:write(table.concat(C.prose_lines(f), "\n"), "\n") end; h:close() end
+  do local h = io.open(tmp, "w"); for _, f in ipairs(C.MAIN) do h:write(C.prose(table.concat(C.prose_lines(f), "\n")), "\n") end; h:close() end
   local function unknown(dict)
     local out = C.run("detex " .. tmp .. " | tr -c \"[:alpha:]'\" '\\n' | grep -E \"^[A-Za-z][a-z']{3,}$\" | hunspell -d " .. dict .. personal .. " -l | sort | uniq -c | sort -rn") or ""
     local t, order = {}, {}
@@ -100,15 +102,16 @@ rule("spelling", "tools", "advice", "always", "hunspell on the detexed chapters:
   if have_us then us, usorder = unknown("en_US") end
   local american, british = {}, {}
   if have_gb and have_us then
-    for w in pairs(gb) do if not us[w] then american[#american + 1] = w end end
-    for w in pairs(us) do if not gb[w] then british[#british + 1] = w end end
+    -- names (capitalised) are not spellings
+    for w in pairs(gb) do if not us[w] and not w:match("^%u") then american[#american + 1] = w end end
+    for w in pairs(us) do if not gb[w] and not w:match("^%u") then british[#british + 1] = w end end
     table.sort(american); table.sort(british)
     if #american >= 3 and #british >= 3 then
       note(nil, nil, string.format("words only one dictionary knows: American %s; British %s (the terms rule checks the known pairs)", table.concat(american, ", ", 1, math.min(8, #american)), table.concat(british, ", ", 1, math.min(8, #british))))
     end
   end
   local both, order = gb, gborder
-  if have_gb and have_us then both = {}; order = {}; for w, c in pairs(gb) do if us[w] then both[w] = c; order[#order + 1] = w end end; table.sort(order, function(a, b) return both[a] > both[b] end) end
+  if have_gb and have_us then both = {}; order = {}; for w, c in pairs(gb) do if us[w] then both[w] = c; order[#order + 1] = w end end; table.sort(order, function(a, b) if both[a] ~= both[b] then return both[a] > both[b] end; return a < b end) end
   local shown = 0
   for _, w in ipairs(order) do
     if not w:match("^%u") then shown = shown + 1; if shown <= 40 then note(nil, nil, string.format("unknown word (%d): %s", both[w], w)) end end

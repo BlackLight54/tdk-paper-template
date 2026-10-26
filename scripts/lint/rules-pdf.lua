@@ -124,10 +124,13 @@ rule("pdf-margins", "pdf", "check", "polish", "margins on every text page are wi
     local body = 0; for _, t in ipairs(page.texts) do if t.font == bf.id then body = body + 1 end end
     if body >= 10 then
       local l, r, tp, b = 1e9, 0, 1e9, 0
+      -- the text column's right edge: the draft's todonotes margin notes start 4 mm inside it and reach the page edge by design (the reviewer build has none)
+      local edge = 0; for _, t in ipairs(page.texts) do if t.font == bf.id then edge = math.max(edge, t.left + t.w) end end
       for _, t in ipairs(page.texts) do
         local f = d.fonts[t.font]
         local pagenum = t.text:match("^%s*%d+%s*$") and t.top > page.h * 0.9
-        if f and f.size >= 9 and not pagenum then
+        local margin_note = t.left > edge - 6 * MM
+        if f and f.size >= 9 and not pagenum and not margin_note then
           l = math.min(l, t.left); r = math.max(r, t.left + t.w); tp = math.min(tp, t.top); b = math.max(b, t.top + t.h)
         end
       end
@@ -141,7 +144,8 @@ rule("pdf-margins", "pdf", "check", "polish", "margins on every text page are wi
   if #typical.left == 0 then warn(nil, nil, "no text pages found"); return end
   for _, k in ipairs({ "left", "right", "top", "bottom" }) do
     -- the smallest margin over the text pages: chapter openings and short last pages leave more room, which is not a wide margin
-    if worst[k] < p.margin[1] - 1.5 then fail(nil, nil, string.format("%s margin is %.1f mm on page %d; the %s asks for at least %d mm", k, worst[k], worstpage[k], p.name, p.margin[1])) end
+    -- 2 mm of slack: a line-final period or comma measured by its advance box ends past the text edge
+    if worst[k] < p.margin[1] - 2 then fail(nil, nil, string.format("%s margin is %.1f mm on page %d; the %s asks for at least %d mm", k, worst[k], worstpage[k], p.name, p.margin[1])) end
     if worst[k] > p.margin[2] + 1 then fail(nil, nil, string.format("%s margin is at least %.1f mm on every page; the %s allows at most %d mm", k, worst[k], p.name, p.margin[2])) end
   end
   return string.format("min l/r/t/b=%.0f/%.0f/%.0f/%.0f mm", worst.left, worst.right, worst.top, worst.bottom)

@@ -8,7 +8,7 @@ These steps follow Zenodo's documentation as of September 2026; if the interface
 \section{Prepare the repository}
 Zenodo archives the code repository, the \texttt{code/} submodule (\cref{app:code:github}); prepare it, not the notes repository.
 \begin{enumerate}
-  \item A \texttt{README.md} with the sections of \cref{app:code:readme}: at minimum the one command that reproduces every measurement in \tplref{chap:evaluation}, and the results map.
+  \item A \texttt{README.md} with the sections of \cref{app:code:readme}: at minimum the one command that reproduces every measurement in \tplref{ch:evaluation}, and the results map.
   \item A \texttt{LICENSE} file; ask us which license to use. Apache 2.0 for a tool (\cref{app:code:readme}), MIT otherwise.
   \item A \texttt{.zenodo.json} file in the repository root (\cref{lst:zenodo-json}). Zenodo takes the record's title, authors, license and links from it (\href{https://help.zenodo.org/docs/github/describe-software/zenodo-json/}{format and example}). Check that it is valid JSON before releasing.
   \item If the repository has a \texttt{CITATION.cff}, keep its fields in line with \texttt{.zenodo.json}; Zenodo uses \texttt{.zenodo.json} when both exist.
@@ -43,7 +43,7 @@ If the repository cannot be connected to Zenodo, upload a prepared archive inste
 \section{Cite it}\label{app:zenodo:cite}
 Each release gets its own \emph{version DOI}; the \emph{concept DOI} stands for all versions together and always resolves to the newest one (\href{https://support.zenodo.org/help/en-gb/1-upload-deposit/97-what-is-doi-versioning}{DOI versioning}).
 \begin{itemize}
-  \item In the paper, cite the \textbf{concept DOI}, as the \texttt{artifact} entry in \texttt{bib/references.bib} shows, and cite it in \tplref{chap:implementation}. Next to it, name the \textbf{results tag}: the Git tag, and with it the Zenodo version, that every number in the paper came from. The reviewer who follows the DOI lands on the newest, best-packaged version; the reviewer who wants exactly what you measured has the tag.
+  \item In the paper, cite the \textbf{concept DOI}, as the \texttt{artifact} entry in \texttt{bib/references.bib} shows, and cite it in \tplref{ch:implementation}. Next to it, name the \textbf{results tag}: the Git tag, and with it the Zenodo version, that every number in the paper came from. The reviewer who follows the DOI lands on the newest, best-packaged version; the reviewer who wants exactly what you measured has the tag.
   \item In \texttt{README.md}, put the badge of the concept DOI, and name the results tag in its own section (\cref{app:code:readme}). The record page's DOI badge dialog gives the Markdown.
   \item Copy both DOIs from the Zenodo record; never guess a DOI by changing its number.
 \end{itemize}

@@ -3,6 +3,8 @@
 %----------------------------------------------------------------------------
 This chapter uses every package that \texttt{include/packages.tex} loads, every theorem-like environment, and every tagged list, on one running example: an issuer revokes verifiable credentials in a shared registry.
 Copy what you need from the source, \texttt{guide/09-latex-template.tex}.
+Your own packages and macros go in \texttt{include/macros.tex}, which \texttt{thesis.tex} inputs after the template's preamble; a template update replaces the other files under \texttt{include/} and leaves that one alone.
+The theorem-like environments of \cref{app:latex:theorems} are already defined: use them, because a second \texttt{\textbackslash newtheorem} of the same name stops the build.
 \Cref{tab:package-index} at the end lists each package and where it is shown.
 
 %----------------------------------------------------------------------------
@@ -22,7 +24,6 @@ The running example's appearance in a chapter; \texttt{\textbackslash exname} is
 \end{runningexample}
 
 All notes are collected in the list of todos after the table of contents, and the \emph{Checks} page follows it: on every compile the lint of \cref{app:code:paperci} runs on the sources and prints a table of its rules with their status and first findings, so you see where the paper stands without leaving the PDF. Its failing checks also appear as \texttt{tdk-lint} package warnings in Overleaf's log panel. The page is governed by two lines in \texttt{thesis.tex}: \texttt{\textbackslash lintphase}, which you set to \texttt{plan}, \texttt{draft}, \texttt{polish} or \texttt{final} as the lifecycle moves, because a check only counts once its phase is reached; and \texttt{\textbackslash linttrue}, which you may flip to \texttt{\textbackslash lintfalse} to switch the page off. A finding you have judged and rejected is silenced with a comment on its line, \texttt{\% lint-ignore: <rule> <reason>}; the reason is required and the page counts the ignores.
-All notes are collected in the list of todos after the table of contents.
 The submitted version is built from \texttt{reviewer.tex}, a four-line root file that sets the \texttt{final} class option, disables todonotes, defines \texttt{\textbackslash reviewermode}, and inputs \texttt{thesis.tex}: every note disappears, and \texttt{thesis.tex} skips the list of todos and the guide. On Overleaf, open \texttt{reviewer.tex} and choose \emph{Recompile from this file}; locally, \texttt{make reviewer}. Look at it every week, not only in the last one: it is the paper the reviewer gets.
 
 %----------------------------------------------------------------------------
