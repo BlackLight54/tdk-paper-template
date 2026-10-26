@@ -14,19 +14,19 @@
 \newcommand{\vikszerzoKeresztnev}{Jakab}
 
 \newcommand{\vikkonzulensAMegszolitas}{}
-\newcommand{\vikkonzulensAVezeteknev}{Konzulens}
-\newcommand{\vikkonzulensAKeresztnev}{Egy}
+\newcommand{\vikkonzulensAVezeteknev}{Farkas}
+\newcommand{\vikkonzulensAKeresztnev}{Martin}
 
-\newcommand{\vikkonzulensBMegszolitas}{dr.~}
-\newcommand{\vikkonzulensBVezeteknev}{Konzulens}
-\newcommand{\vikkonzulensBKeresztnev}{Kettő}
+\newcommand{\vikkonzulensBMegszolitas}{Dr.~}
+\newcommand{\vikkonzulensBVezeteknev}{Kocsis}
+\newcommand{\vikkonzulensBKeresztnev}{Imre}
 
 \newcommand{\vikkonzulensCMegszolitas}{}
 \newcommand{\vikkonzulensCVezeteknev}{}
 \newcommand{\vikkonzulensCKeresztnev}{}
 
 \newcommand{\exname}{TODO name of the running example} % used in every chapter, e.g. "the flat reservation"
-\newcommand{\vikcim}{Elektronikus terelők} % Cím
+\newcommand{\vikcim}{TODO Title of the paper} % Cím
 \newcommand{\viktanszek}{\bmemit} % Tanszék
 \newcommand{\vikdoktipus}{\tdk} % Dokumentum típusa (\bsc vagy \msc)
 \newcommand{\vikmunkatipusat}{szakdolgozatot} % a "hallgató nyilatkozat" részhez: szakdolgozatot vagy diplomatervet
@@ -35,10 +35,8 @@
 \newcommand{\szerzoMeta}{\vikszerzoVezeteknev{} \vikszerzoKeresztnev} % egy szerző esetén
 %\newcommand{\szerzoMeta}{\vikszerzoVezeteknev{} \vikszerzoKeresztnev, \tdkszerzoB} % két szerző esetén
 
-%TODO Language configuration -- choose one
-% Beállítások magyar nyelvű dolgozathoz
-%\input{include/thesis-hu}
-% Settings for English documents
+% The paper is written in English; the Hungarian abstract and the AI declaration switch to
+% Hungarian themselves. A Hungarian paper starts from the faculty's template instead.
 \input{include/thesis-en}
 
 \input{include/preamble}
@@ -108,7 +106,7 @@
 % Bibliography
 %~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 \addcontentsline{toc}{chapter}{\bibname}
-\bibliography{bib/references,bib/zotero,bib/mybib} % zotero.bib: linked to the Zotero group by Overleaf; mybib.bib: cited by the guide
+\bibliography{bib/references,bib/zotero,bib/guide} % zotero.bib: linked to the Zotero group by Overleaf; guide.bib: cited by the guide
 
 
 % Declaration on generative AI use (required by the faculty)
@@ -135,13 +133,6 @@
 \include{guide/07-zenodo}
 \include{guide/08-glossary}
 \include{guide/09-latex-template}
-\include{guide/10-bme-guide-note}
-\selecthungarian
-\include{guide/10-bme-latex-tools}
-\include{guide/11-bme-thesis-format}
-\include{guide/12-bme-template-usage}
-\include{guide/13-bme-examples}
-\selectthesislanguage
 
 %\label{page:last}
 \end{document}

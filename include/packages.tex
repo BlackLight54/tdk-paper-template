@@ -6,14 +6,19 @@
    \xetexorluatextrue
 \fi
 
+% Text font: Times, as the TDK call asks for. TeX Gyre Termes has the metrics of Times New
+% Roman and ships with TeX Live and Overleaf; Times New Roman itself does not. Code stays in
+% Latin Modern Mono. The math font is set after amsmath below.
 \ifxetexorluatex
   \usepackage{fontspec}
+  \setmainfont{TeX Gyre Termes}
 \else
   \usepackage[T1]{fontenc}
   \usepackage[utf8]{inputenc}
   \usepackage[lighttt]{lmodern}
   % Latin Modern Mono has no italic; use slanted (italic comments in code listings).
   {\ttfamily}\DeclareFontShape{T1}{lmtt}{m}{it}{<->ssub*lmtt/m/sl}{} % \ttfamily loads the family first
+  \usepackage{newtxtext}
 \fi
 
 \usepackage[english,magyar]{babel} % Alapértelmezés szerint utoljára definiált nyelv lesz aktív, de később külön beállítjuk az aktív nyelvet.
@@ -21,7 +26,16 @@
 %--------------------------------------------------------------------------------------
 % Math and theorems
 %--------------------------------------------------------------------------------------
-\usepackage{amsfonts,amsmath,amssymb} % Mathematical symbols.
+\usepackage{amsmath}
+% Times math to match the text. Both packages replace amssymb and amsfonts, which must not be
+% loaded next to them; \mathbb, \nexists, \varnothing, \checkmark and the rest come from them.
+\ifxetexorluatex
+  \usepackage{unicode-math}
+  \setmathfont{TeX Gyre Termes Math}
+  \providecommand{\square}{\mdlgwhtsquare} % amssymb's name, used by the proof end mark and the AI declaration's boxes
+\else
+  \usepackage{newtxmath}
+\fi
 \usepackage[amsmath,thmmarks]{ntheorem} % Theorem-like environments. Do not load amsthm next to it.
 
 %--------------------------------------------------------------------------------------
@@ -98,7 +112,6 @@
 
 % Citations: natbib + BibTeX. \cite{a,b,c} prints [1-3]; \citet{a} prints "Lamport [1]".
 \usepackage[numbers,sort&compress]{natbib}
-\newif\ifnamedcitations % true when the bibliography style gives \citet the authors (see thesis-en.tex)
 
 \usepackage{fontawesome5}
 

@@ -33,7 +33,7 @@ Declare acronyms in \texttt{content/acronyms.tex}; the list of acronyms is print
 %----------------------------------------------------------------------------
 \section{Citations, links and icons (natbib, hyperref, bookmark, orcidlink, fontawesome5)}\label{app:latex:cite}
 Numeric citations are sorted and compressed~\cite{w3c2025vcdm,lamport1978time}.
-\ifnamedcitations\texttt{\textbackslash citet} names the author: \citet{lamport1978time} introduced logical clocks.\else\texttt{\textbackslash citet} names the author with \texttt{plainnat}; the Hungarian \texttt{huplain} style has no author data for it.\fi
+\texttt{\textbackslash citet} names the author: \citet{lamport1978time} introduced logical clocks.
 \texttt{\textbackslash citep} brackets the reference~\citep{lamport1978time}.
 
 Links: \url{https://github.com/ftsrg} prints the address, \href{https://ftsrg.mit.bme.hu}{the research group} hides it.
@@ -49,7 +49,7 @@ Ranges compress: \cref{eq:latex:window,eq:latex:fresh,eq:latex:valid}.
 Label prefixes are listed in \texttt{include/preamble.tex}.
 
 %----------------------------------------------------------------------------
-\section{Mathematics and theorems (amsmath, amssymb, ntheorem)}\label{app:latex:theorems}
+\section{Mathematics and theorems (amsmath, unicode-math, ntheorem)}\label{app:latex:theorems}
 A numbered equation:
 \begin{equation}\label{eq:latex:window}
   \mathit{valid}(c, t) \iff t \in [t_\mathrm{issue}(c), t_\mathrm{exp}(c)) \land c \notin R_t .
@@ -59,7 +59,7 @@ Aligned equations, each with its own number:
   R_{t+1} &= R_t \cup \{ c \} \label{eq:latex:fresh}\\
   \mathit{valid}(c, t+1) &\implies \mathit{valid}(c, t) \label{eq:latex:valid}
 \end{align}
-Symbols from amssymb: $\mathbb{N}$, $\mathcal{R}$, $\nexists$, $\varnothing$.
+Symbols beyond amsmath come from the math font: $\mathbb{N}$, $\mathcal{R}$, $\nexists$, $\varnothing$.
 
 Every theorem-like environment, in a typical order.
 Definitions and examples have their own counters; the rest share the theorem counter.
@@ -260,8 +260,8 @@ Put one before a section whose text must not be preceded by stray floats.
     \toprule
     Approach & Offline check & Privacy & Finality & Open source & Throughput & Standardised \\
     \midrule
-    Status list & \checkmark & -- & \checkmark & \checkmark & high & \checkmark \\
-    Accumulator & \checkmark & \checkmark & \checkmark & $\circ$ & medium & -- \\
+    Status list & \gapyes & -- & \gapyes & \gapyes & high & \gapyes \\
+    Accumulator & \gapyes & \gapyes & \gapyes & \gappartial & medium & -- \\
     \bottomrule
   \end{tabular}
 \end{sidewaystable}
@@ -498,7 +498,7 @@ This sentence is in the source but not in the PDF.
   acro & \cref{app:latex:acro} \\
   natbib, hyperref, bookmark, orcidlink, fontawesome5 & \cref{app:latex:cite} \\
   cleveref & \cref{app:latex:cref}, and every reference in this chapter \\
-  amsmath, amssymb, amsfonts, ntheorem & \cref{app:latex:theorems} \\
+  amsmath, unicode-math (newtxmath under pdfLaTeX), ntheorem & \cref{app:latex:theorems} \\
   enumitem & \cref{app:latex:tags} \\
   graphicx, svg, tikz, pgfplots, subcaption, wrapfig, placeins & \cref{app:latex:figures} \\
   tcolorbox & \cref{app:latex:boxes} \\
@@ -510,6 +510,6 @@ This sentence is in the source but not in the PDF.
   anysize & Page margins, set with \texttt{\textbackslash marginsize} in \texttt{thesis.tex} \\
   microtype & Character protrusion and font expansion on every page \\
   emptypage & Blank pages before chapters have no page number \\
-  ifxetex, ifluatex, fontspec, fontenc, inputenc, lmodern & Font setup for XeLaTeX, LuaLaTeX and pdfLaTeX \\
+  ifxetex, ifluatex, fontspec, fontenc, inputenc, lmodern, newtxtext & Text in TeX Gyre Termes (Times), code in Latin Modern Mono, under XeLaTeX, LuaLaTeX and pdfLaTeX \\
   \bottomrule
 \end{xltabular}

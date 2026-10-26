@@ -82,3 +82,12 @@ Reviewers score the paper on the review sheet (bírálói lap), saved in \texttt
   2025 & \href{https://tdk.bme.hu/conference/VIK/2025/sessions/neural/paper/Hozzajarulasi-ertek-szamitasa-elosztott}{Robustness Scores in Federated Learning} & Ulrich Flóra Zsuzsanna & Pejő Balázs \\
 \end{xltabular}
 }
+
+\section{A thesis from this paper}\label{app:tdk:thesis}
+A TDK paper often grows into a BSc or MSc thesis, so the template keeps what a thesis needs, commented out in \texttt{thesis.tex}: the thesis title page (\texttt{include/titlepage.tex}), the student's declaration (\texttt{include/declaration.tex}), the faculty's structure guide (\texttt{include/guideline.tex}) and the task description page (\texttt{include/project.tex}). Switch \texttt{\textbackslash vikdoktipus} to \texttt{\textbackslash bsc} or \texttt{\textbackslash msc}, and change what differs from the TDK; from the faculty's own guide, that is:
+\begin{itemize}[noitemsep]
+  \item \textbf{Length.} A BSc thesis is around 30--45 pages, an MSc thesis 60--90 pages of useful content; ask us, departments differ.
+  \item \textbf{Language.} The faculty's default is Hungarian. English is for students who aim at international research or industry, and it costs more in writing and in reading for the advisor and the reviewer. This template is English-only; a Hungarian thesis starts from the faculty's template.
+  \item \textbf{Format.} A4, 2.5\,cm margins plus 1\,cm for binding, 11--12\,pt serif, one-and-a-half line spacing. The TDK's 15\,mm margins and single spacing are set in \texttt{thesis.tex}; change them there. Typography beyond that: \citet{Jeney}.
+  \item \textbf{Structure.} The faculty's list is in \texttt{include/guideline.tex}: task description, title page, table of contents, declaration, abstracts in both languages, introduction, analysis of the task, prior work, the design with its alternatives, evaluation, acknowledgements, bibliography, appendices. The declaration is mandatory; without it the thesis is not reviewed. The PDF may be at most 15\,MB.
+\end{itemize}
