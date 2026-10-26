@@ -304,7 +304,7 @@ rule("tables", "source", "advice", "polish", "tables use booktabs rules, no vert
   end
 end)
 
-rule("labels", "source", "check", "always", "label prefixes match their environments (fig:, tab:, lst:, alg:, eq:, def:, thm:, lem:, ch:, sec:), so references read right and the lint can trace them", function()
+rule("labels", "source", "check", "always", "label prefixes match their environments (fig:, tab:, lst:, alg:, eq:, def:, thm:, lem:, ch:, sec: or subsec:), so references read right and the lint can trace them", function()
   local envpref = { figure = "fig", table = "tab", sidewaystable = "tab", listing = "lst", lstlisting = "lst", algorithm = "alg", equation = "eq", align = "eq", definition = "def", theorem = "thm", lemma = "lem", proposition = "prop", corollary = "cor", invariant = "inv", property = "prty", claim = "claim", remark = "rem", notation = "not", example = "ex", subfigure = "fig", subtable = "tab" }
   local listpref = { contributions = "c", requirements = "req", assumptions = "asm", guarantees = "g", threats = "thr", limitations = "lim", rqlist = "rq" }
   for _, f in ipairs(MAIN) do
@@ -322,7 +322,8 @@ rule("labels", "source", "check", "always", "label prefixes match their environm
         local pref = key:match("^([^:]+):")
         if key:match("^page:") then expect = nil end
         if expect and pref ~= expect then
-          if not (expect == "sec" and pref == "ch") and not (expect == "fig" and pref == "fig") then warn(f, n, string.format("label %s inside %s: expected prefix %s:", key, top or lastheading, expect)) end
+          -- subsec: and subsubsec: are common enough for subsections to count as sec:
+          if not (expect == "sec" and (pref == "ch" or pref == "subsec" or pref == "subsubsec")) and not (expect == "fig" and pref == "fig") then warn(f, n, string.format("label %s inside %s: expected prefix %s:", key, top or lastheading, expect)) end
         elseif not pref then warn(f, n, "label without a prefix: " .. key) end
       end
       for e in l:gmatch("\\end{([%a%*]+)}") do e = e:gsub("%*", ""); for i = #stack, 1, -1 do if stack[i] == e then table.remove(stack, i); break end end end
@@ -561,7 +562,7 @@ rule("placeholders", "source", "count", "final", "what the template left for you
   local files = {}
   for _, f in ipairs(CONTENT) do files[#files + 1] = f end
   files[#files + 1] = "thesis.tex"
-  for _, b in ipairs(C.BIB) do if b ~= "bib/guide.bib" then files[#files + 1] = b end end
+  for _, b in ipairs(C.BIB) do files[#files + 1] = b end
   for _, f in ipairs(files) do
     local t, p, first = 0, 0, nil
     C.each_line({ f }, function(_, n, l)

@@ -3,6 +3,7 @@ lint-checks.tex
 # PDFs as artifacts of every run.
 *.aux
 *.bbl
+!guide/guide.bbl
 *.blg
 *.fdb_latexmk
 *.fls

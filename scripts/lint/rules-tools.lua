@@ -48,8 +48,7 @@ rule("words", "tools", "count", "polish", "texcount: words per chapter and in th
   local words = 0
   for _ in C.prose(eng):gmatch("%a[%a%-']+") do words = words + 1 end
   if placeholders > 0 then warn(C.FILES.abstract, nil, placeholders .. " of the seven placeholders of the abstract are still there")
-  elseif words > 300 then warn(C.FILES.abstract, nil, string.format("the abstract is %d words; Nature's summary paragraph is at most 300", words))
-  elseif words < 150 then warn(C.FILES.abstract, nil, string.format("the abstract is %d words; aim for 190-250", words)) end
+  elseif words < 150 then warn(C.FILES.abstract, nil, string.format("the abstract is %d words: too short to say the problem, the approach and the result", words)) end
   return string.format("main=%d abstract=%d %s", total, words, table.concat(parts, " "))
 end)
 

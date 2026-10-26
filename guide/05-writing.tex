@@ -155,14 +155,14 @@ The leading figure (\tplref{fig:overview}) explains the central idea in one pict
     \includegraphics[width=\linewidth,height=5.2cm,keepaspectratio]{guide/figures/collage/bpm2026}
     \caption{From a BPMN collaboration to a security analysis: inputs on the left, the method in the middle, the verdicts on the right.}\label{fig:collage:bpm26}
   \end{subfigure}
-  \caption{Leading figures of four papers from the group: (a) the EuroCyberSec 2024 workshop paper on self-evaluated policies~\cite{farkas2024selfevaluated}, (b) the 2023 TDK paper it grew out of~\cite{farkas2023tdk}, (c) the self-orchestration model for business collaborations~\cite{farkas2025selforchestration}, and (d) the formal security analysis of BPMN collaborations~\cite{farkas2026trustnopool}. Each one shows the problem, the contribution and the result in a single picture, and each was drawn before the paper was written.}\label{fig:collage}
+  \caption{Leading figures of four papers from the group: (a) the EuroCyberSec 2024 workshop paper on self-evaluated policies~\cite{guide:farkas2024selfevaluated}, (b) the 2023 TDK paper it grew out of~\cite{guide:farkas2023tdk}, (c) the self-orchestration model for business collaborations~\cite{guide:farkas2025selforchestration}, and (d) the formal security analysis of BPMN collaborations~\cite{guide:farkas2026trustnopool}. Each one shows the problem, the contribution and the result in a single picture, and each was drawn before the paper was written.}\label{fig:collage}
 \end{figure}
 
 \section{Figures}\label{app:writing:figures}
 Every figure is vector. Draw the final version in TikZ, in the paper repository, so that it uses the paper's fonts, scales without loss, and can be fixed by anyone in the last week; \cref{app:latex} shows the TikZ and pgfplots setup of this template. Sketch in \href{https://www.drawio.com/}{draw.io} while the figure is still changing, then redraw it in TikZ once the spine is agreed. An exported PDF is the last resort, for a figure from another paper or a screenshot. Plots come from pgfplots reading the CSV that \texttt{just reproduce} writes, so a changed measurement changes the figure without anyone redrawing it. Every axis has a label with a unit, and nothing in a figure is smaller than 10\,pt in print.
 
 \section{Captions}\label{app:writing:captions}
-A caption is the figure's own paragraph, and a reader who reads only figures and captions should follow the paper. A caption explains the figure; it does not describe it. Its first sentence states what the figure shows as a claim. Then it puts that claim in context: which question it answers, what a reader needs to know to understand it, and why the result is what it is. Anything the reader could get from the axes and the legend does not belong in the caption; anything they could not, does: the concept being measured, the assumption behind the setup, the reason one curve bends. A diagram gets two or three sentences; a result figure gets as many as the explanation needs. Nature's captions are the model, for example those of \citet{gulyas2015navigable}; \cref{fig:caption-example} is one in this template's style.
+A caption is the figure's own paragraph, and a reader who reads only figures and captions should follow the paper. A caption explains the figure; it does not describe it. Its first sentence states what the figure shows as a claim. Then it puts that claim in context: which question it answers, what a reader needs to know to understand it, and why the result is what it is. Anything the reader could get from the axes and the legend does not belong in the caption; anything they could not, does: the concept being measured, the assumption behind the setup, the reason one curve bends. A diagram gets two or three sentences; a result figure gets as many as the explanation needs. Nature's captions are the model, for example those of \citet{guide:gulyas2015navigable}; \cref{fig:caption-example} is one in this template's style.
 
 \begin{figure}[!ht]
   \centering
@@ -189,7 +189,7 @@ The abstract has a job before it has a structure: it must convince two readers t
 \begin{itemize}
   \item The Chicago School of Writing lectures: \href{https://www.youtube.com/watch?v=vtIzMaLkCaM}{part I}, \href{https://www.youtube.com/watch?v=aFwVf5a3pZM}{part II}, \href{https://www.youtube.com/watch?v=gphdfSwYMWU}{part III}.
   \item \href{https://www.youtube.com/watch?v=Unzc731iCUY}{MIT: How to Speak}, for the conference talk.
-  \item Good examples: Leslie Lamport's papers, the Raft paper, and the figures and captions of \citet{gulyas2015navigable}.
+  \item Good examples: Leslie Lamport's papers, the Raft paper, and the figures and captions of \citet{guide:gulyas2015navigable}.
   \item For contrast, read the original Paxos and PBFT papers next to the Raft paper: all three carry great ideas, and the Raft paper was written so that its idea is the easy part.
 \end{itemize}
 

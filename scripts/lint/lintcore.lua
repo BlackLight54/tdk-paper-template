@@ -62,7 +62,7 @@ do
     for f in lfs.dir("content") do if f:match("%.tex$") then M.CONTENT[#M.CONTENT + 1] = "content/" .. f end end
     table.sort(M.CONTENT)
   end
-  if #M.BIB == 0 then M.BIB = { "bib/references.bib", "bib/zotero.bib", "bib/guide.bib" } end
+  if #M.BIB == 0 then M.BIB = { "bib/references.bib", "bib/zotero.bib" } end
   for _, f in ipairs(M.CONTENT) do
     local s = M.readfile(f) or ""
     local body = s:gsub("%%[^\n]*", "")

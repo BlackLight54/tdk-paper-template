@@ -26,4 +26,8 @@ lint-%:
 check-reviewer: reviewer
 	$(LINT) all --doc reviewer
 
-.PHONY: all reviewer clean check check-reviewer
+# The guide's own reference list, guide/guide.bbl, after editing its citations or guide/guide.bib.
+guide-bib:
+	texlua scripts/guide-bib.lua
+
+.PHONY: all reviewer clean check check-reviewer guide-bib

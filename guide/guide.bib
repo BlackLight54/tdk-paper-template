@@ -1,6 +1,8 @@
-% Sources cited by the guide. The paper's own sources go to bib/references.bib and bib/zotero.bib.
+% Sources cited by the guide, printed in the guide's own reference list (guide/10-references.tex)
+% from guide/guide.bbl, which `make guide-bib` builds from this file. Keys carry a guide: prefix,
+% so they never meet a paper's own keys. A paper's sources go to bib/references.bib and bib/zotero.bib.
 
-@techreport{Jeney,
+@techreport{guide:Jeney,
   author      = {Jeney, Gábor},
   institution = {Budapesti Műszaki és Gazdaságtudományi Egyetem, Híradástechnikai Tanszék},
   location    = {Budapest},
@@ -9,7 +11,7 @@
   year        = {2014},
 }
 
-@article{gulyas2015navigable,
+@article{guide:gulyas2015navigable,
   author  = {Gulyás, András and Bíró, József J. and Kőrösi, Attila and Rétvári, Gábor and Krioukov, Dmitri},
   title   = {Navigable networks as {N}ash equilibria of navigation games},
   journal = {Nature Communications},
@@ -19,7 +21,7 @@
   doi     = {10.1038/ncomms8651}
 }
 
-@inproceedings{farkas2024selfevaluated,
+@inproceedings{guide:farkas2024selfevaluated,
   author    = {Farkas, Martin and Toldi, Balázs {\'A}d{\'a}m and Péter, Bertalan Zoltán and Kocsis, Imre},
   title     = {A {P}rolog-based Approach to Self-Evaluated, Declarative and Zero-Knowledge Verifiable Policies},
   booktitle = {2024 32nd International Symposium on Modeling, Analysis and Simulation of Computer and Telecommunication Systems (MASCOTS), EuroCyberSec Workshop},
@@ -28,7 +30,7 @@
   doi       = {10.1109/MASCOTS64422.2024.10786564}
 }
 
-@misc{farkas2023tdk,
+@misc{guide:farkas2023tdk,
   author       = {Farkas, Martin and Toldi, Balázs {\'A}d{\'a}m},
   title        = {Self-evaluated policies using Zero-Knowledge proofs},
   howpublished = {TDK paper, Budapest University of Technology and Economics, Faculty of Electrical Engineering and Informatics; first place, Information Systems section},
@@ -37,7 +39,7 @@
   urldate = {2026-10-26}
 }
 
-@inproceedings{farkas2025selforchestration,
+@inproceedings{guide:farkas2025selforchestration,
   author    = {Farkas, Martin and Péter, Bertalan Zoltán and Kocsis, Imre},
   title     = {A Self-orchestration Model for Business Collaborations with Verifiable Process History Credentials},
   booktitle = {Business Process Management Forum (BPM 2025)},
@@ -48,7 +50,7 @@
   doi       = {10.1007/978-3-032-02929-4_4}
 }
 
-@inproceedings{farkas2026trustnopool,
+@inproceedings{guide:farkas2026trustnopool,
   author    = {Farkas, Martin and Kocsis, Imre},
   title     = {Trust No Pool: Formal Security Analysis of {BPMN} Collaborations},
   booktitle = {Business Process Management (BPM 2026)},
@@ -57,4 +59,23 @@
   pages     = {111--127},
   year      = {2026},
   doi       = {10.1007/978-3-032-37777-7_9}
+}
+
+@article{guide:lamport1978time,
+  author    = {Lamport, Leslie},
+  title     = {Time, Clocks, and the Ordering of Events in a Distributed System},
+  journal   = {Communications of the ACM},
+  volume    = {21},
+  number    = {7},
+  pages     = {558--565},
+  year      = {1978},
+  doi       = {10.1145/359545.359563},
+}
+
+@misc{guide:w3c2025vcdm,
+  author  = {{W3C}},
+  title   = {Verifiable Credentials Data Model v2.0},
+  year    = {2025},
+  url     = {https://www.w3.org/TR/vc-data-model-2.0/},
+  urldate = {2026-10-25},
 }
