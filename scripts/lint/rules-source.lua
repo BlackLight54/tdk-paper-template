@@ -377,6 +377,17 @@ rule("bib", "source", true, "the bibliography: every cited key exists; entries h
         local doi = body:match("\n%s*[dD][oO][iI]%s*=%s*[{\"]([^}\"]*)")
         if doi and doi:match("^https?://") then warn(b, nil, key .. ": doi field is a URL; give the bare DOI") end
         if doi and doi:match("TODO") then warn(b, nil, key .. ": DOI still a TODO") end
+        -- BibTeX is not UTF-8 aware: an abbreviated first name that starts with an accented letter
+        -- (Ádám, Éva, Ödön) loses a byte unless the letter is written as a LaTeX accent in braces,
+        -- {\'A}d{\'a}m, which is how Zotero exports it; a plain {Á} does not help
+        local names = body:match("\n%s*[aA][uU][tT][hH][oO][rR]%s*=%s*(%b{})") or body:match("\n%s*[eE][dD][iI][tT][oO][rR]%s*=%s*(%b{})")
+        if names then
+          for given in names:gmatch(",%s*([^,}]+)") do
+            for word in given:gmatch("%S+") do
+              if word:match("^[\195-\197][\128-\191]") then warn(b, nil, key .. ": the given name " .. word .. " starts with an accented letter; write it as a LaTeX accent in braces, like {\\'A}d{\\'a}m, or BibTeX breaks the initial"); break end
+            end
+          end
+        end
         local title = body:match("\n%s*[tT][iI][tT][lL][eE]%s*=%s*(%b{})")
         if title then
           local inner = title:sub(2, -2):gsub("%b{}", "")
