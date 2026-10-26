@@ -1,13 +1,22 @@
 %----------------------------------------------------------------------------
 \chapter{Implementation}\label{chap:implementation}
 %----------------------------------------------------------------------------
-\todo[inline]{Criterion D/2. \textbf{Correctness}: give what a reader needs to reproduce or trust the evaluation: technology choices with reasons, the non-obvious parts, and the code archived on Zenodo, cited by its version DOI (\cref{app:zenodo}). No class-by-class tour.}
+\todo[inline]{Your technical contributions; \cref{chap:approach} holds the theoretical ones. Criteria D/1 and D/2. \textbf{Novelty}: what you built that did not exist before (a tool, system, prototype, integration or dataset), separated from what you reused (libraries, frameworks, existing tools). \textbf{Non-triviality}: the design decisions, and the problems a straightforward build runs into. \textbf{Correctness}: what a reader needs to trust and reproduce the evaluation: the architecture, technology choices with reasons, and the code archived on Zenodo, cited by its version DOI (\cref{app:zenodo}). No class-by-class tour. Rename the chapter after what you built if that reads better.}
 
-\beat{what was built and why these technologies}{the archived code}{the example as input or configuration (\cref{lst:key})}{the evaluation}
+\section{Overview}
+\beat{what was built and how it realises the approach of \cref{chap:approach}}{the components of \cref{fig:architecture} mapped to code; the archived artifact}{the example as the system's input or configuration}{the design decisions}
 TODO The code and measurement scripts are archived on Zenodo~\cite{artifact}; the development repository is \url{https://github.com/TODO}.
 \begin{runningexample}[as input]
 TODO The scenario as the implementation sees it: a configuration file, a model, or a test case.
 \end{runningexample}
+
+\section{Design decisions}
+\beat{the engineering choices, and the problems a straightforward build runs into}{each decision with the alternative rejected and why}{where the example exposed the problem}{the key technical contribution}
+TODO
+
+\section{TODO The key technical contribution}
+\beat{the part of the implementation that did not exist before}{\cref{lst:key} and the tests that cover it}{the example processed by it, step by step}{the evaluation}
+TODO
 
 \begin{lstlisting}[caption={TODO The one snippet that shows the key idea.}, label={lst:key}]
 // TODO
