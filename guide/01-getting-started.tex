@@ -28,8 +28,10 @@ Work through the steps below in order in your first week. Each says who does it.
 Add both of us to all three, add \texttt{paper/} and \texttt{code/} to the notes repository as submodules, and clone it with \texttt{git clone --recurse-submodules}. One clone then holds everything: you can compile the paper locally, use every GitHub feature, and work with agent-based AI tools across notes, paper and code (\cref{app:code:ai}).
 \advisortodo{Link the templates of the notes and the code repository once they exist.}
 
-\paragraph{Zotero group.} \emph{We} add you to our Zotero group, where we collect the literature of the topic. \emph{You} install \href{https://www.zotero.org/}{Zotero} with its browser connector, save every source you read into the group library, and export the collection to \texttt{bib/references.bib} (the Better BibTeX plugin can keep the file up to date automatically).
-\advisortodo{Add the Zotero group link, and confirm the export setup (Better BibTeX auto-export into the paper repository).}
+\paragraph{Zotero group.} \emph{We} add you to our Zotero group, where we collect the literature of the topic. \emph{You} install \href{https://www.zotero.org/}{Zotero} with its browser connector and save every source you read into the group library.
+
+The paper gets the library through Overleaf's Zotero integration, another feature of our Pro subscription. Link your Zotero account in Overleaf's account settings, under \emph{Linked accounts}. Then, in the project, delete the placeholder \texttt{bib/zotero.bib}, choose \emph{New file}, then \emph{From Zotero}, pick the group library, and name the file \texttt{bib/zotero.bib}. The \emph{Refresh} button on the file brings in new sources. A refresh overwrites the file, so keep hand-written entries, such as the Zenodo artifact and AI citations, in \texttt{bib/references.bib}; the paper reads both. Working locally without Overleaf, the Better BibTeX plugin of Zotero can export the group to the same file.
+\advisortodo{Add the Zotero group link, and confirm who links the integration: whether a student without Overleaf Pro can use it in our Pro project, or one of us links it.}
 
 \paragraph{GitHub Student Developer Pack.} Apply for the free \href{https://education.github.com/pack}{GitHub Student Developer Pack} with your \texttt{@edu.bme.hu} address; it includes GitHub Pro and GitHub Copilot.
 
