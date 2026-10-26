@@ -40,6 +40,8 @@ Links: \url{https://github.com/ftsrg} prints the address, \href{https://ftsrg.mi
 The PDF bookmarks in the viewer's sidebar come from hyperref and bookmark.
 Icons: \faGithub~source code, \faFilePdf~paper, \faEnvelope~contact. Author ORCID: \orcidlink{0000-0000-0000-0000}.
 
+\paragraph{Where the entries come from: Zotero.} You do not write BibTeX by hand. Every source you read goes into the group library with the \href{https://www.zotero.org/download/connectors}{Zotero Connector} in your browser, one click on the paper's page or its DOI; Zotero fetches the metadata, and you fix what it got wrong there, once, for everyone. Overleaf's Zotero integration turns the group library into \texttt{bib/zotero.bib} (\cref{app:start:access}); \emph{Refresh} on that file pulls in what was added since. The citation key is the one Zotero generates, visible in Overleaf's autocomplete after you type \texttt{\textbackslash cite\{}. Official guides: the \href{https://www.zotero.org/support/quick_start_guide}{Zotero quick start guide}, \href{https://www.zotero.org/support/groups}{group libraries}, and Overleaf's \href{https://www.overleaf.com/learn/how-to/How_to_link_your_Overleaf_account_to_Mendeley_and_Zotero}{linking your account to Zotero}. Working locally, the \href{https://retorque.re/zotero-better-bibtex/}{Better BibTeX} plugin keeps an auto-exported \texttt{.bib} in sync with the library and gives stable citation keys. Three habits keep the bibliography clean: check the entry type and the title's capitalisation when you save (protect names and acronyms with braces, \texttt{\{BPMN\}}), add the DOI where one exists, and put hand-written entries that are not literature, the Zenodo artifact and AI citations, in \texttt{bib/references.bib}, because a refresh overwrites \texttt{zotero.bib}.
+
 %----------------------------------------------------------------------------
 \section{Cross-references (cleveref)}\label{app:latex:cref}
 Use \texttt{\textbackslash cref} for every reference, so the type name comes for free, and \texttt{\textbackslash Cref} at the start of a sentence:
@@ -284,7 +286,7 @@ Put one before a section whose text must not be preceded by stray floats.
 \section{Code with syntax highlighting (minted, listings)}\label{app:latex:code}
 Common languages go through minted, which uses the Pygments highlighter.
 For a captioned listing, put a \texttt{minted} environment inside a \texttt{listing} float; in running text, use \mintinline{python}{print("inline")}.
-Pygments knows over 500 languages; \texttt{pygmentize -L lexers} lists their names.
+Pygments knows over 500 languages; \texttt{pygmentize -L lexers} lists their names, as does the \href{https://pygments.org/docs/lexers/}{lexer list} in its documentation.
 Languages Pygments does not know (Refinery, Tamarin, Lean) go through listings with the styles in \texttt{include/code-languages.tex}: \lstinline[style=lean]{theorem le_succ (n : Nat) : n <= n + 1 := by omega}.
 Inline listings must be ASCII under XeLaTeX; Unicode notation such as $\forall$ or $\mathbb{N}$ works in block listings (\cref{lst:latex:lean}).
 Both are numbered as listings in one sequence, from \cref{lst:latex:refinery} to \cref{lst:latex:sql}.
@@ -484,8 +486,9 @@ This sentence is in the source but not in the PDF.
 
 %----------------------------------------------------------------------------
 \section{Package index}\label{app:latex:index}
+\newcommand{\ctan}[1]{\href{https://ctan.org/pkg/#1}{#1}}
 \begin{xltabular}{\linewidth}{>{\ttfamily\raggedright\arraybackslash\hsize=1.1\hsize}X >{\raggedright\arraybackslash\hsize=0.9\hsize}X}
-  \caption{Every package in \texttt{include/packages.tex} and where it is shown.}\label{tab:package-index}\\
+  \caption{Every package in \texttt{include/packages.tex} and where it is shown. Each name links to the package's documentation on CTAN; \texttt{texdoc <name>} opens the same locally. TikZ and pgfplots also have \href{https://tikz.dev/}{tikz.dev} and the \href{https://pgfplots.sourceforge.net/}{pgfplots gallery}.}\label{tab:package-index}\\
   \toprule
   \normalfont\textbf{Package} & \textbf{Shown in} \\
   \midrule
@@ -494,22 +497,22 @@ This sentence is in the source but not in the PDF.
   \normalfont\textbf{Package} & \textbf{Shown in} \\
   \midrule
   \endhead
-  todonotes & \cref{app:latex:todo} \\
-  acro & \cref{app:latex:acro} \\
-  natbib, hyperref, bookmark, orcidlink, fontawesome5 & \cref{app:latex:cite} \\
-  cleveref & \cref{app:latex:cref}, and every reference in this chapter \\
-  amsmath, unicode-math (newtxmath under pdfLaTeX), ntheorem & \cref{app:latex:theorems} \\
-  enumitem & \cref{app:latex:tags} \\
-  graphicx, svg, tikz, pgfplots, subcaption, wrapfig, placeins & \cref{app:latex:figures} \\
-  tcolorbox & \cref{app:latex:boxes} \\
-  booktabs, array, tabularx, xltabular, multirow, makecell, rotating & \cref{app:latex:tables} \\
-  algorithm, algpseudocode & \cref{app:latex:alg} \\
-  listings, minted & \cref{app:latex:code} \\
-  csquotes, ulem, xcolor, xspace, babel, setspace, lineno, comment & \cref{app:latex:text} \\
-  caption & Every caption: bold labels, hanging indent \\
-  anysize & Page margins, set with \texttt{\textbackslash marginsize} in \texttt{thesis.tex} \\
-  microtype & Character protrusion and font expansion on every page \\
-  emptypage & Blank pages before chapters have no page number \\
-  ifxetex, ifluatex, fontspec, fontenc, inputenc, lmodern, newtxtext & Text in TeX Gyre Termes (Times), code in Latin Modern Mono, under XeLaTeX, LuaLaTeX and pdfLaTeX \\
+  \ctan{todonotes} & \cref{app:latex:todo} \\
+  \ctan{acro} & \cref{app:latex:acro} \\
+  \ctan{natbib}, \ctan{hyperref}, \ctan{bookmark}, \ctan{orcidlink}, \ctan{fontawesome5} & \cref{app:latex:cite} \\
+  \ctan{cleveref} & \cref{app:latex:cref}, and every reference in this chapter \\
+  \ctan{amsmath}, \ctan{unicode-math} (\ctan{newtx} under pdfLaTeX), \ctan{ntheorem} & \cref{app:latex:theorems} \\
+  \ctan{enumitem} & \cref{app:latex:tags} \\
+  \ctan{graphicx}, \ctan{svg}, \ctan{tikz}, \ctan{pgfplots}, \ctan{subcaption}, \ctan{wrapfig}, \ctan{placeins} & \cref{app:latex:figures} \\
+  \ctan{tcolorbox} & \cref{app:latex:boxes} \\
+  \ctan{booktabs}, \ctan{array}, \ctan{tabularx}, \ctan{xltabular}, \ctan{multirow}, \ctan{makecell}, \ctan{rotating} & \cref{app:latex:tables} \\
+  \ctan{algorithms}, \ctan{algorithmicx} & \cref{app:latex:alg} \\
+  \ctan{listings}, \ctan{minted} & \cref{app:latex:code} \\
+  \ctan{csquotes}, \ctan{ulem}, \ctan{xcolor}, \ctan{xspace}, \ctan{babel}, \ctan{setspace}, \ctan{lineno}, \ctan{comment} & \cref{app:latex:text} \\
+  \ctan{caption} & Every caption: bold labels, hanging indent \\
+  \ctan{anysize} & Page margins, set with \texttt{\textbackslash marginsize} in \texttt{thesis.tex} \\
+  \ctan{microtype} & Character protrusion and font expansion on every page \\
+  \ctan{emptypage} & Blank pages before chapters have no page number \\
+  \ctan{ifxetex}, \ctan{ifluatex}, \ctan{fontspec}, \ctan{fontenc}, \ctan{inputenc}, \ctan{lm}, \ctan{newtx} & Text in TeX Gyre Termes (Times), code in Latin Modern Mono, under XeLaTeX, LuaLaTeX and pdfLaTeX \\
   \bottomrule
 \end{xltabular}
