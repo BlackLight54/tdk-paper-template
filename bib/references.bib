@@ -1,5 +1,7 @@
 % Bibliography database, read by BibTeX with the style set in include/thesis-en.tex.
-% Prefer article and inproceedings entries with a doi field. For web sources use misc with url and an "Accessed" note.
+% Prefer article and inproceedings entries with a doi field. A web source is a misc entry whose author
+% names the page's owner, with url and urldate (the day you read it); the bibliography style prints
+% "accessed <date>" after the URL, as the faculty's guideline asks. Zotero fills urldate itself.
 
 @article{lamport1978time,
   author    = {Lamport, Leslie},
@@ -17,7 +19,7 @@
   title   = {Verifiable Credentials Data Model v2.0},
   year    = {2025},
   url     = {https://www.w3.org/TR/vc-data-model-2.0/},
-  note    = {Accessed: 2026-10-25},
+  urldate = {2026-10-25},
 }
 
 % The archived code: replace with your Zenodo record. Use the version DOI of the release

@@ -73,6 +73,9 @@ jobs:
       - name: source / acronyms
         if: always()
         run: texlua scripts/lint.lua acronyms
+      - name: source / bib
+        if: always()
+        run: texlua scripts/lint.lua bib
       - name: source / code
         if: always()
         run: texlua scripts/lint.lua code

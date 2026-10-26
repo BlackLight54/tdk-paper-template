@@ -345,6 +345,52 @@ rule("acronyms", "source", true, "every acronym used is declared, every declared
   end)
 end)
 
+rule("bib", "source", true, "the bibliography: every cited key exists; entries have a title, a year and an author; a web source has its access date; DOIs are bare", function()
+  local keys = {}
+  for _, b in ipairs({ "bib/references.bib", "bib/zotero.bib", "bib/guide.bib" }) do
+    local s = C.readfile(b) or ""
+    for entry in ("\n" .. s):gmatch("\n@(%w+%b{})") do
+      local kind, body = entry:match("^(%w+)(%b{})"); body = body:sub(2, -2)
+      local key = body:match("^%s*([^,%s]+)")
+      local k = kind:lower()
+      if key and k ~= "comment" and k ~= "string" and k ~= "preamble" then
+        keys[key] = true
+        local function has(fld) return body:lower():match("\n%s*" .. fld .. "%s*=") ~= nil end
+        if not has("title") then fail(b, nil, key .. ": no title") end
+        if not has("year") and not has("date") then fail(b, nil, key .. ": no year") end
+        if not (has("author") or has("editor") or k == "misc" or k == "manual" or k == "online") then fail(b, nil, key .. ": no author") end
+        local hasdate = has("urldate") or (body:match("\n%s*note%s*=%s*[{\"][^}\"]*[Aa]ccessed") ~= nil)
+        if has("url") and not has("doi") and not hasdate then warn(b, nil, key .. ": a web source needs its access date (urldate); Zotero records it, the faculty's guideline asks for it") end
+        if (k == "misc" or k == "online") and has("url") and not has("author") then warn(b, nil, key .. ": a web source names the page's owner as author, in double braces") end
+        local doi = body:match("\n%s*[dD][oO][iI]%s*=%s*[{\"]([^}\"]*)")
+        if doi and doi:match("^https?://") then warn(b, nil, key .. ": doi field is a URL; give the bare DOI") end
+        if doi and doi:match("TODO") then warn(b, nil, key .. ": DOI still a TODO") end
+        local title = body:match("\n%s*[tT][iI][tT][lL][eE]%s*=%s*(%b{})")
+        if title then
+          local inner = title:sub(2, -2):gsub("%b{}", "")
+          for w in inner:gmatch("%S+") do
+            if w:match("^%a") and (w:match("^%u%u") or w:match("%l%u")) then warn(b, nil, key .. ": " .. w .. " in the title is not protected with braces; BibTeX lowercases it") ; break end
+          end
+        end
+      end
+    end
+  end
+  C.each_line(MAIN, function(f, n, l)
+    local pos = 1
+    while true do
+      local s, e = l:find("\\cite[tp]?%*?", pos); if not s then break end
+      pos = e + 1
+      if l:sub(pos, pos) == "[" then local _, be = l:find("%b[]", pos); pos = (be or pos) + 1 end
+      if l:sub(pos, pos) == "[" then local _, be = l:find("%b[]", pos); pos = (be or pos) + 1 end
+      local bs, be = l:find("%b{}", pos)
+      if bs == pos then
+        for k in l:sub(bs + 1, be - 1):gmatch("[^,%s]+") do if not keys[k] then fail(f, n, "cited key " .. k .. " is in no .bib file") end end
+        pos = be + 1
+      end
+    end
+  end)
+end)
+
 rule("code", "source", true, "listings: \\lstinline is ASCII (XeLaTeX fails on Unicode there), every listing has a caption and a label, minted sits in a listing float", function()
   C.each_line(MAIN, function(f, n, l)
     local inl = l:match("\\lstinline%b[]({.-})") or l:match("\\lstinline(%b{})")
