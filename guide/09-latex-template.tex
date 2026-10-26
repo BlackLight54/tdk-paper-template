@@ -22,7 +22,7 @@ The running example's appearance in a chapter; \texttt{\textbackslash exname} is
 \end{runningexample}
 
 All notes are collected in the list of todos after the table of contents.
-To hide them in the submitted version, add \texttt{final} to the \texttt{\textbackslash documentclass} options in \texttt{thesis.tex} (or load todonotes with \texttt{disable}) and remove \texttt{\textbackslash listoftodos} from \texttt{thesis.tex}.
+The submitted version is built from \texttt{reviewer.tex}, a four-line root file that sets the \texttt{final} class option, disables todonotes, defines \texttt{\textbackslash reviewermode}, and inputs \texttt{thesis.tex}: every note disappears, and \texttt{thesis.tex} skips the list of todos and the guide. On Overleaf, open \texttt{reviewer.tex} and choose \emph{Recompile from this file}; locally, \texttt{make reviewer}. Look at it every week, not only in the last one: it is the paper the reviewer gets.
 
 %----------------------------------------------------------------------------
 \section{Acronyms (acro)}\label{app:latex:acro}

@@ -1,0 +1,69 @@
+# Builds the draft and the reviewer PDF on every push and runs every lint rule as its own step,
+# so the run page lists the rules with a check or a cross each, findings appear as annotations
+# on the files, and the job summary ends with one table. Gates fail the run; the burn-down
+# rules only report. The paper repository is created by Overleaf per project, so this file
+# travels with the Overleaf project; see "Paper CI" in the guide.
+name: paper
+on: [push, pull_request, workflow_dispatch]
+jobs:
+  paper:
+    runs-on: ubuntu-latest
+    container: texlive/texlive:latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Inkscape for SVG figures
+        run: apt-get update -qq && apt-get install -y -qq --no-install-recommends inkscape >/dev/null
+      - name: Build the draft
+        run: make all
+      - name: Build the reviewer PDF
+        run: make reviewer
+      - name: Upload the PDFs
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: paper
+          path: |
+            thesis.pdf
+            reviewer.pdf
+      - name: Lint header
+        run: printf '\n## Lint on the reviewer build\n\n| Rule | Status | Errors | Warnings | Counts |\n|---|---|---|---|---|\n' >> "$GITHUB_STEP_SUMMARY"
+      - name: build log
+        if: always()
+        run: texlua scripts/lint.lua build --doc reviewer
+      - name: overfull boxes
+        if: always()
+        run: texlua scripts/lint.lua overfull --doc reviewer
+      - name: page count
+        if: always()
+        continue-on-error: ${{ github.ref_name != 'main' }}
+        run: texlua scripts/lint.lua pages --doc reviewer
+      - name: traceability
+        if: always()
+        run: texlua scripts/lint.lua traceability
+      - name: outline
+        if: always()
+        run: texlua scripts/lint.lua outline
+      - name: figures
+        if: always()
+        run: texlua scripts/lint.lua figures
+      - name: acronyms
+        if: always()
+        run: texlua scripts/lint.lua acronyms
+      - name: bibliography
+        if: always()
+        run: texlua scripts/lint.lua bib
+      - name: placeholders (burn-down)
+        if: always()
+        run: texlua scripts/lint.lua placeholders
+      - name: beats and notes (burn-down)
+        if: always()
+        run: texlua scripts/lint.lua beats
+      - name: burn-down record
+        if: always()
+        run: texlua scripts/lint.lua burndown --doc reviewer | tail -1 | tee burndown.json
+      - name: Keep the burn-down record
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: burndown-${{ github.run_number }}
+          path: burndown.json
