@@ -210,6 +210,14 @@
 \newcommand{\gate}{\textcolor{red!70!black}{\textsc{gate}}}
 \newcommand{\advisortodo}[1]{\todo[inline, color=cyan!20, bordercolor=cyan!60!black]{\textbf{Advisor:} #1}}
 
+% Review comments from the supervisor in the student's paper:
+%   \supervisortodo[options]{comment}
+% Pre-fills a green color and "A" (advisor) as author; like \todo, it is a margin note unless
+% given [inline]. Every \todo option
+% still works, and options given here override the defaults:
+%   \supervisortodo{short margin comment}  \supervisortodo[inline]{longer comment}  \supervisortodo[author=IK]{...}
+\newcommand{\supervisortodo}[2][]{\todo[color=green!25, bordercolor=green!50!black, author=A, #1]{#2}}
+
 
 %--------------------------------------------------------------------------------------
 % Acronyms (acro)
