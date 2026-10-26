@@ -11,13 +11,70 @@ If you are working on a hard topic, show your hard work in a TDK paper: the \hre
 \end{itemize}
 
 \section{Official dates}\label{app:tdk:dates}
-The portal publishes the dates each year; these are the 2026 ones, and \cref{tab:lifecycle} plans the semester backwards from them.
+The portal publishes the dates each year; these are the 2026 ones, \cref{fig:timeline} draws them on the semester, and \cref{tab:lifecycle} plans the semester backwards from them.
 \begin{itemize}
   \item \textbf{1--30 September:} registration on the portal, with the one-page summary in Hungarian and English. Without it there is no paper.
   \item \textbf{1 October -- 1 November:} paper upload on the portal. The deadline is the last day; the portal closes.
   \item \textbf{2--16 November:} the reviewers read and score the paper. The code can still be polished in this window (\cref{app:zenodo:versions}).
   \item \textbf{18 November:} the conference. A plenary at 8:00, section talks from 8:30, fifteen minutes of talk and five of questions each; the awards ceremony is the same evening.
 \end{itemize}
+
+
+\begin{figure}[!ht]
+  \centering
+  % One unit = one day from 1 September; the semester dates are the 2026 autumn ones as far as we know them.
+  \newcommand{\tlband}[6]{\fill[#5, rounded corners=1.2pt] (#1,#3) rectangle (#2,#4); \node[font=\footnotesize, #6] at ({(#1+#2)/2},{(#3+#4)/2}) {\strut};}
+  \begin{tikzpicture}[x=0.142cm, y=1cm, every node/.style={inner sep=1.5pt}]
+    % months and weeks
+    \foreach \d/\m in {0/September, 30/October, 61/November, 91/December} {
+      \draw[gray!60] (\d,0.25) -- (\d,-3.55);
+      \node[anchor=south west, font=\footnotesize\bfseries, text=gray!70!black] at (\d,0.3) {\m};
+    }
+    \draw[gray!60] (111,0.25) -- (111,-3.55);
+    \foreach \d in {7,14,21,28,37,44,51,58,68,75,82,89,98,105} \draw[gray!50] (\d,0.1) -- (\d,0.25);
+    \draw[thick, gray!70!black] (0,0.25) -- (111,0.25);
+    % lane 1: the faculty's dates
+    \node[anchor=east, font=\footnotesize\bfseries, text=orange!80!black] at (-1,-0.3) {Faculty};
+    \fill[official, rounded corners=1.5pt] (0,-0.62) rectangle (29,-0.02);
+    \node[font=\footnotesize] at (14.5,-0.32) {registration + summary};
+    \fill[official, rounded corners=1.5pt] (30,-0.62) rectangle (61,-0.02);
+    \node[font=\footnotesize] at (45.5,-0.32) {paper upload};
+    \fill[official, rounded corners=1.5pt] (62,-0.62) rectangle (76,-0.02);
+    \node[font=\footnotesize] at (69,-0.32) {review};
+    \foreach \d/\t in {29/30 Sep, 61/1 Nov} {
+      \draw[orange!80!black, very thick] (\d,-0.68) -- (\d,0.1);
+      \node[font=\footnotesize\bfseries, text=orange!80!black, anchor=north] at (\d,-0.68) {\t};
+    }
+    \node[diamond, fill=orange!80!black, inner sep=2.2pt] at (78,-0.32) {};
+    \node[font=\footnotesize\bfseries, text=orange!80!black, anchor=west] at (79,-0.32) {18 Nov conference};
+    % lane 2: our phases and the anchors
+    \node[anchor=east, font=\footnotesize\bfseries, text=teal!60!black] at (-1,-1.45) {Us};
+    \foreach \a/\b/\t in {0/14/research, 15/29/plan, 30/51/draft, 52/61/polish, 62/76/{talk, code}} {
+      \fill[teal!12, rounded corners=1.5pt] (\a,-1.75) rectangle (\b,-1.15);
+      \node[font=\footnotesize] at ({(\a+\b)/2},-1.45) {\t};
+    }
+    \fill[teal!12, rounded corners=1.5pt] (79,-1.75) rectangle (111,-1.15);
+    \node[font=\footnotesize] at (95,-1.45) {OTDK, paper or thesis};
+    \foreach \d/\t/\p in {-0.5/manifest/west, 29/spine/east, 52/full draft/east} {
+      \draw[red!70!black, very thick] (\d,-1.85) -- (\d,-1.05);
+      \node[font=\footnotesize\bfseries, text=red!70!black, anchor=north \p] at (\d,-1.85) {\t};
+    }
+    % lane 3: the semester and the department
+    \node[anchor=east, font=\footnotesize\bfseries, text=gray!70!black] at (-1,-2.95) {Semester};
+    \fill[gray!14, rounded corners=1.5pt] (6,-3.25) rectangle (100,-2.65);
+    \node[font=\footnotesize] at (36,-2.95) {fourteen teaching weeks, a consultation in each};
+    \fill[gray!30, rounded corners=1.5pt] (103,-3.25) rectangle (108,-2.65);
+    \node[font=\footnotesize, anchor=north, align=center] at (105.5,-3.3) {pótlási\\hét};
+    \draw[-Stealth, gray!70!black] (108.5,-2.95) -- (111,-2.95);
+    \node[font=\footnotesize, anchor=north, align=center] at (6,-3.3) {semester\\starts};
+    \foreach \d/\t in {58/writing session, 76/rehearsal} {
+      \draw[teal!60!black, very thick] (\d,-3.35) -- (\d,-2.55);
+      \node[font=\footnotesize, text=teal!60!black, anchor=north, align=center] at (\d,-3.35) {\t};
+    }
+  \end{tikzpicture}
+  \caption{The semester on one line: the faculty's windows and deadlines in yellow, our phases in teal with the three anchors in red, and the department's two events, the writing session with pizza in the last days before the upload and the talk rehearsal two days before the conference. The deadlines are the fixed points; everything to their left is planned backwards from them.}\label{fig:timeline}
+\end{figure}
+\advisortodo{The semester start, the end of the teaching period and the pótlási hét in \cref{fig:timeline} are placed from the usual pattern of the autumn semester; confirm them against the 2026/27 academic calendar.}
 
 \section{Form requirements}\label{app:tdk:form}
 From the faculty call; the template already meets them.
