@@ -7,17 +7,17 @@ If you are working on a hard topic, show your hard work in a TDK paper: the Stud
 \begin{itemize}
   \item The \href{https://tdk.bme.hu/}{BME TDK portal} and the \href{https://tdk.bme.hu/conference/VIK/2026}{faculty's page for the current year}: check the call, the templates, the FAQ, and the review sheet. Calls change from year to year.
   \item The research group's own guide: \href{https://github.com/ftsrg/cheat-sheets/wiki/TDK-Howto}{TDK Howto} in the FTSRG cheat-sheets wiki.
-  \item Past first-place papers of the research group and the department, for structure and tone.
+  \item Past first-place papers of the research group and of neighbouring groups at the faculty (\cref{app:tdk:papers}), for structure and tone.
 \end{itemize}
-\advisortodo{Link past first-place TDK papers of the research group and the department.}
 
-\section{Usual deadlines}
+\section{Official dates}\label{app:tdk:dates}
+The portal publishes the dates each year; these are the 2026 ones, and \cref{tab:lifecycle} plans the semester backwards from them.
 \begin{itemize}
-  \item 30 September: abstract submission on the TDK portal.
-  \item Early November (around 1 November): paper submission.
-  \item Around 18 November: the conference.
+  \item \textbf{1--30 September:} registration on the portal, with the one-page summary in Hungarian and English. Without it there is no paper.
+  \item \textbf{1 October -- 1 November:} paper upload on the portal. The deadline is the last day; the portal closes.
+  \item \textbf{2--16 November:} the reviewers read and score the paper. The code can still be polished in this window (\cref{app:zenodo:versions}).
+  \item \textbf{18 November:} the conference. A plenary at 8:00, section talks from 8:30, fifteen minutes of talk and five of questions each; the awards ceremony is the same evening.
 \end{itemize}
-Check the exact dates in the current call; \cref{app:lifecycle} plans the semester backwards from them.
 
 \section{Form requirements}\label{app:tdk:form}
 From the faculty call; the template already meets them.
@@ -28,5 +28,57 @@ From the faculty call; the template already meets them.
   \item The faculty's templates under \emph{Letöltések} are diploma thesis templates, so they need small changes for the TDK, such as margins and headings. This template has them.
 \end{itemize}
 
-\section{The review sheet}
-Reviewers score the paper on the review sheet (bírálói lap), saved in \texttt{docs/} of this project: form and style (A, 0--5), figures and literature (B, 0--4), topic (C, 0--8), originality and soundness (D, 0--10), and introduction and evaluation (E, 0--8). The todo at the start of \tplref{chap:intro} explains the criteria and the four things to argue: relevance, non-triviality, novelty and correctness. Each chapter's todo says which of them that chapter carries.
+\section{The review sheet}\label{app:tdk:sheet}
+Reviewers score the paper on the review sheet (bírálói lap), saved in \texttt{docs/} of this project, 35 points in five criteria. The todo at the start of \tplref{chap:intro} explains the four things to argue throughout: relevance, non-triviality, novelty and correctness; each chapter's todo quotes the criterion that chapter carries, in the sheet's own words, so that you can score yourself against the same sentences the reviewer reads. The top score of each criterion, in the sheet's words:
+\begin{description}[noitemsep]
+  \item[A. Szerkesztés, stílus (0--5)] \enquote{4--5: kiváló (ha a dolgozat közel hibamentes, jól tagolt, követhető, gördülékeny stílusú)}. The sheet also says: \enquote{Terjedelmi korlát 30--35 oldal. Ettől eltérés esetén 3 oldalanként 1 pont levonás javasolt.}
+  \item[B/1. Ábrák, táblázatok] \enquote{4: kiváló (a dolgozat megfelelő számú és jól átgondolt ábrát, táblázatot tartalmaz, és a szakirodalmi hivatkozások pontosak)}.
+  \item[B/2. Hivatkozások, irodalom feldolgozás] \enquote{3--4: újszerű ipari megoldások és kutatási eredmények (a dolgozat -- az újszerű ipari megoldásokon túl -- bemutatja a dolgozat témakörében releváns kutatási eredményeket a szakterületen)}. B is the average of B/1 and B/2.
+  \item[C. A dolgozat témája (0--8)] \enquote{7--8: tudományos vizsgálat szükséges (ha a dolgozat témája korszerű, nem lezárt, vizsgálata magas szintű, tudományos, elmélyült tudást igényel)}.
+  \item[D/1. Tudományos újdonságtartalom és kontribúció (0--5)] \enquote{5: újszerű (legalább hazánkban újszerű, vagy eddig még nem létező megoldás)}; one step below, \enquote{3--4: inkrementális (értékes inkrementális kontribúció, létező megoldások apró továbbfejlesztése)}.
+  \item[D/2. Technikai helyesség és színvonal (0--5)] \enquote{5: kiváló (kimagasló színvonalú kidolgozás, a közölt eredmények helyessége kétségkívül megalapozott)}. D is the sum of D/1 and D/2.
+  \item[E. Bevezetés és az eredmények értékelése (0--8)] \enquote{7--8: teljeskörű -- A bevezetés megfelelő és az elért eredmények pontosak és teljesek, az értékelés megalapozott. A szerző skálázhatósági, robosztussági vizsgálatokat is elvégzett, mellyel igazolta, hogy rendszere ipari környezetben is megállja a helyét}.
+\end{description}
+
+\section{First-place papers to learn from}\label{app:tdk:papers}
+\Cref{tab:papers-ftsrg} lists the first-place TDK papers of the research group's advisors since 2018, and \cref{tab:papers-neighbours} those of neighbouring groups at the faculty. Read two or three before you write the spine: look at how the leading figure, the contributions and the evaluation are built, not at the topic. Each link opens the paper's page on the portal, where the PDF is.
+
+{\small
+\begin{xltabular}{\linewidth}{>{\raggedright\arraybackslash}p{0.07\linewidth} X >{\raggedright\arraybackslash}p{0.2\linewidth} >{\raggedright\arraybackslash}p{0.24\linewidth}}
+  \caption{First-place TDK papers advised in the research group, 2018--2025, from the BME TDK portal.}\label{tab:papers-ftsrg}\\
+  \toprule \textbf{Year} & \textbf{Title} & \textbf{Authors} & \textbf{Advisors} \\ \midrule \endfirsthead
+  \toprule \textbf{Year} & \textbf{Title} & \textbf{Authors} & \textbf{Advisors} \\ \midrule \endhead
+  \bottomrule \endlastfoot
+  2018 & \href{https://tdk.bme.hu/conference/VIK/2018/sessions/SW5/paper/Grafmintailleszto-rendszerek-tesztelese}{Functional Testing of Graph Query Engines by Automated Graph Generators} & Bekő Mária & Semeráth Oszkár \\
+  2019 & \href{https://tdk.bme.hu/conference/VIK/2019/sessions/intel/paper/Kiberfizikai-rendszerek-megbizhatosagi}{Simulation, inference and verification for state-based advanced reliability models of complex cyber-physical systems} & Nagy Simon József & Marussy Kristóf \\
+  2019 & \href{https://tdk.bme.hu/conference/VIK/2019/sessions/model/paper/Tenzorreprezentacios-modszerek-a-komplex}{Towards tensor-based reliability analysis of complex safety-critical systems} & Szekeres Dániel & Marussy Kristóf \\
+  2020 & \href{https://tdk.bme.hu/conference/VIK/2020/sessions/modell/paper/Komplex-elosztott-rendszerek}{Towards tensor-based extrafunctional analysis of complex distributed systems} & Szekeres Dániel & Marussy Kristóf \\
+  2021 & \href{https://tdk.bme.hu/conference/VIK/2021/sessions/inform/paper/ZKPalapu-audit-digitalis-jegybankpenzt-kezelo}{ZKP-based Audit for Blockchain Systems Managing Central Bank Digital Currency} & Péter Bertalan Zoltán & Kocsis Imre \\
+  2022 & \href{https://tdk.bme.hu/conference/VIK/2022/sessions/inform1/paper/Alkalmazasi-szintu-ateresztokepesseg}{Data model driven goodput optimization for execute-order-validate blockchains} & Debreczeni Máté & Klenik Attila, Kocsis Imre \\
+  2022 & \href{https://tdk.bme.hu/conference/VIK/2022/sessions/sw8/paper/Kollaborativ-munkafolyamatok-titkossagmegorzo}{Blockchain-based, confidentiality preserving orchestration of collaborative workflows} & Toldi Balázs Ádám & Kocsis Imre \\
+  2022 & \href{https://tdk.bme.hu/conference/VIK/2022/sessions/sw8/paper/Graflekerdezesekkel-tamogatott-architektura}{System Architecture Evaluation and Synthesis for Performability with Graph Queries} & Földiák Máté & Marussy Kristóf \\
+  2023 & \href{https://tdk.bme.hu/conference/VIK/2023/sessions/inform2/paper/Onkiertekelo-eljarasrendek-tamogatasa}{Self-evaluated policies using Zero-Knowledge proofs} & Farkas Martin, Toldi Balázs Ádám & Kocsis Imre, Péter Bertalan Zoltán \\
+  2023 & \href{https://tdk.bme.hu/conference/VIK/2023/sessions/sw9/paper/Valos-ideju-szoftverintenziv-rendszer-modellek}{Abstraction-based model checking for real-time software-intensive system models} & Cziborová Dóra & Marussy Kristóf, Dobos-Kovács Mihály \\
+  2024 & \href{https://tdk.bme.hu/conference/VIK/2024/sessions/intel/paper/Kvalitativ-kovetkeztes-alapu-hibadiagnosztika}{Qualitative Reasoning-Based Fault Diagnosis in Distributed Systems} & Tarnay Márton & Földvári András, Péter Bertalan Zoltán \\
+  2024 & \href{https://tdk.bme.hu/conference/VIK/2024/sessions/model/paper/Beagyazott-MI-komponensek-rendszer-szintu}{System-level impact analysis of embedded AI components} & Deé-Lukács András Gergely & Pataricza András, Földvári András \\
+  2025 & \href{https://tdk.bme.hu/conference/VIK/2025/sessions/inf/paper/Hatasanalizissel-Tamogatott-MI-Biztonsagi}{Impact Assessment Supported AI Safety Wrapper} & Deé-Lukács András Gergely & Pataricza András, Földvári András \\
+  2025 & \href{https://tdk.bme.hu/conference/VIK/2025/sessions/inteli/paper/Grafalapu-logikai-megoldok-kombinalasa}{Combining graph-based logic solvers with genetic algorithms} & Tömöri Péter András & Ficsor Attila, Semeráth Oszkár \\
+  2025 & \href{https://tdk.bme.hu/conference/VIK/2025/sessions/rendmod/paper/Modellalapu-rendszertervezest-tamogato-agensek}{Developing AI assistants for model-based systems engineering} & Bilicki Vilmos & Elekes Márton, Marussy Kristóf, Vörös András \\
+  2025 & \href{https://tdk.bme.hu/conference/VIK/2025/sessions/sw/paper/Numerikus-kovetkezteto-modszerek-vizsgalata}{Numerical constraint propagation for automated graph generation} & Balog Bors & Marussy Kristóf \\
+\end{xltabular}
+
+\begin{xltabular}{\linewidth}{>{\raggedright\arraybackslash}p{0.07\linewidth} X >{\raggedright\arraybackslash}p{0.2\linewidth} >{\raggedright\arraybackslash}p{0.24\linewidth}}
+  \caption{First-place TDK papers advised in neighbouring groups at the faculty, 2017--2025: the CrySyS Lab (Buttyán Levente) and Pejő Balázs.}\label{tab:papers-neighbours}\\
+  \toprule \textbf{Year} & \textbf{Title} & \textbf{Authors} & \textbf{Advisors} \\ \midrule \endfirsthead
+  \toprule \textbf{Year} & \textbf{Title} & \textbf{Authors} & \textbf{Advisors} \\ \midrule \endhead
+  \bottomrule \endlastfoot
+  2017 & \href{https://tdk.bme.hu/conference/VIK/2017/sessions/SW4/paper/a84}{Detection of malicious web pages with static analysis} & Tamás Kristóf & Buttyán Levente \\
+  2020 & \href{https://tdk.bme.hu/conference/VIK/2020/sessions/info2/paper/Keresesi-hatekonysag-novelese-nagyon-nagy}{Improving search efficiency in very large malware repositories} & Tamás Csongor & Buttyán Levente \\
+  2021 & \href{https://tdk.bme.hu/conference/VIK/2021/sessions/beagy/paper/Kartekony-kod-mentes-allapot-tavoli}{Protocol for remote attestation of malware-free state of embedded IoT devices} & Bak Márton László & Buttyán Levente, Futóné Papp Dorottya \\
+  2022 & \href{https://tdk.bme.hu/conference/VIK/2022/sessions/beagy1/paper/Robusztussag-vizsgalat-a-hasonlosagalapu-IoT}{Robustness Against Evasion of Similarity-based IoT Malware Detection Methods} & Sándor József & Buttyán Levente \\
+  2023 & \href{https://tdk.bme.hu/conference/VIK/2023/sessions/sw9/paper/Ket-tamadas-a-TLSH-hasonlosagi-hash-algoritmus}{Two Attacks on the TLSH Similarity Digest Scheme} & Fuchs Gábor & Buttyán Levente, Nagy Roland \\
+  2024 & \href{https://tdk.bme.hu/conference/VIK/2024/sessions/kvantum/paper/A-securitybydesign-modszer-tamogatasa-az}{Supporting security-by-design via automating attack tree generation from abstract system models} & Szilvágyi Dániel Zoltán & Buttyán Levente \\
+  2025 & \href{https://tdk.bme.hu/conference/VIK/2025/sessions/modeling/paper/Nagy-meretu-dinamikus-grafok-klaszterezeset}{Design and analysis of clustering algorithms for large dynamic graphs} & Maliga Dávid & Buttyán Levente \\
+  2025 & \href{https://tdk.bme.hu/conference/VIK/2025/sessions/neural/paper/Hozzajarulasi-ertek-szamitasa-elosztott}{Robustness Scores in Federated Learning} & Ulrich Flóra Zsuzsanna & Pejő Balázs \\
+\end{xltabular}
+}

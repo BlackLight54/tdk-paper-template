@@ -59,7 +59,9 @@
   patterns, positioning, quotes, shadows, shapes.geometric, shapes.misc,
   shapes.multipart, babel}
 \usepackage{pgfplots}
+\usepackage{forest} % Skeleton mind map in the guide (\cref{fig:mindmap}).
 \pgfplotsset{compat=1.18}
+\usepgfplotslibrary{groupplots} % Side-by-side panels, as in the caption example of the guide.
 
 % Colored boxes. [most] loads skins, breakable, listings, theorems, etc.
 \usepackage[most]{tcolorbox}
@@ -90,7 +92,7 @@
 %--------------------------------------------------------------------------------------
 % To hide every todo in the submitted version, add `final` to \documentclass (obeyFinal below
 % makes todonotes honour it) or `disable` here.
-\usepackage[colorinlistoftodos,obeyFinal]{todonotes}
+\usepackage[colorinlistoftodos,obeyFinal,textsize=footnotesize]{todonotes}
 
 \usepackage{acro} % Acronyms: define them in content/acronyms.tex, use \ac{key}.
 

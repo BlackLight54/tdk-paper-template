@@ -84,7 +84,7 @@
 \pagenumbering{arabic}
 
 %TODO import your own content
-\include{content/01-introduction}
+\include{content/01-introduction} % the main text starts here (page:main:start)
 \include{content/02-background}
 \include{content/03-approach}
 \include{content/04-implementation}
@@ -124,7 +124,7 @@
 % The guide: how we work, the TDK lifecycle, and how to use this template
 %~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 %TODO Delete from here to \selectthesislanguage before submission.
-\part*{Guide}\addcontentsline{toc}{part}{Guide}
+% The part heading is in guide/01-getting-started.tex, so that its contents line lands in that file's .aux before the chapter's.
 \renewcommand{\exname}{the credential revocation registry} % the guide's own running example
 \include{guide/01-getting-started}
 \include{guide/02-tdk-essentials}

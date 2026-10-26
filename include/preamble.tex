@@ -171,7 +171,13 @@
 % todonotes checks for at least 2cm at \begin{document}; the narrow width is deliberate,
 % so it is set after that check.
 \setlength{\marginparwidth}{2cm}
-\AtBeginDocument{\setlength{\marginparwidth}{13mm}}
+% 15mm margins leave no room for a readable note, so margin notes are 18mm wide, set in
+% footnotesize, and shifted 4mm into the text: they touch the text edge but stay readable.
+% Inline notes keep the text width. Both kinds disappear with todonotes' disable option.
+\AtBeginDocument{\setlength{\marginparwidth}{18mm}\setlength{\marginparsep}{-4mm}}
+\makeatletter
+\@ifpackageloaded{todonotes}{\setlength{\@todonotes@textwidth}{18mm}}{}
+\makeatother
 \newcommand{\todoinline}[1]{\todo[inline]{#1}}
 
 % Two kinds of notes: orange \todo for the student; blue \advisortodo for the advisors
@@ -212,7 +218,9 @@
 \newcommand{\weblink}[2]{\href{#1}{\textcolor{weblinkcolor}{\uline{#2}}}}
 
 % Marks a step where the student stops for the advisors' approval (lifecycle chapter of the guide).
-\newcommand{\gate}{\textcolor{red!70!black}{\textsc{gate}}}
+\newcommand{\anchor}{\textcolor{red!70!black}{\textsc{anchor}}}
+\definecolor{official}{RGB}{255,243,205}
+\newcommand{\official}{\textcolor{orange!80!black}{\textsc{official}}}
 \newcommand{\advisortodo}[1]{\todo[inline, color=cyan!20, bordercolor=cyan!60!black]{\textbf{Advisor:} #1}}
 
 % Review comments from the supervisor in the student's paper:

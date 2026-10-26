@@ -4,26 +4,136 @@
 \section{Plan before you write: problem to skeleton}\label{app:writing:spine}
 Write the argument before the prose. We plan papers in this order, and each step builds on the previous one: problem; context and literature review; gap analysis; research questions; contributions; threat analysis; leading figure; examples; validation plan; spine; figures; skeleton; beats.
 \begin{description}
+  \item[Problem] The entry point, and the only step you need to start. One paragraph: who has what problem, what goes wrong for them today, and one concrete scenario in which it goes wrong. The scenario becomes the running example, and the paragraph becomes the first page of \tplref{chap:intro}. If you can write it, you can start the literature review; if you cannot, bring what you have to the next consultation and we write it together.
   \item[Spine] One page that fixes the claims, the terminology and the notation of the whole paper. Every chapter, figure and review is checked against it. Its worst enemy is drift: terms, symbols and claims quietly changing between chapters.
-  \item[Skeleton mind map] The argument made explicit before any prose: each chapter broken into paragraphs, each paragraph reduced to its topic sentence and a pointer to the evidence that backs it. Drafting then means filling in sentences around a skeleton already known to be sound. A mind map, on paper or in a tool, is the quickest way to draw it.
+  \item[Skeleton mind map] The argument made explicit before any prose: each chapter broken into paragraphs, each paragraph reduced to its topic sentence and a pointer to the evidence that backs it. Drafting then means filling in sentences around a skeleton already known to be sound. A mind map, on paper or in a tool, is the quickest way to draw it; \cref{fig:mindmap} shows one for a made-up paper, at the level of detail we expect.
   \item[Running example] One concrete scenario that every chapter returns to. Name it once with \texttt{\textbackslash exname} in \texttt{thesis.tex}, introduce it in \tplref{chap:intro}, and revisit it in every chapter in a \texttt{runningexample} box: what each concept, component, measurement or competitor does with it. A reader who follows only the boxes should understand the paper.
   \item[Beats] The moves inside each paragraph of the skeleton: what it establishes, which evidence it uses, what the running example shows there, and how it leads to the next one. The chapters of this template start every paragraph with a \texttt{\textbackslash beat\{establishes\}\{evidence\}\{running example\}\{leads to\}}; it prints as a todo, so it disappears from the final version.
 \end{description}
-\advisortodo{Drafted from the paper-planning workflow, as the starter-pack note on the spine and skeleton mind map was empty; confirm, or add an example mind map.}
+
+\begin{figure}[p]
+  \centering
+  \begin{forest}
+    for tree={
+      grow'=0, child anchor=west, parent anchor=east, anchor=west,
+      font=\scriptsize, edge={gray!60},
+      l sep=6mm, s sep=1.2pt, inner sep=1.5pt,
+      edge path={\noexpand\path[\forestoption{edge}](!u.parent anchor) -- +(3mm,0) |- (.child anchor)\forestoption{edge label};},
+    },
+    where level=0{text width=2.4cm, font=\footnotesize}{},
+    where level=1{text width=2.5cm}{},
+    where level=2{text width=9.3cm}{},
+    [{\textbf{Conflict-free room booking on interval graphs}}
+      [{\textbf{1 Introduction}}
+        [{Shared rooms are double-booked when two services write the same calendar \textit{[incident report, cited]}}]
+        [{Existing booking systems lock the calendar; under load the lock is the bottleneck \textit{[vendor docs, our measurement]}}]
+        [{Running example: a faculty with 40 rooms and three booking front ends}]
+        [{Claim: bookings are conflict-free iff the interval graph of requests is properly coloured by rooms \textit{[Thm 3.1]}}]
+        [{RQ1 correctness, RQ2 scalability, RQ3 robustness; C1 model, C2 service, C3 evaluation}]
+      ]
+      [{\textbf{2 Background}}
+        [{Interval graphs: definition, perfectness, greedy colouring in $O(n \log n)$ \textit{[Golumbic, cited]}}]
+        [{Alloy and TLA+: what each checks, which we use for what}]
+        [{Example: one day of the faculty's requests as an interval graph}]
+      ]
+      [{\textbf{3 Approach}}
+        [{Booking as online colouring: a request is an interval, a room is a colour \textit{[Def. 3.1]}}]
+        [{Theorem 3.1: the service never double-books \textit{[proof; Alloy model]}}]
+        [{Theorem 3.2: rooms used $\le$ max overlap $+ 1$ \textit{[proof]}}]
+        [{Theorem 3.3: liveness under crash and recovery \textit{[TLA+ model, TLC]}}]
+        [{Example: a conflicting request pair and how the service rejects it}]
+      ]
+      [{\textbf{4 Implementation}}
+        [{Architecture: front ends, the colouring service, the calendar store \textit{[Fig. 4.1]}}]
+        [{Design decisions: in-memory interval tree, idempotent requests \textit{[code, archived]}}]
+        [{What is reused (store, web framework) and what is new (the service)}]
+      ]
+      [{\textbf{5 Evaluation}}
+        [{Correctness: Alloy finds no counterexample up to 12 rooms; 200 property-based tests \textit{[Tab. 5.1]}}]
+        [{Three representative days: exam week, a conference, an ordinary Tuesday \textit{[Tab. 5.2]}}]
+        [{Statistics: 1\,000 generated days, conflict rate and rooms used vs.\ the lock-based baseline \textit{[Fig. 5.2]}}]
+        [{Scalability: latency vs.\ requests per second up to 10$\times$ the faculty's load \textit{[Fig. 5.3]}}]
+        [{Robustness: crash of the service mid-day, clock skew, duplicate requests \textit{[Tab. 5.3, Fig. 5.4]}}]
+        [{Threats to validity: generated workloads, one faculty's shape of day}]
+      ]
+      [{\textbf{6 Related work}}
+        [{Lock-based and queue-based booking systems \textit{[three products, cited]}}]
+        [{Online interval colouring in theory \textit{[Kierstead--Trotter, cited]}}]
+        [{Gap matrix: no system both proves conflict-freedom and bounds rooms used \textit{[Tab. 6.1]}}]
+      ]
+      [{\textbf{7 Conclusion}}
+        [{C1--C3 restated with their evidence}]
+        [{Limitations: fixed room sizes, no recurring bookings}]
+        [{Future work: weighted intervals, a formal model of the front ends}]
+      ]
+    ]
+  \end{forest}
+  \caption{A skeleton mind map for a made-up paper: a room-booking service whose correctness rests on interval graph colouring. Every leaf is one paragraph's topic sentence, and the bracketed italics name the evidence behind it: a theorem, a model, a table, a figure or a citation. A skeleton at this level of detail shows whether the argument holds before a sentence of prose exists, and it is what the spine anchor of \cref{tab:lifecycle} is checked against. Copy the shape, not the topic: one leaf per paragraph, evidence on every leaf that makes a claim, and the running example visible in every chapter.}\label{fig:mindmap}
+\end{figure}
 
 \section{The leading figure (vezérábra)}\label{app:writing:figure}
-The leading figure (\tplref{fig:overview}) explains the central idea in one picture: the problem, the contributions, and the result. Decide what a reader should take away from it, draw that, and write the caption so that the figure stands without the text. Draft it early, in the research phase, and treat it as exploratory until the spine is agreed: many papers find their argument while drawing it.
-\advisortodo{Drafted from the paper-planning workflow, as the starter-pack note on the vezérábra was empty; confirm, or add good examples from past papers.}
+The leading figure (\tplref{fig:overview}) explains the central idea in one picture: the problem, the contributions, and the result. Decide what a reader should take away from it, draw that, and write the caption so that the figure stands without the text. Draft it early, in the research phase, and treat it as exploratory until the spine is agreed: many papers find their argument while drawing it. \Cref{fig:collage} shows the leading figures of four papers from our group.
 
-\section{The abstract}
-Follow \weblink{https://www.nature.com/documents/nature-summary-paragraph.pdf}{Nature's summary paragraph guide}; the abstract in this template already has its seven steps as placeholders.
+\begin{figure}[!ht]
+  \centering
+  \begin{subfigure}[t]{0.48\linewidth}
+    \centering
+    \includegraphics[width=\linewidth,height=5.2cm,keepaspectratio]{figures/collage/eurocybersec2024}
+    \caption{A policy is evaluated by its own subject and proven in zero knowledge: the actors and the flows between them, nothing else.}\label{fig:collage:ecs}
+  \end{subfigure}\hfill
+  \begin{subfigure}[t]{0.48\linewidth}
+    \centering
+    \includegraphics[width=\linewidth,height=5.2cm,keepaspectratio]{figures/collage/tdk2023}
+    \caption{The toolchain of the same idea as a TDK paper: every stage from policy to proof, so the reader sees where the contribution sits.}\label{fig:collage:tdk}
+  \end{subfigure}
+
+  \medskip
+  \begin{subfigure}[t]{0.48\linewidth}
+    \centering
+    \includegraphics[width=\linewidth,height=5.2cm,keepaspectratio]{figures/collage/bpm2025}
+    \caption{Self-orchestrated business collaborations: the architecture with the data model folded in, one picture for both.}\label{fig:collage:bpm25}
+  \end{subfigure}\hfill
+  \begin{subfigure}[t]{0.48\linewidth}
+    \centering
+    \includegraphics[width=\linewidth,height=5.2cm,keepaspectratio]{figures/collage/bpm2026}
+    \caption{From a BPMN collaboration to a security analysis: inputs on the left, the method in the middle, the verdicts on the right.}\label{fig:collage:bpm26}
+  \end{subfigure}
+  \caption{Leading figures of four papers from the group: (a) the EuroCyberSec 2024 workshop paper on self-evaluated policies~\cite{farkas2024selfevaluated}, (b) the 2023 TDK paper it grew out of~\cite{farkas2023tdk}, (c) the self-orchestration model for business collaborations~\cite{farkas2025selforchestration}, and (d) the formal security analysis of BPMN collaborations~\cite{farkas2026trustnopool}. Each one shows the problem, the contribution and the result in a single picture, and each was drawn before the paper was written.}\label{fig:collage}
+\end{figure}
+
+\section{Figures}\label{app:writing:figures}
+Every figure is vector. Draw the final version in TikZ, in the paper repository, so that it uses the paper's fonts, scales without loss, and can be fixed by anyone in the last week; \cref{app:latex} shows the TikZ and pgfplots setup of this template. Sketch in \href{https://www.drawio.com/}{draw.io} while the figure is still changing, then redraw it in TikZ once the spine is agreed. An exported PDF is the last resort, for a figure from another paper or a screenshot. Plots come from pgfplots reading the CSV that \texttt{just reproduce} writes, so a changed measurement changes the figure without anyone redrawing it. Every axis has a label with a unit, and nothing in a figure is smaller than 10\,pt in print.
+
+\section{Captions}\label{app:writing:captions}
+A caption is the figure's own paragraph, and a reader who reads only figures and captions should follow the paper. A caption explains the figure; it does not describe it. Its first sentence states what the figure shows as a claim. Then it puts that claim in context: which question it answers, what a reader needs to know to understand it, and why the result is what it is. Anything the reader could get from the axes and the legend does not belong in the caption; anything they could not, does: the concept being measured, the assumption behind the setup, the reason one curve bends. A diagram gets two or three sentences; a result figure gets as many as the explanation needs. Nature's captions are the model, for example those of \citet{gulyas2015navigable}; \cref{fig:caption-example} is one in this template's style.
+
+\begin{figure}[!ht]
+  \centering
+  \begin{tikzpicture}
+    \begin{groupplot}[group style={group size=2 by 1, horizontal sep=1.6cm}, width=0.5\linewidth, height=5cm,
+      xmode=log, log basis x=10, xlabel={Issuers in the registry}, grid=major, tick label style={font=\scriptsize}, label style={font=\footnotesize}, legend style={font=\scriptsize, at={(0.03,0.97)}, anchor=north west}]
+      \nextgroupplot[ylabel={Median check latency [ms]}, ymode=log, title={(a)}, title style={font=\footnotesize}]
+        \addplot+[mark=*, blue!70!black] coordinates {(10,31) (100,33) (1000,35) (10000,38)};
+        \addplot+[mark=square*, gray] coordinates {(10,34) (100,61) (1000,310) (10000,2900)};
+        \addplot[dashed, red!70!black] coordinates {(10,40) (10000,40)};
+        \legend{this work, list-based baseline, one round trip}
+      \nextgroupplot[ylabel={Registry size [MB]}, title={(b)}, title style={font=\footnotesize}, ymode=log]
+        \addplot+[mark=*, blue!70!black] coordinates {(10,2) (100,12) (1000,110) (10000,1050)};
+        \addplot+[mark=square*, gray] coordinates {(10,1) (100,3) (1000,21) (10000,190)};
+    \end{groupplot}
+  \end{tikzpicture}
+  \caption{\textbf{Revocation checks stay within one network round trip up to 10\,000 issuers, while the list-based baseline grows linearly.} This is the scalability question, RQ2: a registry that serves a national ecosystem must answer a check without the verifier noticing. Our registry stays flat because a check reads one accumulator witness whatever the number of issuers, whereas the baseline scans the issuer's list. The price is the storage in panel (b), which grows with the number of credentials ever issued; the robustness analysis shows this stays under what a single server holds today. Medians over 10 runs with fresh issuer sets, on one 8-core VM in the BME cloud. (Illustrative numbers for the guide's running example.)}\label{fig:caption-example}
+\end{figure}
+
+\section{The abstract}\label{app:writing:abstract}
+The abstract has a job before it has a structure: it must convince two readers that the paper is worth their time. The first is us, when you register the summary on the portal; the second is the committee that assigns the reviewers and, later, the reviewers themselves, who read it before anything else. Both have to come away believing that the topic is \textbf{relevant}, that solving it is \textbf{non-trivial}, that what you did is \textbf{novel}, and that it is \textbf{correct}: the same four things the review sheet scores (\cref{app:tdk:sheet}). Then follow \weblink{https://www.nature.com/documents/nature-summary-paragraph.pdf}{Nature's summary paragraph guide}; the abstract in this template already has its seven steps as placeholders.
 
 \section{Style}
 \begin{itemize}
   \item The Chicago School of Writing lectures: \href{https://www.youtube.com/watch?v=vtIzMaLkCaM}{part I}, \href{https://www.youtube.com/watch?v=aFwVf5a3pZM}{part II}, \href{https://www.youtube.com/watch?v=gphdfSwYMWU}{part III}.
   \item \href{https://www.youtube.com/watch?v=Unzc731iCUY}{MIT: How to Speak}, for the conference talk.
-  \item Good examples: Leslie Lamport's papers and the Raft paper.
-  \item Counterexamples: the Paxos and PBFT papers. Read them to see how hard a good idea is to follow when the writing does not help.
+  \item Good examples: Leslie Lamport's papers, the Raft paper, and the figures and captions of \citet{gulyas2015navigable}.
+  \item For contrast, read the original Paxos and PBFT papers next to the Raft paper: all three carry great ideas, and the Raft paper was written so that its idea is the easy part.
 \end{itemize}
 
 \section{Disclose AI use}\label{app:writing:ai}

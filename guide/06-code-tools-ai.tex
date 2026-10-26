@@ -2,29 +2,42 @@
 \chapter{Code, tools and AI}\label{app:code}
 %----------------------------------------------------------------------------
 \section{GitHub}\label{app:code:github}
-Use GitHub for:
-\begin{itemize}[noitemsep]
-  \item code and models;
-  \item notes and drawings;
-  \item artifacts such as PDFs and presentations;
-  \item syncing with Overleaf (\cref{app:start:access});
-  \item submitting code anonymously for double-blind review, through \href{https://anonymous.4open.science/}{Anonymous GitHub};
-  \item archiving with a DOI on Zenodo (\cref{app:zenodo}).
-\end{itemize}
-In the code repository, run the recurring commands (build, test, reproduce the measurements) through \href{https://github.com/casey/just}{just}, a command runner: one \texttt{justfile} lists them, and \texttt{just reproduce} is all a reviewer has to know.
+Everything you make lives in GitHub, in the three repositories of \cref{app:start:access}: code and models, notes and drawings, artifacts such as PDFs and presentations, and the paper itself through the Overleaf sync. GitHub is also how the code reaches the reader: anonymously for double-blind review, through \href{https://anonymous.4open.science/}{Anonymous GitHub}, and permanently with a DOI, through Zenodo (\cref{app:zenodo}).
 
-\paragraph{Recommended structure.} One notes repository at the top level, with the paper and the code as submodules, which keeps notes, paper and code apart while one clone holds them all:
+\paragraph{Repository layout.} One notes repository at the top level, with the paper and the code as submodules, so that notes, paper and code stay apart while one clone holds them all:
 \begin{itemize}[noitemsep]
   \item notes repository: \texttt{README.md} linking the pieces; \texttt{notes/} for notes, drawings and consultation summaries; \texttt{slides/} for presentations;
   \begin{itemize}[noitemsep]
-    \item \texttt{paper/}: submodule, the Overleaf-synced paper repository;
-    \item \texttt{code/}: submodule, the code repository, with the code in \texttt{src/} and \texttt{tests/}, the measurement scripts and their raw results in \texttt{experiments/}, and \texttt{README.md}, \texttt{LICENSE}, \texttt{.zenodo.json}, \texttt{CITATION.cff} and the \texttt{justfile} at its root.
+    \item \texttt{paper/}: submodule, the Overleaf-synced paper repository, with the TikZ sources of every figure in \texttt{figures/};
+    \item \texttt{code/}: submodule, the code repository: the code in \texttt{src/} and \texttt{tests/}, the measurement scripts and their raw results in \texttt{experiments/}, and at the root \texttt{README.md}, \texttt{LICENSE}, \texttt{.zenodo.json}, \texttt{CITATION.cff}, the \texttt{justfile}, the \texttt{Dockerfile} and \texttt{.devcontainer/}.
   \end{itemize}
 \end{itemize}
-Zenodo archives the code repository on its own, so each release holds exactly the code and data behind the paper's results.
+Zenodo archives the code repository on its own, so each release holds exactly the code and data behind the paper's results (\cref{app:zenodo}).
 
-\paragraph{README structure.} The code repository's README: what the project is, in two sentences; how to install it; how to reproduce each result of the paper, one command per table or figure; how to cite it (the Zenodo DOI badge); the license.
-\advisortodo{Drafted, as the starter-pack note on repository and README structure was empty; align it with the repository templates once they exist.}
+\paragraph{One command.} In the code repository, run the recurring commands (build, test, reproduce the measurements) through \href{https://github.com/casey/just}{just}, a command runner: one \texttt{justfile} lists them, and \texttt{just reproduce} regenerates every figure and table of the paper. Name the recipes after the paper: \texttt{just fig-scalability} makes \tplref{fig:scalability}, \texttt{just tab-robustness} makes \tplref{tab:robustness}, and \texttt{just reproduce} runs them all. \texttt{just reproduce --smoke} does the same on a reduced workload in minutes, and a GitHub Actions workflow runs it on every push, so the README's commands cannot rot unnoticed.
+
+\section{The README}\label{app:code:readme}
+There are two kinds of code repository, and two READMEs. A \emph{results} repository exists so that a reviewer can regenerate the paper's numbers; a \emph{tool} repository is meant to be used by others after the paper. Every TDK produces the first; some produce the second. The code template's \texttt{README.md} is the results README, with the sections of the tool README in a commented block below it: delete the block if you have results only, uncomment it if you built a tool.
+
+\paragraph{The results README.} In this order:
+\begin{enumerate}[noitemsep]
+  \item What this is, in two sentences, with the paper's title and the concept DOI badge (\cref{app:zenodo}).
+  \item The one command: \texttt{docker run \dots{} reproduce}, which regenerates every figure and table (\cref{app:code:docker}); then \texttt{just reproduce} for readers who cloned the repository and installed the dependencies, which are listed, pinned and as few as possible.
+  \item The results map: a table with one row per figure and table of the paper: its number, the command that makes it, the output path, and the wall-clock time on stated hardware.
+  \item What does not reproduce: anything that needs a secret, special hardware, a long run or is nondeterministic, with the seed policy and the expected variance. The section is required even when it says that everything reproduces with fixed seeds.
+  \item The results tag: which Git tag and Zenodo version the paper's numbers came from (\cref{app:zenodo:versions}).
+  \item How to cite, and the license.
+\end{enumerate}
+
+\paragraph{The tool README} adds, after the results sections: how to install it, how to use it on the user's own input with one worked example, how to contribute, and who maintains it. A tool repository also follows the conventions of the open-source foundations we work with, for example the \href{https://github.com/LF-Decentralized-Trust/lab-proposals/blob/main/README.md}{LF Decentralized Trust Labs}: an Apache 2.0 \texttt{LICENSE}, a Developer Certificate of Origin sign-off on every commit (\texttt{git commit -s}), a \texttt{MAINTAINERS.md}, and a \texttt{SECURITY.md} saying how to report a vulnerability. A tool that meets them can be proposed as a lab after the TDK.
+
+\section{Docker}\label{app:code:docker}
+The easiest thing a reviewer can do is \texttt{docker run}; a computer science reviewer without Docker is not the reader we are writing for. The code template has two images:
+\begin{itemize}[noitemsep]
+  \item The \textbf{runtime image}, built by the \texttt{Dockerfile} at the root, whose entry point is \texttt{just}: \texttt{docker run --rm -v \$PWD/out:/out ghcr.io/<you>/<repo> reproduce} regenerates every result into \texttt{out/}, and \texttt{\dots{} fig-scalability} regenerates one. The image pins every dependency, so the result does not depend on the reviewer's machine.
+  \item The \textbf{development image}, described by \texttt{.devcontainer/devcontainer.json}: the toolchain, the language servers and the test runner, so that VS Code, GitHub Codespaces and the Docker development environment feature open the repository ready to work in, and so that we work in the same environment as you when we help.
+\end{itemize}
+A GitHub Actions workflow builds both on every push and publishes the runtime image to the GitHub Container Registry on every release, so the Zenodo version and the image carry the same tag. The README's first command points at the image of the results tag.
 
 \section{Behaviour-driven tests}
 For behaviour-driven development (BDD), write the expected behaviour as scenarios with \href{https://cucumber.io/}{Cucumber}; the scenarios then double as evaluation cases that a reviewer can read.
@@ -47,4 +60,3 @@ These transcripts can contain everything you pasted in, so keep them out of publ
   \item Plugins and skills: the Matt Pocock and poetato plugins for productivity; caveman, ponytail, squeez and TRON if you want to spare tokens. We highly recommend the \href{https://www.aihero.dev/skills-grill-me}{grill-me skill} (\href{https://claudemarketplaces.com/skills/mattpocock/skills/grill-me}{marketplace page}); see also \href{https://github.com/cursor/plugins/blob/main/pstack/skills/unslop/SKILL.md}{unslop} and \href{https://github.com/DietrichGebert/ponytail/blob/main/skills/ponytail/SKILL.md}{ponytail}.
   \item Do not overconstrain your model with excess instructions: bloated \texttt{AGENTS.md} files and memories degrade the performance of any model. Prefer skills with clear, broad descriptions of when to use them.
 \end{itemize}
-

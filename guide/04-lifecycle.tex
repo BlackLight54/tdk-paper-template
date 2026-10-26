@@ -1,9 +1,12 @@
 %----------------------------------------------------------------------------
 \chapter{The TDK lifecycle}\label{app:lifecycle}
 %----------------------------------------------------------------------------
-A TDK paper comes together in the phases of \cref{tab:lifecycle}, planned backwards from the deadlines of \cref{app:tdk}. Each step has an owner, a condition that says when it is done, and a pointer to what helps.
-A \gate{} is a point where you stop and wait for our approval: work after a gate builds on what the gate fixed, so skipping it is the most expensive mistake in the process.
-We track every student's progress in the same steps.
+A TDK paper comes together in the phases of \cref{tab:lifecycle}, planned backwards from the official dates of \cref{app:tdk}. Each step has an owner, a condition that says when it is done, and a pointer to what helps.
+We track every student's progress in the same steps, and the weekly consultation (\cref{app:consult}) is where each step is looked at.
+
+Three steps are \anchor{}s: the topic manifest, the spine and the full draft. An anchor is a one-page artefact that we agree on together and that everything after it is measured against. It is where your topic narrows: before the manifest, the topic is a direction; after the spine, it is a fixed set of claims with fixed names; after the full draft, it is a paper that only gets polished. Nothing stops at an anchor, but work that contradicts one is drift, and drift is the most expensive mistake in the process, because everything built on the old anchor has to be redone.
+
+Rows marked \official{} are the official steps of the faculty's TDK: the portal dates of \cref{app:tdk:dates} are fixed, and missing one ends the semester's TDK.
 
 \newcommand{\lcphase}[2]{\midrule\multicolumn{4}{l}{\textbf{#1}\quad\textit{#2}}\\\midrule}
 {\small
@@ -18,13 +21,14 @@ We track every student's progress in the same steps.
   \bottomrule
   \endlastfoot
   \lcphase{0. Topic}{before the semester}
-  Topic manifest \gate & both & One page: the problem, why it matters, the expected contribution; approved by us & TDK topic page \\
+  Topic manifest \anchor & both & One page: the problem, why it matters, the expected contribution; agreed with us & TDK topic page \\
   \lcphase{1. Setup}{first week}
   Identifiers & you & We have your Neptun code, GitHub username and e-mail & \cref{app:start:ids} \\
   Overleaf project and paper repository & we & You can edit in Overleaf and push to the synced GitHub repository & \cref{app:start:access} \\
   Repositories & you & The notes repository with \texttt{paper/} and \texttt{code/} as submodules, the code repository from the template, both advisors added to all three & \cref{app:start:access} \\
   Zotero & both & You are in the group, the connector is installed, and \texttt{bib/zotero.bib} is linked to the group through Overleaf's Zotero integration & \cref{app:start:access} \\
   Calendar and weekly slot & you & Neptun timetable synced, calendars shared, recurring Teams event set & \cref{app:start:calendar,app:consult} \\
+  Virtual machine & both & You asked us for a VM, and you can reach it over SSH & \cref{app:start:env} \\
   Context upload & we & Our papers, notes and earlier work on the topic are in \texttt{notes/} of your notes repository; we commit them once you add us & --- \\
   \lcphase{2. Research}{first half of September}
   Problem & you & The problem stated with a running example & \tplref{chap:intro} \\
@@ -35,28 +39,60 @@ We track every student's progress in the same steps.
   Proof-of-concept implementation & you & The core idea runs end to end on the running example; shortcuts and hard-coded parts are fine & \texttt{code/} \\
   \lcphase{3. Plan}{second half of September}
   Running example and validation plan & you & The running example is named (\texttt{\textbackslash exname}) and appears in every chapter's beats; how each claim will be verified or measured is written down & \cref{app:writing:spine} \\
-  Spine \gate & both & One page of claims, terminology and notation; approved by us & \cref{app:writing:spine} \\
-  Skeleton mind map & you & Every chapter broken into paragraph topic sentences with their evidence & \cref{app:writing:spine} \\
+  Spine \anchor & both & One page of claims, terminology and notation; agreed with us & \cref{app:writing:spine} \\
+  Skeleton mind map & you & Every chapter broken into paragraph topic sentences with their evidence & \cref{app:writing:spine}, \cref{fig:mindmap} \\
   Premortem & both & The paper imagined as rejected: the reviewers' likely reasons are written down, and the plan is changed to answer them & \cref{app:writing:spine} \\
-  Abstract & you & Seven sentences in Nature's structure, submitted on the TDK portal by 30 September & Abstract todo \\
+  \rowcolor{official}
+  Registration with the summary \official & you & Registered on the TDK portal with the one-page Hungarian and English summary, between 1 and 30 September & \cref{app:tdk:dates}; \cref{app:writing:abstract} \\
   Complete, testable implementation & you & By 30 September: every component of the approach exists, the evaluation workloads run on it, and a test suite runs, even if not every test passes yet & \tplref{chap:implementation} \\
   \lcphase{4. Draft}{October}
   Outline check & we & The skeleton fits the template's chapters and the review sheet & Chapter todos \\
   Proofs (a grind) & you & Every claim of the approach has its proof, mechanised proof, or measurement & \tplref{chap:approach} \\
   Tested implementation (a grind) & you & All tests pass, and \texttt{just reproduce} regenerates every result from the README; the release is ready for Zenodo & \cref{app:code:github} \\
   Scalability and robustness & you & Measurements beyond small examples, with setup and repetitions, and a robustness analysis that perturbs the system on purpose & \tplref{fig:scalability} and \tplref{tab:robustness} \\
-  Full draft \gate & both & Every chapter written; handed to us about ten days before the deadline & --- \\
-  \lcphase{5. Polish}{last ten days of October}
-  Labels and cross-references & you & Every reference uses \texttt{\textbackslash cref}; no undefined references & \cref{app:latex:cref} \\
-  Citations & you & Every claim from the literature is cited; bibliography entries complete; no warnings & \cref{app:latex:cite} \\
-  Acronyms & you & Every abbreviation goes through \texttt{\textbackslash ac} & \cref{app:latex:acro} \\
+  Full draft \anchor & both & Every chapter written; handed to us about ten days before the deadline & --- \\
+  \lcphase{5. Polish}{the last ten days of October; see \cref{tab:polish}}
   Advisor review and todos & both & Our comments are resolved; the list of todos is empty & \texttt{\textbackslash listoftodos} \\
-  Review sheet hill climb & you & You scored the paper on criteria A--E yourself, fixed the weakest, and repeated until nothing cheap is left & Review sheet in \texttt{docs/} \\
-  Code archive & you & The code is on Zenodo and cited by its version DOI & \cref{app:zenodo} \\
-  Submission & you & The AI declaration, after the bibliography, is filled in and signed, the PDF is 30--35 pages, and it is uploaded by the paper deadline in early November & \cref{app:tdk:form} \\
-  \lcphase{6. Conference}{November}
+  Review sheet hill climb & you & You scored the paper on criteria A--E yourself, fixed the weakest, and repeated until nothing cheap is left & Review sheet in \texttt{docs/}; \cref{app:tdk:sheet} \\
+  Last week's checklist & you & Every row of \cref{tab:polish} is checked; \texttt{make check} is clean & \cref{tab:polish} \\
+  Code archive & you & The code is on Zenodo and cited by its concept DOI; the tag the results came from is named in the paper & \cref{app:zenodo} \\
+  \rowcolor{official}
+  Paper upload \official & you & The AI declaration, after the bibliography, is filled in, the main text is 30--35 pages, and the PDF is uploaded on the portal by 1 November & \cref{app:tdk:form} \\
+  \lcphase{6. After the deadline}{2--16 November, while the reviewers read}
+  Code polish & you & The README meets \cref{app:code:readme}, the Docker images build (\cref{app:code:docker}), and a new Zenodo version is published; the results tag named in the paper is untouched & \cref{app:zenodo:versions} \\
   Talk & you & Slides ready and rehearsed with us at least once before the conference & --- \\
+  \lcphase{7. Conference}{18 November}
+  \rowcolor{official}
+  Conference \official & you & Fifteen minutes of talk and five of questions in your section; the awards are the same evening & \cref{app:tdk:dates} \\
   After the TDK & both & Decided together: OTDK, a conference paper, or a thesis built on the work & --- \\
 \end{xltabular}
 }
-\advisortodo{The phases, timing and done-when conditions refine the TDK task matrix of the 2026 cohort; confirm them.}
+
+\section{Last week's checklist}\label{app:lifecycle:polish}
+The polish phase is a checklist, not a phase of writing: if a row needs more than an hour, it belongs to the draft phase and the draft was not full. \texttt{make check} runs the mechanical rows on the build log; the rest you check by reading.
+{\small
+\begin{xltabular}{\linewidth}{>{\raggedright\arraybackslash}p{0.26\linewidth} X}
+  \caption{Last week's checklist. The mechanical rows are also checked by \texttt{make check}.}\label{tab:polish}\\
+  \toprule \textbf{Check} & \textbf{Done when} \\ \midrule \endfirsthead
+  \toprule \textbf{Check} & \textbf{Done when} \\ \midrule \endhead
+  \bottomrule \endlastfoot
+  Page count & The main text, from the first page of \tplref{chap:intro} to the last page of \tplref{chap:conclusion}, is 30--35 pages; appendices, the bibliography, the abstract and the title page do not count. \texttt{make check} prints it. \\
+  Build log & No undefined or multiply defined labels, no undefined citations, no overfull boxes, no missing fonts or files. \\
+  Cross-references & Every reference uses \texttt{\textbackslash cref}; every figure, table, listing and equation is referenced from the text (\cref{app:latex:cref}). \\
+  Figures are vector & Every figure is TikZ in the paper repository, or has a written reason not to be; a draw.io draft was redrawn or exported as PDF only as a last resort (\cref{app:writing:figure}). \\
+  Axes and legends & Every axis has a label with a unit; every legend entry names a thing the text also names. \\
+  Captions & Every caption explains the figure in the sense of \cref{app:writing:captions}: a claim first, then context. \\
+  Readable in print & No text in a figure is below 10\,pt when printed; colour pairs are distinguishable in greyscale. \\
+  Tables & Tables fit the text width, numbers are right-aligned with the same precision in a column, units are in the header. \\
+  Spine drift & Every term, symbol and claim matches the spine; one name per concept across chapters. \\
+  Citations & Every claim from the literature is cited; bibliography entries have author, title, venue and year; DOIs where they exist; capitalisation protected with braces (\cref{app:latex:cite}). \\
+  Acronyms & Every abbreviation goes through \texttt{\textbackslash ac}, and the list of acronyms contains only those used (\cref{app:latex:acro}). \\
+  Front and back matter & Title page variables, abstract in both languages, the AI declaration, acknowledgements and the appendices are filled in; no \enquote{TODO} remains in the PDF. \\
+  Notes removed & \texttt{final} is set in the document class options, \texttt{\textbackslash listoftodos} is removed, and no beat, todo or advisor note prints (\cref{app:latex:todo}). \\
+  Guide removed & The guide is deleted from \texttt{thesis.tex}. \\
+  PDF & Bookmarks and metadata are correct, every link resolves, and the Zenodo DOI opens the record. \\
+  Spelling and language & A spell check in the paper's language passed; British or American spelling is consistent. \\
+  Reproducibility & \texttt{docker run \dots{} reproduce} regenerates every figure and table from the results tag named in the paper (\cref{app:code:readme}). \\
+  Review sheet & You scored the paper on criteria A--E yourself, and nothing cheap is left to fix (\cref{app:tdk:sheet}). \\
+\end{xltabular}
+}
