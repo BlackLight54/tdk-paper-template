@@ -3,11 +3,11 @@
 local C = require("lintcore")
 local rule, fail, warn, note = C.rule, C.fail, C.warn, C.note
 
-rule("chktex", "tools", false, "chktex: typographic slips in the sources (dashes, quotes, spacing before citations, \\ldots, maths in text)", function()
+rule("chktex", "tools", "advice", "always", "chktex: typographic slips in the sources (dashes, quotes, spacing before citations, \\ldots, maths in text)", function()
   if not C.have("chktex") then warn(nil, nil, "chktex not installed: skipped"); return end
   local n = 0
   -- off: 1 command terminated with space, 3 \( \) advice, 8 dash length, 13 \@ after a capital, 24 space before \label (the template puts it on its own line), 36 brace spacing, 44 user regex, 46 \( \)
-  local out = C.run("chktex -q -I0 -n1 -n3 -n8 -n13 -n24 -n36 -n44 -n46 -f '%f:%l:%n:%m\n' " .. table.concat(C.MAIN, " ") .. " content/00-abstract.tex") or ""
+  local out = C.run("chktex -q -I0 -n1 -n3 -n8 -n13 -n24 -n36 -n44 -n46 -f '%f:%l:%n:%m\n' " .. table.concat(C.MAIN, " ") .. " " .. (C.FILES.abstract or "")) or ""
   for l in out:gmatch("[^\n]+") do
     local f, ln, code, msg = l:match("^([^:]+):(%d+):(%d+):(.*)$")
     if f and code == "2" and (C.lines(f)[tonumber(ln)] or ""):match("&") then f = nil end -- ~ before \ref inside table cells
@@ -16,7 +16,7 @@ rule("chktex", "tools", false, "chktex: typographic slips in the sources (dashes
   return string.format("findings=%d", n)
 end)
 
-rule("lacheck", "tools", false, "lacheck: unmatched braces and environments, missing \\@ after capitals, double spaces", function()
+rule("lacheck", "tools", "advice", "always", "lacheck: unmatched braces and environments, missing \\@ after capitals, double spaces", function()
   if not C.have("lacheck") then warn(nil, nil, "lacheck not installed: skipped"); return end
   local n = 0
   for _, f in ipairs(C.MAIN) do
@@ -30,7 +30,7 @@ rule("lacheck", "tools", false, "lacheck: unmatched braces and environments, mis
   return string.format("findings=%d", n)
 end)
 
-rule("words", "tools", false, "texcount: words per chapter and in the abstract; there are no per-chapter budgets, this is for seeing where the paper is", function()
+rule("words", "tools", "count", "polish", "texcount: words per chapter and in the abstract; there are no per-chapter budgets, this is for seeing where the paper is", function()
   if not C.have("texcount") then warn(nil, nil, "texcount not installed: skipped"); return end
   local parts, total = {}, 0
   for _, f in ipairs(C.MAIN) do
@@ -40,19 +40,19 @@ rule("words", "tools", false, "texcount: words per chapter and in the abstract; 
     parts[#parts + 1] = f:match("content/%d%d%-([^.]+)") .. "=" .. w
   end
   -- the English abstract: the text after \chapter*{Abstract}, with the todo and the bracketed placeholders removed
-  local abs = C.readfile("content/00-abstract.tex") or ""
+  local abs = C.readfile(C.FILES.abstract or "content/00-abstract.tex") or ""
   local eng = abs:match("\\chapter%*{Abstract}(.*)$") or ""
   eng = eng:gsub("\\todo%b[]%b{}", ""):gsub("\\todo%b{}", ""):gsub("%%[^\n]*", ""):gsub("\\vfill.*$", "")
   local placeholders = C.count(eng, "%[%d ")
   local words = 0
   for _ in C.prose(eng):gmatch("%a[%a%-']+") do words = words + 1 end
-  if placeholders > 0 then warn("content/00-abstract.tex", nil, placeholders .. " of the seven placeholders of the abstract are still there")
-  elseif words > 300 then warn("content/00-abstract.tex", nil, string.format("the abstract is %d words; Nature's summary paragraph is at most 300", words))
-  elseif words < 150 then warn("content/00-abstract.tex", nil, string.format("the abstract is %d words; aim for 190-250", words)) end
+  if placeholders > 0 then warn(C.FILES.abstract, nil, placeholders .. " of the seven placeholders of the abstract are still there")
+  elseif words > 300 then warn(C.FILES.abstract, nil, string.format("the abstract is %d words; Nature's summary paragraph is at most 300", words))
+  elseif words < 150 then warn(C.FILES.abstract, nil, string.format("the abstract is %d words; aim for 190-250", words)) end
   return string.format("main=%d abstract=%d %s", total, words, table.concat(parts, " "))
 end)
 
-rule("checkcites", "tools", false, "checkcites: bibliography entries never cited (your reading list that has not reached the paper) and citations with no entry", function()
+rule("checkcites", "tools", "count", "always", "checkcites: bibliography entries never cited (your reading list that has not reached the paper) and citations with no entry", function()
   if not C.have("checkcites") then warn(nil, nil, "checkcites not installed: skipped"); return end
   local aux = C.bpath(C.opts.doc .. ".aux")
   if not C.exists(aux) then warn(nil, nil, "no " .. aux .. ": build first"); return end
@@ -69,7 +69,7 @@ rule("checkcites", "tools", false, "checkcites: bibliography entries never cited
   return string.format("unused=%d undefined=%d", unused, undefined)
 end)
 
-rule("bibtex-log", "tools", false, "the BibTeX log: empty fields and other warnings BibTeX prints while building the bibliography", function()
+rule("bibtex-log", "tools", "count", "always", "the BibTeX log: empty fields and other warnings BibTeX prints while building the bibliography", function()
   local blg = C.bpath(C.opts.doc .. ".blg")
   if not C.exists(blg) then warn(nil, nil, "no " .. blg .. ": build first"); return end
   local n = 0
@@ -80,7 +80,7 @@ rule("bibtex-log", "tools", false, "the BibTeX log: empty fields and other warni
   return string.format("warnings=%d", n)
 end)
 
-rule("spelling", "tools", false, "hunspell on the detexed chapters: unknown words, and whether British and American spellings are mixed", function()
+rule("spelling", "tools", "advice", "always", "hunspell on the detexed chapters: unknown words, and whether British and American spellings are mixed", function()
   if not (C.have("hunspell") and C.have("detex")) then warn(nil, nil, "hunspell or detex not installed: skipped"); return end
   local dicts = C.run("hunspell -D 2>&1 | grep -E '/en_(GB|US)$' | sed 's#.*/##' | sort -u") or ""
   local have_gb, have_us = dicts:match("en_GB") ~= nil, dicts:match("en_US") ~= nil
@@ -117,7 +117,7 @@ rule("spelling", "tools", false, "hunspell on the detexed chapters: unknown word
   return string.format("unknown=%d american=%d british=%d (add project words to scripts/words.txt)", #order, #american, #british)
 end)
 
-rule("links", "tools", false, "every \\url and \\href answers over the network; skipped when LINT_OFFLINE is set", function()
+rule("links", "tools", "advice", "always", "every \\url and \\href answers over the network; skipped when LINT_OFFLINE is set", function()
   if os.getenv("LINT_OFFLINE") or not C.have("curl") then note(nil, nil, "offline: skipped"); return end
   local urls, seen = {}, {}
   C.each_line(C.MAIN, function(f, n, l)

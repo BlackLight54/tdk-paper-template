@@ -1,21 +1,16 @@
 #!/usr/bin/env texlua
 -- Lint for the TDK paper: one rule per subcommand, so CI shows them one by one.
 --
---   texlua scripts/lint.lua <rule> [--dir <builddir>] [--doc <jobname>] [--profile tdk|thesis]
---   texlua scripts/lint.lua all | source | pdf | tools     a family, gates first
---   texlua scripts/lint.lua list                           the rules and what each checks
+--   texlua scripts/lint.lua <rule>... [--dir <builddir>] [--doc <jobname>] [--profile tdk|thesis] [--phase <p>]
+--   texlua scripts/lint.lua all | source | pdf | tools | overleaf     a family, in order
+--   texlua scripts/lint.lua list                                      the rules, their severity and phase
+--   texlua scripts/lint.lua overleaf --tex > lint-checks.tex          the Checks page and the package warnings
 --
--- Families:
---   source  the LaTeX sources and the build log: the template's structures, the argument's
---           traceability, the guide's conventions, and the burn-down counts
---   pdf     the output PDF: the form requirements of the call (or, with --profile thesis, of the
---           faculty's thesis guide), checked on the result so they hold whatever the sources are
---   tools   chktex, lacheck, texcount, checkcites, the BibTeX log, hunspell, link checking
---
--- Findings print as "file:line: message"; under GitHub Actions as annotations, and each rule
--- appends a row to the job summary. Exit status is 1 when a gate fails; report rules never fail.
+-- Severity: check (fails once its phase is reached), advice (warns, never fails), count (numbers).
+-- Phase: the manual phase from \newcommand{\lintphase}{plan|draft|polish|final} in thesis.tex;
+-- a check whose phase is not reached yet only reports. Chapters are found by their labels
+-- (chap:intro, ...), not by file name. "% lint-ignore: <rule> <reason>" silences one finding.
 -- Needs texlua (TeX Live); the pdf family needs poppler-utils, the tools family what it names.
--- The profile also comes from LINT_PROFILE; LINT_OFFLINE skips the link check.
 
 package.path = "scripts/lint/?.lua;" .. package.path
 local C = require("lintcore")
@@ -27,35 +22,89 @@ do
     if arg[i] == "--dir" then C.opts.dir = arg[i + 1]; i = i + 2
     elseif arg[i] == "--doc" then C.opts.doc = arg[i + 1]; i = i + 2
     elseif arg[i] == "--profile" then C.opts.profile = arg[i + 1]; i = i + 2
+    elseif arg[i] == "--phase" then C.opts.phase = arg[i + 1]; i = i + 2
+    elseif arg[i] == "--tex" then C.opts.tex = true; i = i + 1
     else args[#args + 1] = arg[i]; i = i + 1 end
   end
 end
 require("rules-source"); require("rules-pdf"); require("rules-tools")
 
+-- the rules the Overleaf hook runs on every compile: the sources, and the page count from this
+-- compile's aux files; not the log (Overleaf shows it), not the PDF (it does not exist yet)
+local OVERLEAF_SKIP = { build = true, overfull = true, checkcites = true, ["bibtex-log"] = true, links = true, spelling = true, burndown = true }
+
 local cmd = args[1]
 if not cmd or cmd == "list" then
-  io.write("rules (gates fail the build; the rest report):\n")
+  io.write(string.format("phase: %s (from \\lintphase in thesis.tex)\n", C.phase()))
+  io.write("rules: severity check fails once its phase is reached; advice warns; count reports numbers\n")
   local fam
   for _, n in ipairs(C.ORDER) do
     local r = C.RULES[n]
     if r.family ~= fam then fam = r.family; io.write("\n[" .. fam .. "]\n") end
-    io.write(string.format("  %-13s %s  %s\n", n, r.gate and "gate  " or "report", r.desc))
+    io.write(string.format("  %-13s %-7s %-7s %s\n", n, r.severity, r.phase == "always" and "" or r.phase, r.desc))
   end
   os.exit(0)
 end
 local todo = {}
 if cmd == "all" then for _, n in ipairs(C.ORDER) do todo[#todo + 1] = n end
+elseif cmd == "overleaf" then for _, n in ipairs(C.ORDER) do if C.RULES[n].family ~= "pdf" and not OVERLEAF_SKIP[n] then todo[#todo + 1] = n end end
 elseif cmd == "source" or cmd == "pdf" or cmd == "tools" then for _, n in ipairs(C.ORDER) do if C.RULES[n].family == cmd then todo[#todo + 1] = n end end
 else for _, n in ipairs(args) do todo[#todo + 1] = n end end
-if #todo > 1 then C.summary_header("Lint: " .. cmd .. " (profile " .. C.opts.profile .. ")") end
+if #todo > 1 then C.summary_header("Lint: " .. cmd .. " (phase " .. C.phase() .. ", profile " .. C.opts.profile .. ")") end
 local allok = true
 for _, name in ipairs(todo) do
   local r = C.RULES[name]
   if not r then io.stderr:write("unknown rule " .. name .. "; try: texlua scripts/lint.lua list\n"); os.exit(2) end
-  C.findings = {}
+  C.findings = {}; C.ignored = 0; C.current_rule = name
   local ok_call, counts = pcall(r.fn)
   if not ok_call then C.fail(nil, nil, "the rule itself failed: " .. tostring(counts)); counts = nil end
-  local ok = C.report(name, r.gate, counts)
-  if r.gate and not ok then allok = false end
+  if not C.report(name, r, counts) then allok = false end
+end
+
+-- the Checks page for the draft PDF, and package warnings for the log panel
+if C.opts.tex then
+  local function esc(s)
+    s = tostring(s or "")
+    s = s:gsub("\\", "\1"):gsub("([#$%%&_{}])", "\\%1"):gsub("~", "\\textasciitilde{}"):gsub("%^", "\\textasciicircum{}"):gsub("\1", "\\textbackslash{}")
+    return s
+  end
+  local out = {}
+  local function w(s) out[#out + 1] = s end
+  w("% generated by scripts/lint.lua --tex; do not edit")
+  w("\\chapter*{Checks}\\addcontentsline{toc}{chapter}{Checks}")
+  w(string.format("\\noindent Phase \\textbf{%s}, set by \\texttt{\\textbackslash lintphase} in \\texttt{thesis.tex}; generated %s by \\texttt{texlua scripts/lint.lua overleaf}. A check whose phase is not reached yet only reports. The build log's own warnings and the PDF rules are not here: Overleaf shows the first, CI runs the second. \\texttt{\\%% lint-ignore: <rule> <reason>} on a line silences one finding.\\par\\medskip", esc(C.phase()), os.date("%Y-%m-%d %H:%M")))
+  w("{\\small\\begin{xltabular}{\\linewidth}{>{\\raggedright\\arraybackslash}p{0.16\\linewidth} >{\\raggedright\\arraybackslash}p{0.17\\linewidth} X}")
+  w("\\toprule \\textbf{Rule} & \\textbf{Status} & \\textbf{Findings} \\\\ \\midrule \\endfirsthead")
+  w("\\toprule \\textbf{Rule} & \\textbf{Status} & \\textbf{Findings} \\\\ \\midrule \\endhead \\bottomrule \\endlastfoot")
+  for _, res in ipairs(C.results) do
+    local colour = ({ FAIL = "red!70!black", ok = "green!45!black", advice = "orange!80!black" })[res.status] or "black"
+    local shown, extra = {}, 0
+    for _, f in ipairs(res.findings) do
+      if f.level ~= "notice" then
+        if #shown < 3 then
+          local loc = f.file and (esc(f.file) .. (f.line and (":" .. f.line) or "") .. ": ") or ""
+          shown[#shown + 1] = string.format("\\textcolor{%s}{%s}\\path{%s}%s", f.level == "error" and "red!70!black" or "orange!80!black", f.level == "error" and "\\textbullet~" or "\\textopenbullet~", loc:gsub("\\path{}", ""), esc(f.msg:sub(1, 160)))
+        else extra = extra + 1 end
+      end
+    end
+    local findings = table.concat(shown, "\\newline ")
+    if extra > 0 then findings = findings .. string.format("\\newline \\ldots{} and %d more", extra) end
+    if res.counts and res.severity == "count" then findings = esc(res.counts) end
+    if res.ignored > 0 then findings = findings .. string.format("\\newline (%d ignored)", res.ignored) end
+    w(string.format("%s & \\textcolor{%s}{%s}%s & %s \\\\", esc(res.rule), colour, esc(res.status), (res.severity == "check" and res.phase ~= "always") and (" \\footnotesize(" .. esc(res.phase) .. ")") or "", findings))
+  end
+  w("\\end{xltabular}}")
+  -- package warnings for check findings only
+  for _, res in ipairs(C.results) do
+    if res.severity == "check" and C.phase_reached(res.phase) then
+      for _, f in ipairs(res.findings) do
+        if f.level == "error" then
+          local loc = f.file and (f.file .. (f.line and (":" .. f.line) or "") .. ": ") or ""
+          w(string.format("\\PackageWarningNoLine{tdk-lint}{%s: %s%s}", res.rule, loc, (f.msg:gsub("[%%#{}\\]", " "):gsub("\n", " "))))
+        end
+      end
+    end
+  end
+  io.write(table.concat(out, "\n"), "\n")
 end
 os.exit(allok and 0 or 1)

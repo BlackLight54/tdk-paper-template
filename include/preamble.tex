@@ -217,6 +217,13 @@
 \definecolor{weblinkcolor}{RGB}{31,86,156}
 \newcommand{\weblink}[2]{\href{#1}{\textcolor{weblinkcolor}{\uline{#2}}}}
 
+% The Checks page of the draft: on every compile, the lint runs on the sources (shell escape, which
+% Overleaf and the Makefile enable) and writes lint-checks.tex, a table of rules and findings that is
+% input after the list of todos; its check findings also come out as package warnings in the log.
+% Without shell escape nothing is written and nothing is input. \lintfalse turns it off.
+\newif\iflint\linttrue
+\newcommand{\lintchecks}{\iflint\immediate\write18{texlua scripts/lint.lua overleaf --tex > lint-checks.tex}\InputIfFileExists{lint-checks.tex}{}{}\fi}
+
 % Marks a step where the student stops for the advisors' approval (lifecycle chapter of the guide).
 \newcommand{\anchor}{\textcolor{red!70!black}{\textsc{anchor}}}
 \definecolor{official}{RGB}{255,243,205}
@@ -247,7 +254,7 @@
 \setabbreviationstyle{long-short}          % first use "long form (SHORT)", then "SHORT"
 \glssetcategoryattribute{abbreviation}{nohyperfirst}{true}
 \renewcommand*{\glsnamefont}[1]{\textbf{#1}} % the first column in bold, as a table head would be
-\setlength{\glsdescwidth}{0.74\linewidth}
+\setlength{\glsdescwidth}{0.62\linewidth} % with the name column the tables come to about three quarters of the text width, centred
 \makenoidxglossaries
 \loadglsentries{content/glossary}
 % The three lists on one page, as booktabs tables with their own column heads, each with a sentence

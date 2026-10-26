@@ -56,7 +56,7 @@ local function is_serif(fam)
 end
 local function is_times(fam) fam = fam:lower(); return fam:find("times", 1, true) or fam:find("termes", 1, true) or fam:find("nimbus", 1, true) or fam:find("newtx", 1, true) or fam:find("liberation serif", 1, true) end
 
-rule("pdf-file", "pdf", true, "the PDF exists, is A4, under the faculty's 15 MB, with title and author metadata, all fonts embedded and none Type 3", function()
+rule("pdf-file", "pdf", "check", "polish", "the PDF exists, is A4, under the faculty's 15 MB, with title and author metadata, all fonts embedded and none Type 3", function()
   if not C.exists(pdf()) then fail(nil, nil, "no " .. pdf() .. ": build first"); return end
   if not C.have("pdfinfo") then warn(nil, nil, "pdfinfo not installed (poppler-utils): skipped"); return end
   local info = C.run(string.format("pdfinfo %q", pdf())) or ""
@@ -84,7 +84,7 @@ rule("pdf-file", "pdf", true, "the PDF exists, is A4, under the faculty's 15 MB,
   return string.format("pages=%d size=%.1fMB", pages, size / 1048576)
 end)
 
-rule("pdf-font", "pdf", true, "the body font is a serif at 12 pt (Times New Roman or another readable serif, the call says)", function()
+rule("pdf-font", "pdf", "check", "polish", "the body font is a serif at 12 pt (Times New Roman or another readable serif, the call says)", function()
   local d = doc(); if not d then warn(nil, nil, "pdftohtml not installed: skipped"); return end
   local p = profile()
   local bf = body_font(d); if not bf then fail(nil, nil, "no text found in the PDF"); return end
@@ -94,7 +94,7 @@ rule("pdf-font", "pdf", true, "the body font is a serif at 12 pt (Times New Roma
   return string.format("font=%s size=%dpt", bf.family, bf.size)
 end)
 
-rule("pdf-spacing", "pdf", true, "line spacing of the body text is single (the call) or one-and-a-half (a thesis), measured from the line pitch", function()
+rule("pdf-spacing", "pdf", "check", "polish", "line spacing of the body text is single (the call) or one-and-a-half (a thesis), measured from the line pitch", function()
   local d = doc(); if not d then warn(nil, nil, "pdftohtml not installed: skipped"); return end
   local p = profile(); local bf = body_font(d); if not bf then return end
   local deltas = {}
@@ -115,7 +115,7 @@ rule("pdf-spacing", "pdf", true, "line spacing of the body text is single (the c
   return string.format("pitch=%.1fpt ratio=%.2f", pitch, ratio)
 end)
 
-rule("pdf-margins", "pdf", true, "margins on every text page are within the call's 1.5-3.5 cm (a thesis: 2.5 cm plus binding), measured from the text", function()
+rule("pdf-margins", "pdf", "check", "polish", "margins on every text page are within the call's 1.5-3.5 cm (a thesis: 2.5 cm plus binding), measured from the text", function()
   local d = doc(); if not d then warn(nil, nil, "pdftohtml not installed: skipped"); return end
   local p = profile(); local bf = body_font(d); if not bf then return end
   local worst = { left = 1e9, right = 1e9, top = 1e9, bottom = 1e9 }; local worstpage = {}
@@ -147,7 +147,7 @@ rule("pdf-margins", "pdf", true, "margins on every text page are within the call
   return string.format("min l/r/t/b=%.0f/%.0f/%.0f/%.0f mm", worst.left, worst.right, worst.top, worst.bottom)
 end)
 
-rule("pdf-smalltext", "pdf", false, "text below 10 pt, which the call forbids in figures and tables (labels included); listings and footnotes show up here too", function()
+rule("pdf-smalltext", "pdf", "advice", "polish", "text below 10 pt, which the call forbids in figures and tables (labels included); listings and footnotes show up here too", function()
   local d = doc(); if not d then warn(nil, nil, "pdftohtml not installed: skipped"); return end
   local perpage, total, smallest = {}, 0, 99
   for _, page in ipairs(d.pages) do
@@ -167,7 +167,7 @@ rule("pdf-smalltext", "pdf", false, "text below 10 pt, which the call forbids in
   return string.format("runs<10pt=%d pages=%d", total, #pages)
 end)
 
-rule("pdf-pages", "pdf", true, "main text pages counted from the PDF outline, first chapter to the page before the back matter: 30-35 for the TDK", function()
+rule("pdf-pages", "pdf", "check", "final", "main text pages counted from the PDF outline, first chapter to the page before the back matter: 30-35 for the TDK", function()
   local d = doc(); if not d then warn(nil, nil, "pdftohtml not installed: skipped"); return end
   local p = profile()
   local start, stop
@@ -186,7 +186,7 @@ rule("pdf-pages", "pdf", true, "main text pages counted from the PDF outline, fi
   return string.format("pages=%d", n)
 end)
 
-rule("pdf-parts", "pdf", true, "the parts the form requires are in the PDF: abstracts in both languages, the AI declaration, the table of contents; and the parts it forbids are not", function()
+rule("pdf-parts", "pdf", "check", "final", "the parts the form requires are in the PDF: abstracts in both languages, the AI declaration, the table of contents; and the parts it forbids are not", function()
   if not C.have("pdftotext") then warn(nil, nil, "pdftotext not installed: skipped"); return end
   local p = profile()
   local text = C.run(string.format("pdftotext -layout %q -", pdf())) or ""
