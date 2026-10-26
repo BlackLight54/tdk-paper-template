@@ -13,9 +13,9 @@ Use GitHub for:
 \end{itemize}
 In the code repository, run the recurring commands (build, test, reproduce the measurements) through \href{https://github.com/casey/just}{just}, a command runner: one \texttt{justfile} lists them, and \texttt{just reproduce} is all a reviewer has to know.
 
-\paragraph{Recommended structure.} One top-level repository with the paper and the code as submodules, which keeps notes, paper and code apart while one clone holds them all:
+\paragraph{Recommended structure.} One notes repository at the top level, with the paper and the code as submodules, which keeps notes, paper and code apart while one clone holds them all:
 \begin{itemize}[noitemsep]
-  \item top-level repository: \texttt{README.md} linking the pieces; \texttt{notes/} for notes, drawings and consultation summaries; \texttt{slides/} for presentations;
+  \item notes repository: \texttt{README.md} linking the pieces; \texttt{notes/} for notes, drawings and consultation summaries; \texttt{slides/} for presentations;
   \begin{itemize}[noitemsep]
     \item \texttt{paper/}: submodule, the Overleaf-synced paper repository;
     \item \texttt{code/}: submodule, the code repository, with the code in \texttt{src/} and \texttt{tests/}, the measurement scripts and their raw results in \texttt{experiments/}, and \texttt{README.md}, \texttt{LICENSE}, \texttt{.zenodo.json}, \texttt{CITATION.cff} and the \texttt{justfile} at its root.
