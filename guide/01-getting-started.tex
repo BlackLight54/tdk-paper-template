@@ -21,8 +21,13 @@ Work through the steps below in order in your first week. Each says who does it.
 
 \paragraph{Paper repository.} \emph{We} connect the Overleaf project to a new GitHub repository with Overleaf's GitHub integration. Only the owner of the Overleaf project can use this Pro feature, and only with a fresh repository, so we create it and add you. Clone it to your machine: you can then compile locally, use every GitHub feature, and work with agent-based AI tools on it (\cref{app:code:ai}). Overleaf and GitHub stay in sync through the GitHub dialog in Overleaf's menu.
 
-\paragraph{Code repository.} \emph{You} create the repository for your code from our template repository and add both of us. The paper repository is included in it, so one clone holds everything.
-\advisortodo{Link the code repository template once it exists, and decide where notes and drawings live: a notes folder in the code repository or a separate notes repository.}
+\paragraph{Repositories.} Your work lives in one top-level repository that holds everything except the paper and the code: notes, drawings, consultation summaries, presentations. It includes the other two as Git submodules (\cref{app:code:github}):
+\begin{itemize}[noitemsep]
+  \item \texttt{paper/}: the Overleaf-synced paper repository, which \emph{we} create;
+  \item \texttt{code/}: the code repository, which \emph{you} create from our template, with everything Zenodo needs to archive it (\cref{app:zenodo}).
+\end{itemize}
+\emph{You} create the top-level repository, add the two submodules, and add both of us to all three. Clone it with \texttt{git clone --recurse-submodules}, so that one clone holds everything.
+\advisortodo{Link the templates of the top-level and the code repository once they exist.}
 
 \paragraph{Zotero group.} \emph{We} add you to our Zotero group, where we collect the literature of the topic. \emph{You} install \href{https://www.zotero.org/}{Zotero} with its browser connector, save every source you read into the group library, and export the collection to \texttt{bib/references.bib} (the Better BibTeX plugin can keep the file up to date automatically).
 \advisortodo{Add the Zotero group link, and confirm the export setup (Better BibTeX auto-export into the paper repository).}
@@ -55,10 +60,12 @@ Work through the steps below in order in your first week. Each says who does it.
 \section{Development environment}\label{app:start:env}
 \paragraph{Operating system.} Use Linux on bare metal if you can. We recommend \href{https://omarchy.org/}{Omarchy}, an easy-to-use distribution set up for development; ask Martin for his setup. Ubuntu and Pop!\_OS are good options too. Omarchy has a built-in Windows virtual machine; dual boot if you occasionally need Windows on bare metal. Use the Windows Subsystem for Linux (WSL) only as a last resort, if you really have to use Windows every day for a pressing reason, such as video editing.
 
-\paragraph{Virtual machine.} We can give you a virtual machine with 8 cores and 16\,GB of memory in the BME cloud. \advisortodo{link bme cloud}Use it to host your editor and repositories remotely, and to run AI agents that keep working while your laptop is closed. Reach it through SSH, RDP, VS Code Remote, or Tailscale, or run Claude Code, Codex, T3 Code or GitKraken Kepler on it directly.
-\advisortodo{Describe how a student requests the VM (whom to ask, what to send).}
+\paragraph{Editor.} We use \href{https://code.visualstudio.com/}{Visual Studio Code}. Useful extensions: LaTeX Workshop to build the paper locally, Remote - SSH to work on the VM, GitHub Pull Requests, the Claude Code and Codex extensions, and the language extensions of your code.
 
-\paragraph{Workspace layout.} Keep one clone of the code repository, with the paper repository inside it (\cref{app:code:github}), on your machine or on the VM. Open it in one editor window with the \LaTeX{} build and an AI agent working in the same folder, so that code, paper and notes are edited, versioned and searched together.
+\paragraph{Virtual machine.} We can give you a virtual machine with 8 cores and 16\,GB of memory in the BME cloud. Use it to host your editor and repositories remotely, and to run AI agents that keep working while your laptop is closed. Reach it through SSH, RDP, VS Code Remote, or Tailscale, or run Claude Code, Codex, T3 Code or GitKraken Kepler on it directly.
+\advisortodo{Describe how a student requests the VM (whom to ask, what to send), and link the BME cloud.}
+
+\paragraph{Workspace layout.} Keep one clone of the top-level repository, with its \texttt{paper/} and \texttt{code/} submodules (\cref{app:code:github}), on your machine or on the VM. Open it in one VS Code window with the \LaTeX{} build and an AI agent working in the same folder, so that code, paper and notes are edited, versioned and searched together.
 \advisortodo{Draft for the empty \enquote{Munkakörnyezet elrendezése} note; confirm or rewrite.}
 
 \paragraph{Do not overdo it.} Do not spend too much time on your environment setup. We learned this the hard way.

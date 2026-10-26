@@ -11,19 +11,20 @@ Use GitHub for:
   \item submitting code anonymously for double-blind review, through \href{https://anonymous.4open.science/}{Anonymous GitHub};
   \item archiving with a DOI on Zenodo (\cref{app:zenodo}).
 \end{itemize}
-Run the repository's recurring commands (build, test, reproduce the measurements) through \href{https://github.com/casey/just}{just}, a command runner: one \texttt{justfile} lists them, and \texttt{just reproduce} is all a reviewer has to know.
+In the code repository, run the recurring commands (build, test, reproduce the measurements) through \href{https://github.com/casey/just}{just}, a command runner: one \texttt{justfile} lists them, and \texttt{just reproduce} is all a reviewer has to know.
 
-\paragraph{Recommended structure.} A layout that keeps paper, code and evidence apart:
+\paragraph{Recommended structure.} One top-level repository with the paper and the code as submodules, which keeps notes, paper and code apart while one clone holds them all:
 \begin{itemize}[noitemsep]
-  \item \texttt{paper/}: the Overleaf-synced paper repository, included in the code repository;
-  \item \texttt{src/} and \texttt{tests/}: the code;
-  \item \texttt{experiments/}: measurement scripts and their raw results;
-  \item \texttt{notes/}: notes, drawings and consultation summaries;
-  \item \texttt{README.md}, \texttt{LICENSE}, \texttt{.zenodo.json}, \texttt{justfile} at the root.
+  \item top-level repository: \texttt{README.md} linking the pieces; \texttt{notes/} for notes, drawings and consultation summaries; \texttt{slides/} for presentations;
+  \begin{itemize}[noitemsep]
+    \item \texttt{paper/}: submodule, the Overleaf-synced paper repository;
+    \item \texttt{code/}: submodule, the code repository, with the code in \texttt{src/} and \texttt{tests/}, the measurement scripts and their raw results in \texttt{experiments/}, and \texttt{README.md}, \texttt{LICENSE}, \texttt{.zenodo.json}, \texttt{CITATION.cff} and the \texttt{justfile} at its root.
+  \end{itemize}
 \end{itemize}
+Zenodo archives the code repository on its own, so each release holds exactly the code and data behind the paper's results.
 
-\paragraph{README structure.} What the project is, in two sentences; how to install it; how to reproduce each result of the paper, one command per table or figure; how to cite it (the Zenodo DOI badge); the license.
-\advisortodo{Drafted, as the starter-pack note on repository and README structure was empty; align it with the code repository template once that exists.}
+\paragraph{README structure.} The code repository's README: what the project is, in two sentences; how to install it; how to reproduce each result of the paper, one command per table or figure; how to cite it (the Zenodo DOI badge); the license.
+\advisortodo{Drafted, as the starter-pack note on repository and README structure was empty; align it with the repository templates once they exist.}
 
 \section{Behaviour-driven tests}
 For behaviour-driven development (BDD), write the expected behaviour as scenarios with \href{https://cucumber.io/}{Cucumber}; the scenarios then double as evaluation cases that a reviewer can read.
