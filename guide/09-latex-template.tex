@@ -1,13 +1,12 @@
 %----------------------------------------------------------------------------
-\clearpage\section{Using this \LaTeX{} template}\label{app:latex}
+\chapter{Using this \LaTeX{} template}\label{app:latex}
 %----------------------------------------------------------------------------
-% TODO Delete this appendix (the \input in content/appendices.tex) before submission.
-This appendix uses every package that \texttt{include/packages.tex} loads, every theorem-like environment, and every tagged list, on one running example: an issuer revokes verifiable credentials in a shared registry.
-Copy what you need from the source, \texttt{content/appendix-latex.tex}.
+This chapter uses every package that \texttt{include/packages.tex} loads, every theorem-like environment, and every tagged list, on one running example: an issuer revokes verifiable credentials in a shared registry.
+Copy what you need from the source, \texttt{guide/09-latex-template.tex}.
 \Cref{tab:package-index} at the end lists each package and where it is shown.
 
 %----------------------------------------------------------------------------
-\subsection{Todo notes (todonotes)}\label{app:latex:todo}
+\section{Todo notes (todonotes)}\label{app:latex:todo}
 A margin note sits next to the line it refers to.\todo{A margin note.}
 The margins are narrow, so prefer inline notes:
 \todo[inline]{An inline note: a block across the text width.}
@@ -24,13 +23,13 @@ All notes are collected in the list of todos after the table of contents.
 To hide them in the submitted version, load todonotes with the \texttt{disable} option and remove \texttt{\textbackslash listoftodos} from \texttt{thesis.tex}.
 
 %----------------------------------------------------------------------------
-\subsection{Acronyms (acro)}\label{app:latex:acro}
+\section{Acronyms (acro)}\label{app:latex:acro}
 The first use expands: \ac{vc}. Later uses stay short: \ac{vc}. The plural: \acp{vc}.
 Short and long forms on demand: \acs{zkp}, \acl{zkp}.
 Declare acronyms in \texttt{content/acronyms.tex}; the list of acronyms is printed after the list of tables.
 
 %----------------------------------------------------------------------------
-\subsection{Citations, links and icons (natbib, hyperref, bookmark, orcidlink, fontawesome5)}\label{app:latex:cite}
+\section{Citations, links and icons (natbib, hyperref, bookmark, orcidlink, fontawesome5)}\label{app:latex:cite}
 Numeric citations are sorted and compressed~\cite{w3c2025vcdm,lamport1978time}.
 \texttt{\textbackslash citet} names the author: \citet{lamport1978time} introduced logical clocks.
 \texttt{\textbackslash citep} brackets the reference~\citep{lamport1978time}.
@@ -40,7 +39,7 @@ The PDF bookmarks in the viewer's sidebar come from hyperref and bookmark.
 Icons: \faGithub~source code, \faFilePdf~paper, \faEnvelope~contact. Author ORCID: \orcidlink{0000-0000-0000-0000}.
 
 %----------------------------------------------------------------------------
-\subsection{Cross-references (cleveref)}\label{app:latex:cref}
+\section{Cross-references (cleveref)}\label{app:latex:cref}
 Use \texttt{\textbackslash cref} for every reference, so the type name comes for free, and \texttt{\textbackslash Cref} at the start of a sentence:
 \cref{fig:latex:tikz,fig:latex:svg}, \cref{tab:latex:booktabs}, \cref{alg:latex:revoke}, \cref{lst:latex:verify}, \cref{eq:latex:window}, \cref{app:latex:theorems}.
 Ranges compress: \cref{eq:latex:window,eq:latex:fresh,eq:latex:valid}.
@@ -48,7 +47,7 @@ Ranges compress: \cref{eq:latex:window,eq:latex:fresh,eq:latex:valid}.
 Label prefixes are listed in \texttt{include/preamble.tex}.
 
 %----------------------------------------------------------------------------
-\subsection{Mathematics and theorems (amsmath, amssymb, ntheorem)}\label{app:latex:theorems}
+\section{Mathematics and theorems (amsmath, amssymb, ntheorem)}\label{app:latex:theorems}
 A numbered equation:
 \begin{equation}\label{eq:latex:window}
   \mathit{valid}(c, t) \iff t \in [t_\mathrm{issue}(c), t_\mathrm{exp}(c)) \land c \notin R_t .
@@ -104,7 +103,7 @@ Expiry is not revocation: an expired credential is not in $R_t$.
 References: \cref{def:latex:registry}, \cref{not:latex:issuer}, \cref{ex:latex:registry}, \cref{inv:latex:monotone}, \cref{prty:latex:final}, \cref{lem:latex:step}, \cref{thm:latex:finality}, \cref{cor:latex:noresurrect}, \cref{prop:latex:size}, \cref{claim:latex:append}, \cref{rem:latex:expiry}.
 
 %----------------------------------------------------------------------------
-\subsection{Tagged lists and other lists (enumitem)}\label{app:latex:tags}
+\section{Tagged lists and other lists (enumitem)}\label{app:latex:tags}
 Tagged lists give short, stable names to the things a paper argues about.
 Add a new kind with one \texttt{\textbackslash NewTagList} line in \texttt{include/preamble.tex}.
 \begin{contributions}
@@ -139,7 +138,7 @@ Compact lists:
 \end{itemize}
 
 %----------------------------------------------------------------------------
-\subsection{Figures (graphicx, svg, tikz, pgfplots, subcaption, wrapfig, rotating, placeins)}\label{app:latex:figures}
+\section{Figures (graphicx, svg, tikz, pgfplots, subcaption, wrapfig, rotating, placeins)}\label{app:latex:figures}
 \Cref{fig:latex:tikz} is drawn in TikZ, so it uses the document's fonts and scales without blurring.
 \begin{figure}[!ht]
   \centering
@@ -205,7 +204,7 @@ The \texttt{\textbackslash FloatBarrier} command from placeins above this line k
 Put one before a section whose text must not be preceded by stray floats.
 
 %----------------------------------------------------------------------------
-\subsection{Colored boxes (tcolorbox)}\label{app:latex:boxes}
+\section{Colored boxes (tcolorbox)}\label{app:latex:boxes}
 \begin{infobox}[Information]
   A general-purpose box for background facts.
 \end{infobox}
@@ -217,7 +216,7 @@ Put one before a section whose text must not be preceded by stray floats.
 \end{keybox}
 
 %----------------------------------------------------------------------------
-\subsection{Tables (booktabs, array, tabularx, xltabular, multirow, makecell, rotating)}\label{app:latex:tables}
+\section{Tables (booktabs, array, tabularx, xltabular, multirow, makecell, rotating)}\label{app:latex:tables}
 \Cref{tab:latex:booktabs} uses booktabs rules, a bold first column defined with array's \texttt{>\{\textbackslash bfseries\}}, a stretching tabularx column, multirow, makecell, and a colored row from xcolor.
 \begin{table}[!ht]
   \centering
@@ -266,7 +265,7 @@ Put one before a section whose text must not be preceded by stray floats.
 \end{sidewaystable}
 
 %----------------------------------------------------------------------------
-\subsection{Algorithms (algorithm, algpseudocode)}\label{app:latex:alg}
+\section{Algorithms (algorithm, algpseudocode)}\label{app:latex:alg}
 \begin{algorithm}[!ht]
   \caption{Revocation with a freshness check}\label{alg:latex:revoke}
   \begin{algorithmic}[1]
@@ -280,7 +279,7 @@ Put one before a section whose text must not be preceded by stray floats.
 \end{algorithm}
 
 %----------------------------------------------------------------------------
-\subsection{Code with syntax highlighting (minted, listings)}\label{app:latex:code}
+\section{Code with syntax highlighting (minted, listings)}\label{app:latex:code}
 Common languages go through minted, which uses the Pygments highlighter.
 For a captioned listing, put a \texttt{minted} environment inside a \texttt{listing} float; in running text, use \mintinline{python}{print("inline")}.
 Pygments knows over 500 languages; \texttt{pygmentize -L lexers} lists their names.
@@ -460,7 +459,7 @@ ORDER BY revoked DESC;
 \FloatBarrier
 
 %----------------------------------------------------------------------------
-\subsection{Text (csquotes, ulem, xcolor, xspace, babel, setspace, lineno, comment)}\label{app:latex:text}
+\section{Text (csquotes, ulem, xcolor, xspace, babel, setspace, lineno, comment)}\label{app:latex:text}
 Quotes adapt to the language: \enquote{revocation is final}, and nested: \enquote{the issuer said \enquote{revoked}}.
 ulem marks edits: \uline{underlined}, \sout{struck out}, \uwave{wavy}. xcolor colors text: \textcolor{red!70!black}{red}, \colorbox{yellow!40}{highlighted}.
 Abbreviation macros use xspace, so they need no trailing braces: \eg the issuer, \ie the registry, Lamport \etal showed.
@@ -482,7 +481,7 @@ This sentence is in the source but not in the PDF.
 \end{comment}
 
 %----------------------------------------------------------------------------
-\subsection{Package index}\label{app:latex:index}
+\section{Package index}\label{app:latex:index}
 \begin{xltabular}{\linewidth}{>{\ttfamily\raggedright\arraybackslash\hsize=1.1\hsize}X >{\raggedright\arraybackslash\hsize=0.9\hsize}X}
   \caption{Every package in \texttt{include/packages.tex} and where it is shown.}\label{tab:package-index}\\
   \toprule
@@ -496,7 +495,7 @@ This sentence is in the source but not in the PDF.
   todonotes & \cref{app:latex:todo} \\
   acro & \cref{app:latex:acro} \\
   natbib, hyperref, bookmark, orcidlink, fontawesome5 & \cref{app:latex:cite} \\
-  cleveref & \cref{app:latex:cref}, and every reference in this appendix \\
+  cleveref & \cref{app:latex:cref}, and every reference in this chapter \\
   amsmath, amssymb, amsfonts, ntheorem & \cref{app:latex:theorems} \\
   enumitem & \cref{app:latex:tags} \\
   graphicx, svg, tikz, pgfplots, subcaption, wrapfig, placeins & \cref{app:latex:figures} \\
@@ -512,11 +511,3 @@ This sentence is in the source but not in the PDF.
   ifxetex, ifluatex, fontspec, fontenc, inputenc, lmodern & Font setup for XeLaTeX, LuaLaTeX and pdfLaTeX \\
   \bottomrule
 \end{xltabular}
-
-% The stock BME template guide, in Hungarian.
-\selecthungarian
-\clearpage\input{content/appendix-latex-tools}
-\clearpage\input{content/appendix-latex-format}
-\clearpage\input{content/appendix-latex-usage}
-\clearpage\input{content/appendix-latex-examples}
-\selectthesislanguage

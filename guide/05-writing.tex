@@ -1,24 +1,24 @@
 %----------------------------------------------------------------------------
-\clearpage\section{Writing}\label{app:writing}
+\chapter{Writing}\label{app:writing}
 %----------------------------------------------------------------------------
-\subsection{Plan before you write: problem to skeleton}\label{app:writing:spine}
+\section{Plan before you write: problem to skeleton}\label{app:writing:spine}
 Write the argument before the prose. We plan papers in this order, and each step builds on the previous one: problem; context and literature review; gap analysis; research questions; contributions; threat analysis; leading figure; examples; validation plan; spine; figures; skeleton; beats.
 \begin{description}
   \item[Spine] One page that fixes the claims, the terminology and the notation of the whole paper. Every chapter, figure and review is checked against it. Its worst enemy is drift: terms, symbols and claims quietly changing between chapters.
   \item[Skeleton mind map] The argument made explicit before any prose: each chapter broken into paragraphs, each paragraph reduced to its topic sentence and a pointer to the evidence that backs it. Drafting then means filling in sentences around a skeleton already known to be sound. A mind map, on paper or in a tool, is the quickest way to draw it.
-  \item[Running example] One concrete scenario, introduced in \cref{chap:intro}, named once with \texttt{\textbackslash exname} in \texttt{thesis.tex}, and revisited in every chapter in a \texttt{runningexample} box: what each concept, component, measurement or competitor does with it. A reader who follows only the boxes should understand the paper.
+  \item[Running example] One concrete scenario that every chapter returns to. Name it once with \texttt{\textbackslash exname} in \texttt{thesis.tex}, introduce it in \tplref{chap:intro}, and revisit it in every chapter in a \texttt{runningexample} box: what each concept, component, measurement or competitor does with it. A reader who follows only the boxes should understand the paper.
   \item[Beats] The moves inside each paragraph of the skeleton: what it establishes, which evidence it uses, what the running example shows there, and how it leads to the next one. The chapters of this template start every paragraph with a \texttt{\textbackslash beat\{establishes\}\{evidence\}\{running example\}\{leads to\}}; it prints as a todo, so it disappears from the final version.
 \end{description}
 \advisortodo{Drafted from the paper-planning workflow, as the starter-pack note on the spine and skeleton mind map was empty; confirm, or add an example mind map.}
 
-\subsection{The leading figure (vezérábra)}\label{app:writing:figure}
-The leading figure (\cref{fig:overview}) explains the central idea in one picture: the problem, the contributions, and the result. Decide what a reader should take away from it, draw that, and write the caption so that the figure stands without the text. Draft it early, in the research phase, and treat it as exploratory until the spine is agreed: many papers find their argument while drawing it.
+\section{The leading figure (vezérábra)}\label{app:writing:figure}
+The leading figure (\tplref{fig:overview}) explains the central idea in one picture: the problem, the contributions, and the result. Decide what a reader should take away from it, draw that, and write the caption so that the figure stands without the text. Draft it early, in the research phase, and treat it as exploratory until the spine is agreed: many papers find their argument while drawing it.
 \advisortodo{Drafted from the paper-planning workflow, as the starter-pack note on the vezérábra was empty; confirm, or add good examples from past papers.}
 
-\subsection{The abstract}
+\section{The abstract}
 Follow \href{https://www.nature.com/documents/nature-summary-paragraph.pdf}{Nature's summary paragraph guide}; the abstract in this template already has its seven steps as placeholders.
 
-\subsection{Style}
+\section{Style}
 \begin{itemize}
   \item The Chicago School of Writing lectures: \href{https://www.youtube.com/watch?v=vtIzMaLkCaM}{part I}, \href{https://www.youtube.com/watch?v=aFwVf5a3pZM}{part II}, \href{https://www.youtube.com/watch?v=gphdfSwYMWU}{part III}.
   \item \href{https://www.youtube.com/watch?v=Unzc731iCUY}{MIT: How to Speak}, for the conference talk.
@@ -26,10 +26,10 @@ Follow \href{https://www.nature.com/documents/nature-summary-paragraph.pdf}{Natu
   \item Counterexamples: the Paxos and PBFT papers. Read them to see how hard a good idea is to follow when the writing does not help.
 \end{itemize}
 
-\subsection{Disclose AI use}\label{app:writing:ai}
+\section{Disclose AI use}\label{app:writing:ai}
 The faculty's \href{https://vik.bme.hu/page/1346/}{guidelines on the use of AI} set two rules, and this template follows both:
 \begin{itemize}
-  \item \textbf{Declare every use} in the faculty's declaration (\hyperref[aidecl]{the AI declaration}, after the bibliography): which tool, for what, which parts of the paper, and how large a share. It is required for every thesis and cannot be waived; we require it for the TDK too.
+  \item \textbf{Declare every use} in the faculty's declaration (\tplref{aidecl}, after the bibliography): which tool, for what, which parts of the paper, and how large a share. It is required for every thesis and cannot be waived; we require it for the TDK too.
   \item \textbf{Cite facts and conclusions from an AI answer} that were not in your prompt, like any other source, in the faculty's required MLA form: a one-sentence summary of the prompt, the model with its version, the company, the date, and a link to the conversation if possible. The faculty's example: \enquote{Examples of harm-reduction initiatives} prompt. ChatGPT-4o, OpenAI, February 10, 2025. \texttt{bib/references.bib} has a commented entry in this form.
 \end{itemize}
 Verifying an AI answer is always your responsibility; an answer can never be a reference by itself. \Cref{app:code:ai} covers the tools.

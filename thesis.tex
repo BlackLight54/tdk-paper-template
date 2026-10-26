@@ -52,7 +52,7 @@
 \begin{document}
 
 \pagenumbering{gobble}
-\hypersetup{pageanchor=false} % unnumbered pages get no PDF page anchors; content/abstract.tex turns them back on
+\hypersetup{pageanchor=false} % unnumbered pages get no PDF page anchors; content/00-abstract.tex turns them back on
 
 %TODO These includes define guidelines -- remove these
 %~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -77,7 +77,7 @@
 % Declaration and Abstract
 %~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 %\include{include/declaration} %TODO Hallgatói nyilatkozat -- TDK és OTDK esetén törlendő!
-\include{content/abstract}    %TODO Összefoglaló -- TDK és OTDK esetén nem kötelező
+\include{content/00-abstract}    %TODO Összefoglaló -- TDK és OTDK esetén nem kötelező
 
 
 % The main part of the thesis
@@ -85,18 +85,18 @@
 \pagenumbering{arabic}
 
 %TODO import your own content
-\include{content/introduction}
-\include{content/background}
-\include{content/approach}
-\include{content/implementation}
-\include{content/evaluation}
-\include{content/related-work}
-\include{content/conclusion}
+\include{content/01-introduction}
+\include{content/02-background}
+\include{content/03-approach}
+\include{content/04-implementation}
+\include{content/05-evaluation}
+\include{content/06-related-work}
+\include{content/07-conclusion}
 
 
 % Acknowledgements
 %~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-\include{content/acknowledgement}
+\include{content/08-acknowledgement}
 
 
 % List of Figures, Tables
@@ -109,17 +109,17 @@
 % Bibliography
 %~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 \addcontentsline{toc}{chapter}{\bibname}
-\bibliography{bib/references,bib/mybib} % TODO drop bib/mybib with the LaTeX appendix
+\bibliography{bib/references}
 
 
 % Declaration on generative AI use (required by the faculty)
 %~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-\include{content/ai-declaration}
+\include{content/09-ai-declaration}
 
 
 % Appendix
 %~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-\include{content/appendices}
+\include{content/10-appendices}
 
 %\label{page:last}
 \end{document}

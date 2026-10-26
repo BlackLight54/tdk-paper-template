@@ -1,7 +1,7 @@
 %----------------------------------------------------------------------------
-\clearpage\section{Code, tools and AI}\label{app:code}
+\chapter{Code, tools and AI}\label{app:code}
 %----------------------------------------------------------------------------
-\subsection{GitHub}\label{app:code:github}
+\section{GitHub}\label{app:code:github}
 Use GitHub for:
 \begin{itemize}[noitemsep]
   \item code and models;
@@ -25,11 +25,11 @@ Run the repository's recurring commands (build, test, reproduce the measurements
 \paragraph{README structure.} What the project is, in two sentences; how to install it; how to reproduce each result of the paper, one command per table or figure; how to cite it (the Zenodo DOI badge); the license.
 \advisortodo{Drafted, as the starter-pack note on repository and README structure was empty; align it with the code repository template once that exists.}
 
-\subsection{Behaviour-driven tests}
+\section{Behaviour-driven tests}
 For behaviour-driven development (BDD), write the expected behaviour as scenarios with \href{https://cucumber.io/}{Cucumber}; the scenarios then double as evaluation cases that a reviewer can read.
 
-\subsection{AI tools}\label{app:code:ai}
-\paragraph{Disclose.} AI use must be disclosed in the appropriate form in both the TDK paper and the thesis: the faculty's declaration (\hyperref[aidecl]{the AI declaration}, after the bibliography) and citations for AI-generated facts (\cref{app:writing:ai}).
+\section{AI tools}\label{app:code:ai}
+\paragraph{Disclose.} AI use must be disclosed in the appropriate form in both the TDK paper and the thesis: the faculty's declaration (\tplref{aidecl}, after the bibliography) and citations for AI-generated facts (\cref{app:writing:ai}).
 
 \paragraph{Tools, as of October 2026.} Advice on AI tools goes stale within months; this is what we recommend now.
 \begin{itemize}
@@ -39,4 +39,3 @@ For behaviour-driven development (BDD), write the expected behaviour as scenario
   \item Do not overconstrain your model with excess instructions: bloated \texttt{AGENTS.md} files and memories degrade the performance of any model. Prefer skills with clear, broad descriptions of when to use them.
 \end{itemize}
 
-\input{content/appendix-zenodo}

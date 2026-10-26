@@ -1,13 +1,13 @@
 %----------------------------------------------------------------------------
-\subsection{Archiving the code on Zenodo}\label{app:zenodo}
+\chapter{Archiving the code on Zenodo}\label{app:zenodo}
 %----------------------------------------------------------------------------
 A GitHub link can move, change or disappear; a reviewer checking \textbf{correctness} (criterion D/2) needs the exact code your results came from.
 \href{https://zenodo.org/}{Zenodo}, run by CERN, archives a GitHub release permanently and gives it a DOI, so cite the archived release, not the repository.
 These steps follow Zenodo's documentation as of September 2026; if the interface differs, the linked pages are authoritative.
 
-\subsubsection{Prepare the repository}
+\section{Prepare the repository}
 \begin{enumerate}
-  \item A \texttt{README.md} that says how to install the code and reproduce every measurement in \cref{chap:evaluation}.
+  \item A \texttt{README.md} that says how to install the code and reproduce every measurement in \tplref{chap:evaluation}.
   \item A \texttt{LICENSE} file; ask your supervisor which license to use.
   \item A \texttt{.zenodo.json} file in the repository root (\cref{lst:zenodo-json}). Zenodo takes the record's title, authors, license and links from it (\href{https://help.zenodo.org/docs/github/describe-software/zenodo-json/}{format and example}). Check that it is valid JSON before releasing.
   \item If the repository has a \texttt{CITATION.cff}, keep its fields in line with \texttt{.zenodo.json}; Zenodo uses \texttt{.zenodo.json} when both exist.
@@ -31,7 +31,7 @@ These steps follow Zenodo's documentation as of September 2026; if the interface
 \caption{A minimal \texttt{.zenodo.json}.}\label{lst:zenodo-json}
 \end{listing}
 
-\subsubsection{Publish the first release}
+\section{Publish the first release}
 \begin{enumerate}
   \item Sign in to \href{https://zenodo.org/}{Zenodo} with the GitHub account that owns the repository. Open the profile menu, then \emph{GitHub}; click \emph{Sync now}, find the repository, and switch its toggle on (\href{https://help.zenodo.org/docs/github/enable-repository/}{enable a repository}).
   \item Commit the prepared files. On GitHub, open \emph{Releases}, then \emph{Draft a new release}: create a new tag such as \texttt{v1.0.0} on the commit your measurements used, add release notes, and publish.
@@ -39,13 +39,13 @@ These steps follow Zenodo's documentation as of September 2026; if the interface
 \end{enumerate}
 If the repository cannot be connected to Zenodo, upload a prepared archive instead: \emph{+}, then \emph{New upload}, fill in the metadata, \emph{Preview}, \emph{Publish} (\href{https://help.zenodo.org/docs/deposit/create-new-upload/}{upload instructions}).
 
-\subsubsection{Cite it}
+\section{Cite it}
 Each release gets its own \emph{version DOI}; the \emph{concept DOI} stands for all versions together (\href{https://support.zenodo.org/help/en-gb/1-upload-deposit/97-what-is-doi-versioning}{DOI versioning}).
 \begin{itemize}
-  \item In the paper, cite the \textbf{version DOI} of the release your results came from, as the \texttt{artifact} entry in \texttt{bib/references.bib} shows, and cite it in \cref{chap:implementation}.
+  \item In the paper, cite the \textbf{version DOI} of the release your results came from, as the \texttt{artifact} entry in \texttt{bib/references.bib} shows, and cite it in \tplref{chap:implementation}.
   \item In \texttt{README.md}, put the badge of the \textbf{concept DOI}, so it always leads to the newest version. The record page's DOI badge dialog gives the Markdown.
   \item Copy both DOIs from the Zenodo record; never guess a DOI by changing its number.
 \end{itemize}
 
-\subsubsection{Release a new version}
+\section{Release a new version}
 Fix the code, update \texttt{version} and \texttt{publication\_date} in \texttt{.zenodo.json}, commit, and publish a new GitHub release with a new tag (for example \texttt{v1.0.1}). Zenodo adds it to the same record as a new version with a new version DOI (\href{https://help.zenodo.org/docs/deposit/manage-versions/}{manage versions}). Never move an old tag. If the paper's results now come from the new version, cite its version DOI.
