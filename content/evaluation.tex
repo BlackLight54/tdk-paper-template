@@ -59,9 +59,28 @@ TODO Describe \cref{fig:scalability}: what grows, how fast, and where the limit 
   \label{fig:scalability}
 \end{figure}
 
-\section{Robustness (RQ3)}
-\beat{how the system behaves under faults, attacks or load spikes}{fault-injection or attack results}{the example under \cref{thr:example}}{the threats to validity}
+\section{Robustness analysis (RQ3)}
+\todo[inline]{The review sheet gives 7--8 points on criterion E only if \enquote{a szerző skálázhatósági, robosztussági vizsgálatokat is elvégzett, mellyel igazolta, hogy rendszere ipari környezetben is megállja a helyét}: scalability \emph{and} robustness studies showing the system holds up in an industrial setting. Scalability alone does not earn it. Perturb the system on purpose and report what happens, as in \cref{tab:robustness}.}
+\beat{how the system behaves when its assumptions are stressed: faults, attacks, load spikes, parameter changes}{\cref{tab:robustness}, with the setup of each perturbation}{the example under \cref{thr:example}}{the threats to validity}
 TODO
+
+\begin{table}[!ht]
+  \centering
+  \caption{Robustness: each perturbation, what it tests, and how the system behaved. Placeholder rows, replace with your own.}
+  \label{tab:robustness}
+  {\small
+  \begin{tabularx}{\linewidth}{>{\raggedright\arraybackslash}p{0.2\linewidth} >{\raggedright\arraybackslash}X >{\raggedright\arraybackslash}p{0.16\linewidth} >{\raggedright\arraybackslash}p{0.16\linewidth} >{\raggedright\arraybackslash}p{0.12\linewidth}}
+    \toprule
+    \textbf{Perturbation} & \textbf{What it tests} & \textbf{Expected} & \textbf{Observed} & \textbf{Recovery} \\
+    \midrule
+    Fault injection & A participant crashes or messages are dropped & TODO & TODO & TODO \\
+    Adversarial input & The attack of \cref{thr:example} on the running example & TODO & TODO & TODO \\
+    Load spike & TODO$\times$ the nominal load for TODO seconds & TODO & TODO & TODO \\
+    Parameter sensitivity & Timeouts, batch sizes, thresholds varied around their defaults & TODO & TODO & TODO \\
+    \bottomrule
+  \end{tabularx}
+  }
+\end{table}
 
 \section{Threats to validity}
 \beat{what could make the results wrong or not generalise, and what was done about each}{the mitigations}{whether the example is representative of real use}{related work}
