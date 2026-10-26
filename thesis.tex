@@ -1,7 +1,6 @@
 % !TeX spellcheck = en_GB
 % !TeX encoding = UTF-8
 % !TeX program = xelatex
-% TODO Change language to en_GB (recommended) or en_US for English documents
 \documentclass[12pt,a4paper,oneside]{report}             % Single-side
 %\documentclass[11pt,a4paper,twoside,openright]{report}  % Duplex
 
@@ -32,7 +31,7 @@
 \newcommand{\vikdoktipus}{\tdk} % Dokumentum típusa (\bsc vagy \msc)
 \newcommand{\vikmunkatipusat}{szakdolgozatot} % a "hallgató nyilatkozat" részhez: szakdolgozatot vagy diplomatervet
 
-\input{include/tdk-variables}
+\input{include/tdk-variables} %TODO Second author and year of the TDK title page
 \newcommand{\szerzoMeta}{\vikszerzoVezeteknev{} \vikszerzoKeresztnev} % egy szerző esetén
 %\newcommand{\szerzoMeta}{\vikszerzoVezeteknev{} \vikszerzoKeresztnev, \tdkszerzoB} % két szerző esetén
 
@@ -103,7 +102,7 @@
 %~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 \listoffigures\addcontentsline{toc}{chapter}{\listfigurename}
 \listoftables\addcontentsline{toc}{chapter}{\listtablename}
-\printacronyms
+\printacronyms\addcontentsline{toc}{chapter}{Acronyms}
 
 
 % Bibliography

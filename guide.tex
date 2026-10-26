@@ -53,9 +53,12 @@
 \include{guide/08-glossary}
 \include{guide/09-latex-template}
 
-\printacronyms
+\printacronyms\addcontentsline{toc}{chapter}{Acronyms}
 
 % The stock BME template guide, in Hungarian.
+\chapter*{The faculty's template guide}\addcontentsline{toc}{chapter}{The faculty's template guide}
+The following chapters are the guide of the faculty's original \LaTeX{} template, in Hungarian, unchanged except for heading levels. Their file names and settings describe the faculty's template, not this one: \cref{app:latex} covers this template.
+
 \selecthungarian
 \include{guide/10-bme-latex-tools}
 \include{guide/11-bme-thesis-format}

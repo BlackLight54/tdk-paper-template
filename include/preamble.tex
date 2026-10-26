@@ -176,7 +176,7 @@
 
 % Two kinds of notes: orange \todo for the student; blue \advisortodo for the advisors
 % (a draft to confirm, or a link to fill in). Both disappear with todonotes' disable option.
-% A beat: the plan of one paragraph (see the writing appendix). Prints as a student todo.
+% A beat: the plan of one paragraph (see the Writing chapter of the guide). Prints as a student todo.
 %   \beat{what it establishes}{its evidence}{what the running example shows here}{what it leads to}
 \newcommand{\beat}[4]{\todo[inline, caption={Beat: #1}]{\textbf{Beat.} \textit{Establishes:} #1. \textit{Evidence:} #2. \textit{Running example:} #3. \textit{Leads to:} #4.}}
 
@@ -211,7 +211,7 @@
 \definecolor{weblinkcolor}{RGB}{31,86,156}
 \newcommand{\weblink}[2]{\href{#1}{\textcolor{weblinkcolor}{\uline{#2}}}}
 
-% Marks a step where the student stops for the advisors' approval (lifecycle appendix).
+% Marks a step where the student stops for the advisors' approval (lifecycle chapter of the guide).
 \newcommand{\gate}{\textcolor{red!70!black}{\textsc{gate}}}
 \newcommand{\advisortodo}[1]{\todo[inline, color=cyan!20, bordercolor=cyan!60!black]{\textbf{Advisor:} #1}}
 

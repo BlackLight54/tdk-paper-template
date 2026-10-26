@@ -18,7 +18,7 @@
   {\Large 
   	\keszitette: \\ \vspace{0.3cm}
   	\szerzo \\
-	\tdkszerzoB \\
+	\if\relax\detokenize\expandafter{\tdkszerzoB}\relax\else\tdkszerzoB \\\fi % second author, if any
   	\vspace{1.5cm}
   	\konzulens: \\ \vspace{0.3cm}
   	\vikkonzulensA \\

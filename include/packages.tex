@@ -88,8 +88,9 @@
 %--------------------------------------------------------------------------------------
 % Notes, acronyms, citations, links
 %--------------------------------------------------------------------------------------
-% Add `disable` (or `final` to \documentclass) to hide every todo in the submitted version.
-\usepackage[colorinlistoftodos]{todonotes}
+% To hide every todo in the submitted version, add `final` to \documentclass (obeyFinal below
+% makes todonotes honour it) or `disable` here.
+\usepackage[colorinlistoftodos,obeyFinal]{todonotes}
 
 \usepackage{acro} % Acronyms: define them in content/acronyms.tex, use \ac{key}.
 
