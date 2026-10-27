@@ -456,7 +456,7 @@ rule("crefs", "source", "check", "always", "references go through \\cref: no 'Fi
   end)
 end)
 
-rule("acronyms", "source", "check", "polish", "glossary entries: every \\gls key is declared in content/glossary.tex, every abbreviation declared is used, no abbreviation is typed by hand, and every symbol of a definition has a notation entry", function()
+rule("acronyms", "source", "check", "polish", "glossary entries: every \\gls key is declared in content/glossary.tex, every abbreviation declared is used, none is typed by hand, every all-caps word is declared, and every symbol of a definition has a notation entry", function()
   local G = C.FILES.glossary or "content/glossary.tex"
   local declared, short, used, kind = {}, {}, {}, {}
   C.each_line({ G }, function(f, n, l)
@@ -469,14 +469,25 @@ rule("acronyms", "source", "check", "polish", "glossary entries: every \\gls key
     if t1 then declared[t1] = { file = f, line = n }; kind[t1] = "term" end
   end)
   if next(declared) == nil then fail(G, nil, "no glossary entries: content/glossary.tex is missing or empty") end
+  -- every declared short form as a word, and its plural: VC, VCs and VC-based, not VCS
+  local forms = {}
+  for sh, k in pairs(short) do
+    if not sh:find("[\\{}]") then
+      local pat = C.escape(sh)
+      if sh:match("^%w") then pat = "%f[%w]" .. pat end
+      if sh:match("%w$") then pat = pat .. "s?%f[%W]" end
+      forms[#forms + 1] = { pat = pat, short = sh, key = k }
+    end
+  end
+  table.sort(forms, function(a, b) return a.short < b.short end)
   C.each_prose_line(MAIN, function(f, n, l)
     for k in l:gmatch("\\[Gg]ls[%a]*%*?{([^}]*)}") do
       used[k] = true
       if not declared[k] then fail(f, n, "glossary key " .. k .. " is not declared in " .. G) end
     end
     local p = C.prose(l)
-    for w in p:gmatch("%f[%w][%u][%u%d]+[%u]%f[%W]") do
-      if short[w] and not l:match("\\[Gg]ls[%a]*%*?{" .. C.escape(short[w]) .. "}") then fail(f, n, string.format("%s typed by hand: write \\gls{%s}", w, short[w])) end
+    for _, fm in ipairs(forms) do
+      if p:find(fm.pat) then fail(f, n, string.format("%s typed by hand: write \\gls{%s}", fm.short, fm.key)) end
     end
   end)
   for k, at in pairs(declared) do
@@ -497,7 +508,7 @@ rule("acronyms", "source", "check", "polish", "glossary entries: every \\gls key
   local seen = {}
   C.each_prose_line(MAIN, function(f, n, l)
     for w in C.prose(l):gmatch("%f[%w][%u][%u%d]+[%u]%f[%W]") do
-      if not short[w] and not seen[w] and #w >= 2 and #w <= 6 and not w:match("^RQ") and not w:match("^TODO") and not w:match("^[IVXLC]+$") then seen[w] = true; note(f, n, "possible acronym not declared: " .. w) end
+      if not short[w] and not seen[w] and #w >= 2 and #w <= 6 and not w:match("^RQ") and not w:match("^TODO") and not w:match("^[IVXLC]+$") then seen[w] = true; warn(f, n, w .. " is not in the glossary: declare it, or lint-ignore it if it is a name") end
     end
   end)
 end)

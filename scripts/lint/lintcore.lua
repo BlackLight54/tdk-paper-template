@@ -203,8 +203,8 @@ end
 
 -- the prose lines of a file: comments, todo/beat/advisor notes (brace-balanced, across lines),
 -- tikzpicture and axis blocks, and listings removed; line numbers preserved as empty lines
--- environments that hold no prose: pictures, code and display maths
-M.NONPROSE = { "tikzpicture", "lstlisting", "minted", "forest", "equation", "equation*", "align", "align*", "gather", "gather*", "multline", "multline*", "displaymath" }
+-- environments that hold no prose: commented-out text, pictures, code and display maths
+M.NONPROSE = { "comment", "tikzpicture", "lstlisting", "minted", "forest", "equation", "equation*", "align", "align*", "gather", "gather*", "multline", "multline*", "displaymath" }
 function M.prose_lines(file)
   local out, depth, intodo, inblock = {}, 0, false, nil
   for _, raw in ipairs(M.lines(file)) do
