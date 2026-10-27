@@ -466,7 +466,10 @@ end)
 rule("typography", "source", "advice", "polish", "the small things the reviewer sees: number ranges with --, a thin space before units, no straight quotes, no doubled words, \\eg and \\ie macros, no manual line breaks in prose", function()
   C.each_prose_line(MAIN, function(f, n, l)
     local p = C.prose(l)
-    for a, b in p:gmatch("%f[%d](%d+)%-(%d+)%f[%D]") do if not l:match("\\label") and not l:match("label=") then warn(f, n, string.format("range %s-%s with a hyphen: write %s--%s", a, b, a, b)) end end
+    -- a range stands alone: BLS12-381 and i7-9750H are names, not ranges
+    for s, a, b, e in p:gmatch("()(%d+)%-(%d+)()") do
+      local before, after = p:sub(s - 1, s - 1), p:sub(e, e)
+      if not before:match("[%w%-%.]") and not after:match("[%w%-]") and not l:match("\\label") and not l:match("label=") then warn(f, n, string.format("range %s-%s with a hyphen: write %s--%s", a, b, a, b)) end end
     for num, unit in p:gmatch("(%d) (ms|s|MB|GB|KB|kB|Hz|MHz|GHz|mm|cm|pt|KiB|MiB|GiB|bytes|B)%f[%W]") do warn(f, n, string.format("'%s %s': use a thin space, %s\\,%s", num, unit, num, unit)) end
     if p:match('"') then warn(f, n, "straight double quote: use \\enquote{...}") end
     if p:match("%f[%a]e%.g%.") or p:match("%f[%a]i%.e%.") then warn(f, n, "e.g./i.e. typed out: use \\eg and \\ie, which get the spacing right") end
@@ -478,7 +481,7 @@ rule("typography", "source", "advice", "polish", "the small things the reviewer 
     end
     if p:match("%.%.%.") then warn(f, n, "three dots: use \\dots") end
     if l:match("\\footnote") and l:match("%s\\footnote") then warn(f, n, "space before \\footnote: the mark should sit on the word or the punctuation") end
-    if l:match("\\cite") and not l:match("~\\cite") and not l:match("{\\cite") and not l:match("\\citet") and not l:match("\\cite[tp]") and not l:match("^%s*\\cite") and not l:match("&%s*\\cite") then warn(f, n, "\\cite without a tie: write text~\\cite{...} so the number cannot start a line") end
+    if l:match("\\cite") and not l:match("~\\cite") and not l:match("{\\cite") and not l:match("\\citet") and not l:match("\\cite[tp]") and not l:match("^%s*\\cite") and not l:match("&%s*\\cite") and not l:match("\\\\%s*\\cite") then warn(f, n, "\\cite without a tie: write text~\\cite{...} so the number cannot start a line") end
   end)
 end)
 
