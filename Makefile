@@ -26,8 +26,12 @@ lint-%:
 check-reviewer: reviewer
 	$(LINT) all --doc reviewer
 
+# The lint's copy of the skeleton chapters (scripts/lint/skeleton), after editing content/01-07 of the template.
+skeleton:
+	mkdir -p scripts/lint/skeleton && cp content/0[1-7]-*.tex scripts/lint/skeleton/
+
 # The guide's own reference list, guide/guide.bbl, after editing its citations or guide/guide.bib.
 guide-bib:
 	texlua scripts/guide-bib.lua
 
-.PHONY: all reviewer clean check check-reviewer guide-bib
+.PHONY: all reviewer clean check check-reviewer guide-bib skeleton

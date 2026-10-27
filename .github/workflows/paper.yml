@@ -15,6 +15,9 @@ jobs:
       - uses: actions/checkout@v4
       - name: Inkscape for SVG figures, poppler for the PDF rules, hunspell for spelling
         run: apt-get update -qq && apt-get install -y -qq --no-install-recommends inkscape poppler-utils hunspell hunspell-en-gb hunspell-en-us >/dev/null
+      - name: template / the lint's skeleton copy matches content/ (the template's repository only)
+        if: github.repository == 'BlackLight54/tdk-paper-template'
+        run: for f in content/0[1-7]-*.tex; do cmp "$f" "scripts/lint/skeleton/${f#content/}" || exit 1; done
       - name: Build the draft
         run: make all
       - name: Build the reviewer PDF
@@ -33,6 +36,21 @@ jobs:
       - name: source / structure (check)
         if: always()
         run: texlua scripts/lint.lua structure
+      - name: source / chapters (check)
+        if: always()
+        run: texlua scripts/lint.lua chapters
+      - name: source / orphans (advice)
+        if: always()
+        run: texlua scripts/lint.lua orphans
+      - name: source / stubs (check, polish)
+        if: always()
+        run: texlua scripts/lint.lua stubs
+      - name: source / stock (check, draft)
+        if: always()
+        run: texlua scripts/lint.lua stock
+      - name: source / spine (advice)
+        if: always()
+        run: texlua scripts/lint.lua spine
       - name: source / build (check)
         if: always()
         run: texlua scripts/lint.lua build --doc reviewer
@@ -79,12 +97,18 @@ jobs:
       - name: source / code (check)
         if: always()
         run: texlua scripts/lint.lua code
+      - name: source / preamble (check)
+        if: always()
+        run: texlua scripts/lint.lua preamble
       - name: source / typography (advice, polish)
         if: always()
         run: texlua scripts/lint.lua typography
       - name: source / terms (advice, polish)
         if: always()
         run: texlua scripts/lint.lua terms
+      - name: source / language (advice, polish)
+        if: always()
+        run: texlua scripts/lint.lua language
       - name: source / numbers (advice, polish)
         if: always()
         run: texlua scripts/lint.lua numbers

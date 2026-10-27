@@ -1,0 +1,84 @@
+%----------------------------------------------------------------------------
+\chapter{Approach}\label{ch:approach}
+%----------------------------------------------------------------------------
+\todo[inline, caption={Approach: criteria D/1 and D/2}]{\textbf{Criteria D/1 and D/2 (0--10 together).} The core of the paper: your theoretical contributions, such as a model, formalisation, algorithm or protocol, and what it guarantees; \cref{ch:implementation} holds the technical ones. Rename the chapter after your method.\\
+\textbf{Correctness:} every claim needs a proof, a mechanised proof, or a measurement; state assumptions explicitly.\\
+\textbf{Novelty:} separate what is new from what you adopted from the literature.\\
+\textbf{Non-triviality:} name the hard part and explain why the simple design does not work.\\
+\textbf{Describe here, evaluate later.} This chapter states what the approach is and what it guarantees, objectively; how well it works is \cref{ch:evaluation}'s job, and praise here reads as a claim without evidence.\\
+\textbf{In the sheet's words.} The top of D/1: \enquote{5: újszerű (legalább hazánkban újszerű, vagy eddig még nem létező megoldás)}; the top of D/2: \enquote{5: kiváló (kimagasló színvonalú kidolgozás, a közölt eredmények helyessége kétségkívül megalapozott)}.}
+
+\section{Overview}
+\beat{how the approach works end to end}{\cref{fig:architecture}}{the example walked through the figure, component by component}{the model}
+TODO
+\begin{runningexample}[through the approach]
+TODO The scenario step by step: which component handles which part of it, and what each produces.
+\end{runningexample}
+
+\begin{figure}[!ht]
+  \centering
+  \begin{tikzpicture}[
+      node distance=8mm and 14mm,
+      comp/.style={draw, rounded corners, fill=blue!8, minimum width=28mm, minimum height=10mm, align=center, font=\small},
+      ext/.style={comp, prior, dashed}]
+    \node[ext]  (user) {Actor (TODO)};
+    \node[comp, ours, right=of user] (core) {Component 1\\\footnotesize(contribution C1)};
+    \node[comp, right=of core] (store) {Component 2};
+    \node[comp, below=of core] (check) {Component 3};
+    \draw[-Stealth] (user) -- node[above, font=\footnotesize]{request} (core);
+    \draw[-Stealth] (core) -- node[above, font=\footnotesize]{write} (store);
+    \draw[-Stealth] (core) -- node[right, font=\footnotesize]{verify} (check);
+    \begin{scope}[on background layer]
+      \node[draw, dotted, inner sep=3mm, fit=(core)(store)(check), label={[font=\footnotesize]above right:System boundary}] {};
+    \end{scope}
+  \end{tikzpicture}
+  \caption{Architecture of the approach; blue components are this work, grey ones are reused or external. TODO Replace with your own, and keep what is yours blue.}
+  \label{fig:architecture}
+\end{figure}
+
+\section{TODO Model or design}
+\beat{the formal model or the design decisions}{each decision with the alternative rejected and why}{the example as an instance of the model}{the threat model}
+TODO
+
+\section{Threat model and guarantees}
+\beat{who the adversary is and what it can do, who is trusted, which cryptographic assumptions hold, what is out of scope, and what the approach guarantees under all that}{a proof, a mechanised proof, or a measurement in \cref{ch:evaluation} for every guarantee}{the attack on the example that the threat describes}{the implementation}
+\todo[inline, caption={Threat model: the four parts}]{\textbf{A threat model has four parts, and a reviewer of a security topic looks for each.} \textbf{Adversary:} what it controls (the network, some participants, a key), what it can do (read, replay, reorder, drop, forge within its keys), and what it cannot. Name the standard model where one fits: Dolev--Yao for a protocol, honest-but-curious or malicious participants, a computational adversary with a security parameter for a cryptographic construction. \textbf{Trust:} which parties are assumed honest, and what happens if one is not. \textbf{Cryptographic assumptions:} the primitives and the properties relied on, as items of the assumptions list, so a proof can cite them. \textbf{Out of scope:} the attacks the work does not address, said once, here, so the reviewer does not raise them as gaps. The guarantees then read \enquote{under these assumptions, against this adversary, the following holds}, and \cref{tab:correctness} shows how each was checked.}
+
+\paragraph{Adversary.}
+TODO What the adversary controls and can do, and in which standard model.
+\begin{threats}
+  \item\label{thr:example} TODO A malicious participant who ...
+  \item\label{thr:network} TODO A network adversary who replays or reorders messages ...
+\end{threats}
+
+\begin{runningexample}[under attack]
+TODO How \cref{thr:example} and \cref{thr:network} play out in the scenario, and which guarantee stops each.
+\end{runningexample}
+
+\paragraph{Trust and cryptographic assumptions.}
+TODO Which parties are trusted, and which primitives with which properties the guarantees rest on.
+\begin{assumptions}
+  \item\label{asm:example} TODO The underlying signature scheme is existentially unforgeable under chosen-message attack.
+  \item\label{asm:trust} TODO The registry operator is honest-but-curious: it follows the protocol but reads everything it sees.
+\end{assumptions}
+
+\paragraph{Out of scope.}
+TODO The attacks this work does not address, and why they are someone else's problem: denial of service, side channels, a compromised holder device, ...
+
+\paragraph{Guarantees.}
+
+\begin{guarantees}
+  \item\label{g:example} TODO Under \cref{asm:example,asm:trust}, against \cref{thr:example,thr:network}, no participant can ...
+\end{guarantees}
+
+\begin{lemma}[TODO]\label{lem:helper}
+TODO A helper statement.
+\end{lemma}
+
+\begin{theorem}[TODO]\label{thm:main}
+TODO The main result: \cref{g:example} holds against \cref{thr:example}.
+\end{theorem}
+
+\begin{proof}
+TODO By \cref{lem:helper} and \cref{asm:example}.
+\end{proof}

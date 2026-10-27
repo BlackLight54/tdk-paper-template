@@ -91,17 +91,20 @@ The polish phase is a checklist, not a phase of writing: if a row needs more tha
   Build log [build, overfull] & No undefined or multiply defined labels, no undefined citations, no overfull boxes, no missing fonts or files. \\
   Cross-references [figures] & Every reference uses \texttt{\textbackslash cref}; every figure, table, listing and equation is referenced from the text (\cref{app:latex:cref}). \\
   Traceability [traceability] & Every requirement is a row of the gap matrix and of the correctness table, every threat is met by a guarantee, every guarantee is checked in the evaluation, and the conclusion restates every contribution with its evidence. \\
-  Outline [outline] & Chapters are renamed where the template says so, no heading is a TODO, the running example is named and appears in every chapter. \\
+  Outline [outline, chapters, spine] & Chapters are renamed where the template says so, no heading is a TODO, the running example is named and appears in every chapter; each chapter is one file in reading order, the introduction first and nothing after the conclusion. \\
+  Every chapter written [stubs, orphans] & No main-text chapter is still the template's skeleton or an outline: each has at least 150 words of its own, and no text sits in a file nothing includes. \\
   Figures are vector & Every figure is TikZ in the paper repository, or has a written reason not to be; a draw.io draft was redrawn or exported as PDF only as a last resort (\cref{app:writing:figure}). \\
   Yours is visible & In the leading figure and every architecture-like figure, every component of yours is in the one blue of the \texttt{ours} style and the caption says so (\cref{app:writing:figure}). \\
   Axes and legends & Every axis has a label with a unit; every legend entry names a thing the text also names. \\
   Captions & Every caption explains the figure in the sense of \cref{app:writing:captions}: a claim first, then context. \\
-  Readable in print & No text in a figure is below 10\,pt when printed; colour pairs are distinguishable in greyscale. \\
+  Readable in print [pdf-smalltext] & No text in a figure is below 8\,pt when printed, and 10\,pt where it fits; colour pairs are distinguishable in greyscale. \\
   Tables & Tables fit the text width, numbers are right-aligned with the same precision in a column, units are in the header. \\
   Spine drift & Every term, symbol and claim matches the spine; one name per concept across chapters. \\
+  English throughout [language, spelling] & No Hungarian outline sentence is left in a chapter, and the title and the abstract pass the spell check. \\
+  Own preamble [preamble] & \texttt{include/macros.tex} loads no package the template already loads with other options, no amssymb or amsthm, and redefines none of the template's theorem environments. \\
   Citations [bib] & Every claim from the literature is cited; bibliography entries have author, title, venue and year; DOIs where they exist; capitalisation protected with braces (\cref{app:latex:cite}). \\
   Abbreviations, notation, terms [acronyms] & Every abbreviation goes through \texttt{\textbackslash gls}, every symbol of the model has a notation entry, and the three tables contain only what the text uses (\cref{app:latex:acro}). \\
-  Front and back matter [placeholders] & Title page variables, abstract in both languages, the AI declaration, acknowledgements and the appendices are filled in; no \enquote{TODO} and no placeholder figure remains. \\
+  Front and back matter [placeholders, stock] & Title page variables, abstract in both languages, the AI declaration, acknowledgements and the appendices are filled in; none of the faculty template's placeholder text, no \enquote{TODO} and no placeholder figure remains. \\
   Notes gone [beats] & Every beat has become prose and every todo and advisor note is resolved; the burn-down counts are zero. \\
   The reviewer PDF & The uploaded PDF is the one \texttt{reviewer.tex} builds (\cref{app:latex:todo}): no note, no list of todos, no guide. \\
   Read-only passes & Three readers who read only one layer still follow the paper: figures and captions alone, the running example boxes alone, and the abstract plus the first paragraph of each chapter alone. Where one of them is lost, that layer is missing a step. \\

@@ -2,6 +2,7 @@
 -- conventions the guide asks for. When a structure is absent the rule says so instead of
 -- passing on nothing.
 local C = require("lintcore")
+local lfs = require("lfs")
 local rule, fail, warn, note = C.rule, C.fail, C.warn, C.note
 local MAIN, CONTENT = C.MAIN, C.CONTENT
 
@@ -58,6 +59,117 @@ rule("structure", "source", "check", "always", "what the template provides is st
 end)
 
 -- build log ------------------------------------------------------------------------------
+-- the paper's shape --------------------------------------------------------------------
+-- the main text's chapter files: the numbered chapters up to the appendix
+local function main_chapters()
+  local out = {}
+  for _, f in ipairs(MAIN) do
+    if C.file_has(f, "\\appendix") then break end
+    out[#out + 1] = f
+  end
+  return out
+end
+local function prose_words(f, skip_todo)
+  local n = 0
+  for _, l in ipairs(C.prose_lines(f)) do
+    if not (skip_todo and l:match("TODO")) then for _ in C.prose(l):gmatch("%a%a+") do n = n + 1 end end
+  end
+  return n
+end
+
+rule("chapters", "source", "check", "always", "one chapter per file: no file holds two numbered chapters, and a chapter keeps its text in its own file instead of \\input pieces", function()
+  for _, f in ipairs(main_chapters()) do
+    local n = 0
+    C.each_line({ f }, function(_, ln, l)
+      if l:match("\\chapter{") then n = n + 1; if n == 2 then fail(f, ln, "a second chapter in one file: each chapter is its own content/NN-name.tex") end end
+      for arg in l:gmatch("\\input%s*(%b{})") do
+        local p = arg:sub(2, -2)
+        if not p:match("^include/") then warn(f, ln, "\\input{" .. p .. "} pulls part of the chapter from another file: keep the chapter in one file") end
+      end
+    end)
+  end
+end)
+
+rule("orphans", "source", "advice", "always", "every .tex file of the paper is included: a file thesis.tex never reaches is text no reader sees", function()
+  local reached = {}
+  for _, f in ipairs(CONTENT) do reached[f] = true end
+  local skip = { include = true, guide = true, scripts = true, docs = true, ["svg-inkscape"] = true }
+  local function walk(dir)
+    for e in lfs.dir(dir) do
+      if e ~= "." and e ~= ".." and not e:match("^%.") and not e:match("^_minted") then
+        local p = dir == "." and e or (dir .. "/" .. e)
+        local a = lfs.attributes(p)
+        if a and a.mode == "directory" then
+          if not (dir == "." and skip[e]) then walk(p) end
+        elseif dir ~= "." and e:match("%.tex$") and not reached[p] and not C.file_has(p, "\\documentclass") then -- a standalone figure source is its own document
+          local w = prose_words(p, false)
+          if w > 0 then warn(p, nil, string.format("included nowhere: %d words no reader sees; include them in a chapter or delete the file", w)) end
+        end
+      end
+    end
+  end
+  walk(".")
+end)
+
+-- the template's skeleton chapters, copied into scripts/lint/skeleton by `make skeleton`: a line of
+-- theirs is the template's, not the paper's, however long the skeleton chapter is
+local function skeleton_lines()
+  local set = {}
+  if not C.exists("scripts/lint/skeleton") then return set end
+  for e in lfs.dir("scripts/lint/skeleton") do
+    if e:match("%.tex$") then
+      for _, l in ipairs(C.prose_lines("scripts/lint/skeleton/" .. e)) do
+        local k = C.trim((C.prose(l):gsub("%s+", " ")))
+        if k ~= "" then set[k] = true end
+      end
+    end
+  end
+  return set
+end
+
+rule("stubs", "source", "check", "polish", "every main-text chapter is written: one with fewer than 150 words of its own prose, beyond the template's skeleton text and TODO lines, is still an outline", function()
+  local skel = skeleton_lines()
+  for _, f in ipairs(main_chapters()) do
+    local w = 0
+    for _, l in ipairs(C.prose_lines(f)) do
+      local p = C.prose(l)
+      if not l:match("TODO") and not skel[C.trim((p:gsub("%s+", " ")))] then for _ in p:gmatch("%a%a+") do w = w + 1 end end
+    end
+    if w < 150 then fail(f, 1, string.format("%d word%s of its own prose beyond the template's skeleton: the chapter is still an outline", w, w == 1 and "" or "s")) end
+  end
+end)
+
+-- sentences of the faculty's thesis template, which a paper copied from it may still carry
+local STOCK = {
+  "A bevezető tartalmazza a diplomaterv-kiírás elemzését",
+  "A bevezető szokás szerint a diplomaterv felépítésével záródik",
+  "Ez nem kötelező, akár törölhető is",
+  "Jelen dokumentum egy diplomaterv sablon",
+  "This document is a \\LaTeX-based skeleton",
+  "A Pitagorasz-tételből levezetve",
+  "A TeXstudio felülete",
+}
+rule("stock", "source", "check", "draft", "no text is the faculty template's own: the placeholder sentences of its introduction, abstract, acknowledgement and appendix", function()
+  for _, f in ipairs(CONTENT) do
+    local s = (C.readfile(f) or ""):gsub("\\%%", ""):gsub("%%[^\n]*", ""):gsub("%s+", " ")
+    for _, phrase in ipairs(STOCK) do
+      if s:find(phrase, 1, true) then fail(f, nil, "the faculty template's placeholder text is still here: " .. phrase .. " ...") end
+    end
+  end
+end)
+
+rule("spine", "source", "advice", "always", "the chapters follow the spine: the introduction first, nothing after the conclusion, the evaluation after the approach", function()
+  local mains = main_chapters()
+  local pos = {}
+  for i, f in ipairs(mains) do pos[f] = i end
+  local intro, concl, appr, eval = C.ROLE.intro, C.ROLE.conclusion, C.ROLE.approach, C.ROLE.evaluation
+  if intro and pos[intro] and pos[intro] ~= 1 then warn(intro, 1, "the introduction is not the first chapter") end
+  if concl and pos[concl] then
+    for i = pos[concl] + 1, #mains do warn(mains[i], 1, "a chapter after the conclusion: future work and outlook belong in the conclusion, anything else before it") end
+  end
+  if appr and eval and pos[appr] and pos[eval] and pos[eval] < pos[appr] then warn(eval, 1, "the evaluation comes before the approach it evaluates") end
+end)
+
 rule("build", "source", "check", "always", "the build log: undefined references and citations, multiply defined labels, missing files, missing fonts, TeX errors", function()
   local log = C.bpath(C.opts.doc .. ".log")
   if not C.exists(log) then fail(nil, nil, "no " .. log .. ": build first"); return end
@@ -316,6 +428,7 @@ rule("labels", "source", "check", "always", "label prefixes match their environm
       if l:match("\\chapter") then lastheading = "ch" elseif l:match("\\section") or l:match("\\subsection") then lastheading = "sec" end
       local lab = l:match("\\lstlisting%[.-label%s*=%s*{?([^},%]]+)") ; if lab and not lab:match("^lst:") then warn(f, n, "listing label should start with lst: " .. lab) end
       for key in l:gmatch("\\label{([^}]*)}") do
+        if key:match(":%d+[%.%d]*$") then warn(f, n, "label " .. key .. " encodes a number, which lies once chapters move: name it after what it labels") end
         local expect
         local top = stack[#stack]
         if top and envpref[top] then expect = envpref[top] elseif top and listpref[top] then expect = listpref[top] elseif l:match("\\caption") then expect = nil elseif #stack == 0 and lastheading then expect = lastheading end
@@ -463,6 +576,34 @@ rule("code", "source", "check", "always", "listings: \\lstinline is ASCII (XeLaT
   end
 end)
 
+rule("preamble", "source", "check", "always", "include/macros.tex does not fight the template: no package it loads again with other options, no amssymb, amsfonts or amsthm, no second definition of its theorem environments", function()
+  local M = "include/macros.tex"
+  if not C.exists(M) then return end
+  local loaded, thms = {}, {}
+  for _, f in ipairs({ "include/packages.tex", "include/preamble.tex" }) do
+    C.each_line({ f }, function(_, _, l)
+      for opts, pk in l:gmatch("\\usepackage(%b[]){([^}]*)}") do for p in pk:gmatch("[^,%s]+") do loaded[p] = opts end end
+      for pk in l:gmatch("\\usepackage{([^}]*)}") do for p in pk:gmatch("[^,%s]+") do loaded[p] = loaded[p] or "" end end
+      for t in l:gmatch("\\newtheorem{([^}]*)}") do thms[t] = true end
+    end)
+  end
+  C.each_line({ M }, function(f, n, l)
+    local function check(opts, pk)
+      for p in pk:gmatch("[^,%s]+") do
+        if p == "amssymb" or p == "amsfonts" then fail(f, n, p .. " next to unicode-math redefines \\square and other symbols; the template's math font has them")
+        elseif p == "amsthm" then fail(f, n, "amsthm clashes with ntheorem, which the template's theorem environments use")
+        elseif loaded[p] then
+          if opts ~= "" and opts ~= loaded[p] then fail(f, n, string.format("%s is loaded by the template%s: loading it again with %s is an option clash", p, loaded[p] ~= "" and (" with " .. loaded[p]) or "", opts))
+          else warn(f, n, p .. " is loaded by the template already") end
+        end
+      end
+    end
+    for opts, pk in l:gmatch("\\usepackage(%b[]){([^}]*)}") do check(opts, pk) end
+    for pk in l:gmatch("\\usepackage{([^}]*)}") do check("", pk) end
+    for t in l:gmatch("\\newtheorem%*?{([^}]*)}") do if thms[t] then fail(f, n, "the template defines the " .. t .. " environment: use it, a second \\newtheorem stops the build") end end
+  end)
+end)
+
 rule("typography", "source", "advice", "polish", "the small things the reviewer sees: number ranges with --, a thin space before units, no straight quotes, no doubled words, \\eg and \\ie macros, no manual line breaks in prose", function()
   C.each_prose_line(MAIN, function(f, n, l)
     local p = C.prose(l)
@@ -508,6 +649,17 @@ rule("terms", "source", "advice", "polish", "one name per concept: hyphenated, o
     if b > 0 and a > 0 then warn(nil, nil, string.format("both %s (%d) and %s (%d): keep one spelling", pr[1], b, pr[2], a)) end
   end
   return string.format("variants=%d british=%d american=%d", n, brit, amer)
+end)
+
+-- function words of Hungarian, which an English sentence does not contain three of
+local HU = {}
+for w in ("és hogy nem egy az ez van vagy mint csak már ami amely amelyek illetve valamint szerint között alapján ezért mert ahol amit lesz volt"):gmatch("%S+") do HU[w] = true end
+rule("language", "source", "advice", "polish", "the chapters are in English: a prose line with several Hungarian function words is a note or a draft left in the text", function()
+  C.each_prose_line(main_chapters(), function(f, n, l)
+    local hits = 0
+    for w in C.prose(l):gmatch("[%a\128-\255]+") do if HU[w:lower()] then hits = hits + 1 end end
+    if hits >= 3 then warn(f, n, "Hungarian prose in an English chapter: translate it, or make it a \\todo") end
+  end)
 end)
 
 rule("numbers", "source", "advice", "polish", "the headline numbers of the abstract and the conclusion appear in the evaluation, so the paper agrees with itself", function()

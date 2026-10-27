@@ -89,7 +89,16 @@ rule("spelling", "tools", "advice", "always", "hunspell on the detexed chapters:
   -- the prose only: todos, beats, pictures, code and maths removed, and the arguments that are not
   -- words (labels, references, citations, glossary keys, file names), written to a file for detex
   local tmp = os.tmpname()
-  do local h = io.open(tmp, "w"); for _, f in ipairs(C.MAIN) do h:write(C.prose(table.concat(C.prose_lines(f), "\n")), "\n") end; h:close() end
+  do
+    local h = io.open(tmp, "w")
+    for _, f in ipairs(C.MAIN) do h:write(C.prose(table.concat(C.prose_lines(f), "\n")), "\n") end
+    -- the title and the English abstract, which the reviewer reads first
+    local title = (C.readfile("thesis.tex") or ""):match("\\newcommand{\\vikcim}{([^}]*)}")
+    if title then h:write(C.prose(title), "\n") end
+    local abs = C.FILES.abstract and (C.readfile(C.FILES.abstract) or ""):match("\\chapter%*{Abstract}(.*)$")
+    if abs then h:write(C.prose(table.concat((function() local t = {}; for l in abs:gmatch("[^\n]*") do t[#t + 1] = C.strip_comment(l) end; return t end)(), "\n")), "\n") end
+    h:close()
+  end
   local function unknown(dict)
     local out = C.run("detex " .. tmp .. " | tr -c \"[:alpha:]'\" '\\n' | grep -E \"^[A-Za-z][a-z']{3,}$\" | hunspell -d " .. dict .. personal .. " -l | sort | uniq -c | sort -rn") or ""
     local t, order = {}, {}

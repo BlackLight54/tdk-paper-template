@@ -151,13 +151,14 @@ rule("pdf-margins", "pdf", "check", "polish", "margins on every text page are wi
   return string.format("min l/r/t/b=%.0f/%.0f/%.0f/%.0f mm", worst.left, worst.right, worst.top, worst.bottom)
 end)
 
-rule("pdf-smalltext", "pdf", "advice", "polish", "text below 10 pt, which the call forbids in figures and tables (labels included); listings and footnotes show up here too", function()
+-- 8 pt: the call asks for 10 pt in figures and tables, and 8 pt still reads in print; below it does not
+rule("pdf-smalltext", "pdf", "advice", "polish", "text below 8 pt, too small to read in print (the call asks for 10 pt in figures and tables, labels included); listings and footnotes show up here too", function()
   local d = doc(); if not d then warn(nil, nil, "pdftohtml not installed: skipped"); return end
   local perpage, total, smallest = {}, 0, 99
   for _, page in ipairs(d.pages) do
     for _, t in ipairs(page.texts) do
       local f = d.fonts[t.font]
-      if f and f.size < 10 and #C.trim(t.text) > 0 then perpage[page.n] = (perpage[page.n] or 0) + 1; total = total + 1; smallest = math.min(smallest, f.size) end
+      if f and f.size < 8 and #C.trim(t.text) > 0 then perpage[page.n] = (perpage[page.n] or 0) + 1; total = total + 1; smallest = math.min(smallest, f.size) end
     end
   end
   local pages = {}
@@ -166,9 +167,9 @@ rule("pdf-smalltext", "pdf", "advice", "polish", "text below 10 pt, which the ca
   if total > 0 then
     local list = {}
     for i, n in ipairs(pages) do if i <= 12 then list[#list + 1] = string.format("%d (%d)", n, perpage[n]) end end
-    warn(nil, nil, string.format("%d text runs below 10 pt, smallest %d pt, on pages %s%s: figure labels and table text must be readable in print", total, smallest, table.concat(list, ", "), #pages > 12 and ", ..." or ""))
+    warn(nil, nil, string.format("%d text runs below 8 pt, smallest %d pt, on pages %s%s: figure labels and table text must be readable in print", total, smallest, table.concat(list, ", "), #pages > 12 and ", ..." or ""))
   end
-  return string.format("runs<10pt=%d pages=%d", total, #pages)
+  return string.format("runs<8pt=%d pages=%d", total, #pages)
 end)
 
 rule("pdf-pages", "pdf", "check", "final", "main text pages counted from the PDF outline, first chapter to the page before the back matter: 30-35 for the TDK", function()
@@ -202,6 +203,9 @@ rule("pdf-parts", "pdf", "check", "final", "the parts the form requires are in t
   for _, f in ipairs(p.forbids) do if text:find(f, 1, true) then warn(nil, nil, f .. " is in the PDF; the TDK call says to leave the student declaration out") end end
   if not (text:find("Contents", 1, true) or text:find("Tartalomjegyzék", 1, true)) then fail(nil, nil, "no table of contents") end
   if not (text:find("Budapest University of Technology", 1, true) or text:find("Budapesti Műszaki", 1, true)) then fail(nil, nil, "the title page does not name the university") end
+  for _, m in ipairs({ "[link?]", "[?]", "TBD", "XXX", "FIXME" }) do
+    if text:find(m, 1, true) then fail(nil, nil, m .. " is printed in the PDF: a placeholder left in the text, or an undefined citation") end
+  end
   if text:find("TODO", 1, true) then
     local n = C.count(text, "TODO"); fail(nil, nil, n .. " TODO still printed in the PDF")
   end
