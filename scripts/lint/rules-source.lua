@@ -297,8 +297,9 @@ end)
 rule("outline", "source", "check", "draft", "the outline follows the spine: chapters renamed where the template says so, no TODO heading, the running example named and in every chapter", function()
   if not C.roles_ok({ "approach", "intro" }) then return end
   if #MAIN == 0 then fail(nil, nil, "no chapter files"); return end
+  local box = (C.readfile("thesis.tex") or ""):match("\\newcommand{\\lintexamplebox}{(%a+)}") or "runningexample"
   for _, f in ipairs(MAIN) do
-    if not C.file_has(f, "\\begin{runningexample}") then fail(f, 1, "no runningexample box: every chapter returns to the running example") end
+    if not C.file_has(f, "\\begin{" .. box .. "}") then fail(f, 1, "no " .. box .. " box: every chapter returns to the running example") end
     if not C.file_has(f, "\\chapter") then fail(f, 1, "no \\chapter in a chapter file") end
   end
   if C.file_has(C.ROLE.approach, "\\chapter{Approach}") then warn(C.ROLE.approach, 2, "the chapter is still called Approach: rename it after your method") end

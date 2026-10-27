@@ -20,7 +20,7 @@ The margins are 15\,mm, so margin notes are shifted into the text edge to stay r
 \advisortodo{A note for the advisors: a draft to confirm or a link to add.}
 A margin comment from the supervisor.\atodo[nolist]{Cite this.}
 \begin{runningexample}[a box]
-The running example's appearance in a chapter; \texttt{\textbackslash exname} is set in \texttt{thesis.tex}.
+The running example's appearance in a chapter; \texttt{\textbackslash exname} is set in \texttt{thesis.tex}. A paper with its own environment for the example names it there in \texttt{\textbackslash lintexamplebox}, and the lint looks for that one instead.
 \end{runningexample}
 
 All notes are collected in the list of todos after the table of contents, and the \emph{Checks} page follows it: on every compile the lint of \cref{app:code:paperci} runs on the sources and prints a table of its rules with their status and first findings, so you see where the paper stands without leaving the PDF. Its failing checks also appear as \texttt{tdk-lint} package warnings in Overleaf's log panel. The page is governed by two lines in \texttt{thesis.tex}: \texttt{\textbackslash lintphase}, which you set to \texttt{plan}, \texttt{draft}, \texttt{polish} or \texttt{final} as the lifecycle moves, because a check only counts once its phase is reached; and \texttt{\textbackslash linttrue}, which you may flip to \texttt{\textbackslash lintfalse} to switch the page off. A finding you have judged and rejected is silenced with a comment on its line, \texttt{\% lint-ignore: <rule> <reason>}; the reason is required and the page counts the ignores.
