@@ -10,7 +10,8 @@ GitHub sync creates their paper repository, which carries this CI.
 - `content/` holds the chapters, the abstract, the glossary and the AI declaration; `guide/` the
   advisors' guide; `include/` the preamble; `bib/` the bibliographies; `docs/` the review sheet.
 - `scripts/lint.lua` is the lint: `texlua scripts/lint.lua list` names its rules, `make check`
-  runs them, and `.github/workflows/paper.yml` runs each as its own step on every push.
+  runs them, and `.github/workflows/paper.yml` runs each as its own step on every push to main
+  and on every pull request that is not a draft.
 - `\lintphase` in `thesis.tex` is where you are in the lifecycle; checks come due by phase.
 
 Sibling templates: [tdk-notes-template](https://github.com/BlackLight54/tdk-notes-template) for

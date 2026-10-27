@@ -1,14 +1,21 @@
-# Builds the draft and the reviewer PDF on every push and runs every lint rule as its own step,
+# Builds the draft and the reviewer PDF on every push to main and on every pull request that is
+# not a draft (mark it ready to run it), and runs every lint rule as its own step,
 # so the run page lists the rules with a check or a cross each, findings appear as annotations
 # on the files, and the job summary ends with one table. Gates fail the run; report rules only
 # report. The paper repository is created by Overleaf per project, so this file travels with the
 # Overleaf project; see "Paper CI" in the guide. The steps below mirror `texlua scripts/lint.lua list`.
 name: paper
-on: [push, pull_request, workflow_dispatch]
+on:
+  push:
+    branches: [main, master]
+  pull_request:
+    types: [opened, synchronize, reopened, ready_for_review]
+  workflow_dispatch:
 env:
   LINT_PROFILE: tdk   # thesis: the faculty's thesis guide instead of the TDK call; the phase comes from \lintphase in thesis.tex
 jobs:
   paper:
+    if: github.event_name != 'pull_request' || !github.event.pull_request.draft
     runs-on: ubuntu-latest
     container: texlive/texlive:latest
     steps:
