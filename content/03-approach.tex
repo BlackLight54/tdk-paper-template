@@ -47,19 +47,37 @@ TODO
 \paragraph{Adversary.}
 TODO What the adversary controls and can do, and in which standard model.
 \begin{threats}
-  \item\label{thr:example} TODO A malicious participant who ...
-  \item\label{thr:network} TODO A network adversary who replays or reorders messages ...
+  \item\label{thr:example} \textbf{TODO Malicious participant.} A participant who ...
+  \item\label{thr:network} \textbf{TODO Network adversary.} Controls the network: replays, reorders or drops messages ...
 \end{threats}
 
 \begin{runningexample}[under attack]
 TODO How \cref{thr:example} and \cref{thr:network} play out in the scenario, and which guarantee stops each.
 \end{runningexample}
 
+\paragraph{Attacks.}
+TODO Optional: when the paper names concrete attacks, give each a row of \cref{tab:attacks}: which adversary tries it, what stops it, and what is left. Delete the paragraph and the table otherwise.
+\begin{table}[htbp]
+  \centering
+  \caption{TODO Attacks: who tries each, what stops it, and what is left.}
+  \label{tab:attacks}
+  {\small
+  \begin{tabularx}{\linewidth}{>{\raggedright\arraybackslash}X l >{\raggedright\arraybackslash}X >{\raggedright\arraybackslash}X}
+    \toprule
+    \textbf{Attack} & \textbf{By} & \textbf{Stopped by} & \textbf{Residual risk} \\
+    \midrule
+    TODO A revoked credential is replayed & \cref{thr:network} & \cref{g:example} & none \\
+    TODO A participant forges a status proof & \cref{thr:example} & \cref{asm:example} & \cref{lim:example} \\
+    \bottomrule
+  \end{tabularx}
+  }
+\end{table}
+
 \paragraph{Trust and cryptographic assumptions.}
 TODO Which parties are trusted, and which primitives with which properties the guarantees rest on.
 \begin{assumptions}
-  \item\label{asm:example} TODO The underlying signature scheme is existentially unforgeable under chosen-message attack.
-  \item\label{asm:trust} TODO The registry operator is honest-but-curious: it follows the protocol but reads everything it sees.
+  \item\label{asm:example} \textbf{TODO Unforgeable signatures.} The underlying signature scheme is existentially unforgeable under chosen-message attack.
+  \item\label{asm:trust} \textbf{TODO Honest-but-curious operator.} The registry operator follows the protocol but reads everything it sees.
 \end{assumptions}
 
 \paragraph{Out of scope.}
@@ -68,8 +86,16 @@ TODO The attacks this work does not address, and why they are someone else's pro
 \paragraph{Guarantees.}
 
 \begin{guarantees}
-  \item\label{g:example} TODO Under \cref{asm:example,asm:trust}, against \cref{thr:example,thr:network}, no participant can ...
+  \item\label{g:example} \textbf{TODO Short name.} Under \cref{asm:example,asm:trust}, against \cref{thr:example,thr:network}, no participant can ...
 \end{guarantees}
+
+% Optional: derived requirements, what the design itself must do for the guarantees to hold,
+% such as owner-only writes or replay protection. Each is checked by a test or a proof in the
+% evaluation, and none is a row of the gap matrix. They may also sit in the implementation chapter.
+% \paragraph{Derived requirements.}
+% \begin{derivedrequirements}
+%   \item\label{dr:example} \textbf{Short name.} Every state-changing call carries a token its owner signed.
+% \end{derivedrequirements}
 
 \begin{lemma}[TODO]\label{lem:helper}
 TODO A helper statement.

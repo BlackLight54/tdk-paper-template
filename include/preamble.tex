@@ -307,7 +307,7 @@
 % Write \cref{fig:overview} instead of Figure~\ref{fig:overview}; \Cref at sentence start.
 % Label prefixes: ch: sec: fig: tab: eq: lst: alg: app: def: thm: lem: prop: cor: inv:
 % Glossary keys (content/glossary.tex) have no prefix; they are a separate name space.
-% prty: claim: rem: not: ex: c: rq: req: asm: g: thr: lim:
+% prty: claim: rem: not: ex: c: rq: req: dr: asm: g: thr: lim:
 \crefname{definition}{Definition}{Definitions}
 \crefname{theorem}{Theorem}{Theorems}
 \crefname{example}{Example}{Examples}
@@ -331,27 +331,49 @@
 
 % Tagged lists: numbered items with a short tag that \cref can point to.
 %   \NewTagList{<environment>}{<tag>}{<Name>}{<Names>}
-% defines an enumerate-like environment whose items read "C1", "C2", ... and whose
-% references read "Contribution C1", "Contributions C1 and C2".
-% Usage:
-%   \begin{contributions}
-%     \item\label{c:model} A formal model of ...
-%   \end{contributions}
-%   ... as \cref{c:model} shows ...
+% defines an enumerate-like environment whose items read "AS1", "AS2", ... Each item starts
+% with a short name in bold, which the gap matrix and the text reuse:
+%   \begin{assumptions}
+%     \item\label{asm:clock} \textbf{Bounded drift.} Clocks drift by at most $\delta$.
+%   \end{assumptions}
+% A reference prints the tag alone, as a student would type it: \cref{asm:clock} -> "AS1",
+% \cref{asm:clock,asm:keys} -> "AS1 and AS2", three or more in a row -> "AS1–AS3". The
+% tag says what the item is, so the sentence does not need to. <Name> is what \namecref prints.
+% \tagrow{<environment>} gives a table row the list's next tag, for items kept in a table
+% instead of a list: \tagrow{guarantees}\label{g:monotone} & Monotone growth & ...
+% (\tdk@tagtype makes each kind's format differ, or cleveref would merge two kinds into one
+% range: "AS1–SG3".)
+\makeatletter
+\newcommand{\tdk@tagtype}[1]{}
 \newcommand{\NewTagList}[4]{%
   \newlist{#1}{enumerate}{1}%
   \setlist[#1]{label=\textbf{#2\arabic*}, ref=#2\arabic*, leftmargin=*, widest=99}%
+  \expandafter\def\csname the#1i\endcsname{#2\arabic{#1i}}%
   \crefalias{#1i}{#1}%
-  \crefname{#1}{#3}{#4}%
+  \crefname{#1}{#3}{#4}\Crefname{#1}{#3}{#4}%
+  \crefformat{#1}{\tdk@tagtype{#1}##2##1##3}\Crefformat{#1}{\tdk@tagtype{#1}##2##1##3}%
+  \crefmultiformat{#1}{\tdk@tagtype{#1}##2##1##3}{\tdk@tagtype{#1} and~##2##1##3}{\tdk@tagtype{#1}, ##2##1##3}{\tdk@tagtype{#1} and~##2##1##3}%
+  \Crefmultiformat{#1}{\tdk@tagtype{#1}##2##1##3}{\tdk@tagtype{#1} and~##2##1##3}{\tdk@tagtype{#1}, ##2##1##3}{\tdk@tagtype{#1} and~##2##1##3}%
+  \crefrangeformat{#1}{\tdk@tagtype{#1}##3##1##4--##5##2##6}\Crefrangeformat{#1}{\tdk@tagtype{#1}##3##1##4--##5##2##6}%
+  \crefrangemultiformat{#1}{\tdk@tagtype{#1}##3##1##4--##5##2##6}{\tdk@tagtype{#1} and~##3##1##4--##5##2##6}{\tdk@tagtype{#1}, ##3##1##4--##5##2##6}{\tdk@tagtype{#1} and~##3##1##4--##5##2##6}%
+  \Crefrangemultiformat{#1}{\tdk@tagtype{#1}##3##1##4--##5##2##6}{\tdk@tagtype{#1} and~##3##1##4--##5##2##6}{\tdk@tagtype{#1}, ##3##1##4--##5##2##6}{\tdk@tagtype{#1} and~##3##1##4--##5##2##6}%
 }
+\makeatother
+\newcommand{\tagrow}[1]{\refstepcounter{#1i}\textbf{\csname the#1i\endcsname}}
 \NewTagList{contributions}{C}{Contribution}{Contributions}
-\NewTagList{requirements}{R}{Requirement}{Requirements}
-\NewTagList{assumptions}{A}{Assumption}{Assumptions}
-\NewTagList{guarantees}{G}{Guarantee}{Guarantees}
-\NewTagList{threats}{T}{Threat}{Threats}
-\NewTagList{limitations}{L}{Limitation}{Limitations}
+\NewTagList{requirements}{REQ}{Requirement}{Requirements}
+% Derived requirements: what the design itself must do for the guarantees to hold, each
+% checked by a test or a proof. Unlike requirements, they are not rows of the gap matrix.
+\NewTagList{derivedrequirements}{DR}{Derived requirement}{Derived requirements}
+\NewTagList{assumptions}{AS}{Assumption}{Assumptions}
+\NewTagList{guarantees}{SG}{Guarantee}{Guarantees}
+% Threats are the adversaries: who attacks and what they can do. The attacks themselves,
+% one per row, go into the threat model's attacks table (tab:attacks).
+\NewTagList{threats}{ADV}{Adversary}{Adversaries}
+\NewTagList{limitations}{LIM}{Limitation}{Limitations}
+\NewTagList{rqlist}{RQ}{Research question}{Research questions}
 
-% Gap matrix cells: rows are requirements (\ref{req:x} prints "R1"), columns are approaches.
+% Gap matrix cells: rows are requirements (\ref{req:x} prints "REQ1"), columns are approaches.
 % Put \gaplegend in the caption so every matrix explains the same symbols.
 \newcommand{\gapyes}{\textcolor{green!45!black}{\ensuremath{\checkmark}}}
 \newcommand{\gappartial}{\textcolor{orange!85!black}{$\circ$}}
@@ -359,11 +381,3 @@
 \newcommand{\gapna}{--}
 \newcommand{\gaplegend}{\gapyes{} meets the requirement, \gappartial{} partially, \gapno{} does not, \gapna{} not applicable}
 
-% Research questions are referred to by tag alone: \cref{rq:scale} -> "RQ2".
-\NewTagList{rqlist}{RQ}{}{}
-\crefformat{rqlist}{#2#1#3}
-\Crefformat{rqlist}{#2#1#3}
-\crefmultiformat{rqlist}{#2#1#3}{ and~#2#1#3}{, #2#1#3}{ and~#2#1#3}
-\Crefmultiformat{rqlist}{#2#1#3}{ and~#2#1#3}{, #2#1#3}{ and~#2#1#3}
-\crefrangeformat{rqlist}{#3#1#4--#5#2#6}
-\Crefrangeformat{rqlist}{#3#1#4--#5#2#6}

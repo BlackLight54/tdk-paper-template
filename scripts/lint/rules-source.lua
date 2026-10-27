@@ -231,11 +231,11 @@ rule("pages", "source", "check", "final", "main text, from the first numbered ch
 end)
 
 -- the argument ---------------------------------------------------------------------------
-rule("traceability", "source", "check", "draft", "every tagged item is used where the argument needs it: requirements in the gap matrix and the correctness table, threats met in the approach, guarantees checked in the evaluation, contributions restated in the conclusion, research questions answered", function()
+rule("traceability", "source", "check", "draft", "every tagged item is used where the argument needs it: requirements in the gap matrix and the correctness table, derived requirements in the evaluation, threats met in the approach, guarantees checked in the evaluation, contributions restated in the conclusion, research questions answered", function()
   if not C.roles_ok({ "approach", "conclusion", "evaluation", "intro", "related" }) then return end
   if #MAIN == 0 then fail(nil, nil, "no chapter files"); return end
   local labels = C.collect_labels_and_refs(MAIN)
-  local function need(prefix, where, what)
+  local function need(prefix, where, what, optional)
     local any = false
     for key, at in pairs(labels) do
       if key:match("^" .. prefix .. ":") then
@@ -243,11 +243,12 @@ rule("traceability", "source", "check", "draft", "every tagged item is used wher
         if C.refs_in(where, "^" .. C.escape(key) .. "$") == 0 then fail(at.file, at.line, string.format("%s is never referenced in %s: %s", key, where, what)) end
       end
     end
-    if not any then fail(nil, nil, string.format("no %s: labels: %s", prefix, what)) end
+    if not any and not optional then fail(nil, nil, string.format("no %s: labels: %s", prefix, what)) end
   end
   need("req", C.ROLE.related, "every requirement comes up in the related work, usually as a row of the gap matrix")
   need("req", C.ROLE.evaluation, "every requirement is checked in the evaluation")
   need("c", C.ROLE.conclusion, "every contribution is restated with its evidence")
+  need("dr", C.ROLE.evaluation, "every derived requirement is checked in the evaluation, by a test or a proof", true)
   need("rq", C.ROLE.evaluation, "every research question is answered")
   need("thr", C.ROLE.approach, "every threat is met by a guarantee or an assumption")
   need("g", C.ROLE.evaluation, "every guarantee has a row in the correctness table")
@@ -419,7 +420,7 @@ end)
 
 rule("labels", "source", "check", "always", "label prefixes match their environments (fig:, tab:, lst:, alg:, eq:, def:, thm:, lem:, ch:, sec: or subsec:), so references read right and the lint can trace them", function()
   local envpref = { figure = "fig", table = "tab", sidewaystable = "tab", listing = "lst", lstlisting = "lst", algorithm = "alg", equation = "eq", align = "eq", definition = "def", theorem = "thm", lemma = "lem", proposition = "prop", corollary = "cor", invariant = "inv", property = "prty", claim = "claim", remark = "rem", notation = "not", example = "ex", subfigure = "fig", subtable = "tab" }
-  local listpref = { contributions = "c", requirements = "req", assumptions = "asm", guarantees = "g", threats = "thr", limitations = "lim", rqlist = "rq" }
+  local listpref = { contributions = "c", requirements = "req", derivedrequirements = "dr", assumptions = "asm", guarantees = "g", threats = "thr", limitations = "lim", rqlist = "rq" }
   for _, f in ipairs(MAIN) do
     local stack = {}
     local lastheading
@@ -451,7 +452,7 @@ rule("crefs", "source", "check", "always", "references go through \\cref: no 'Fi
     if l:match("\\autoref") then fail(f, n, "\\autoref: the template uses cleveref, write \\cref") end
     if l:match("\\figref") or l:match("\\tabref") or l:match("\\sectref") or l:match("\\listref") then fail(f, n, "the faculty template's \\figref family: write \\cref") end
     if l:match("^%s*\\cref") or l:match("[%.%?!]%s+\\cref") then warn(f, n, "\\cref at the start of a sentence: use \\Cref") end
-    if l:match("\\ref{") and not l:match("&") and not l:match("\\ref{req:") and not l:match("\\ref{g:") and not l:match("\\ref{c:") and not l:match("\\ref{asm:") and not l:match("\\ref{thr:") then warn(f, n, "bare \\ref in prose: \\cref names the kind of thing for you") end
+    if l:match("\\ref{") and not l:match("&") and not l:match("\\ref{req:") and not l:match("\\ref{g:") and not l:match("\\ref{c:") and not l:match("\\ref{asm:") and not l:match("\\ref{thr:") and not l:match("\\ref{dr:") then warn(f, n, "bare \\ref in prose: \\cref names the kind of thing for you") end
     if l:match("\\pageref") then note(f, n, "\\pageref: rarely needed with hyperlinks") end
   end)
 end)

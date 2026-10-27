@@ -38,11 +38,11 @@ Write the argument before the prose. We plan papers in this order, and each step
       ]
       [{\textbf{3 Approach}}
         [{Booking as online colouring: a request is an interval, a room is a colour \textit{[Def. 3.1]}}]
-        [{Threat model: a front end may replay or reorder requests, the store is trusted, clocks drift by at most $\delta$; what is out of scope \textit{[A1--A3, T1--T2]}}]
+        [{Threat model: a front end may replay or reorder requests, the store is trusted, clocks drift by at most $\delta$; what is out of scope \textit{[AS1--AS3, ADV1--ADV2]}}]
         [{Theorem 3.1: the service never double-books \textit{[proof; Alloy model]}}]
         [{Theorem 3.2: rooms used $\le$ max overlap $+ 1$ \textit{[proof]}}]
         [{Theorem 3.3: liveness under crash and recovery \textit{[TLA+ model, TLC]}}]
-        [{Theorem 3.4: no booking is lost or duplicated under a replaying front end \textit{[TLA+ model; A1--A3]}}]
+        [{Theorem 3.4: no booking is lost or duplicated under a replaying front end \textit{[TLA+ model; AS1--AS3]}}]
         [{Example: a conflicting request pair and how the service rejects it}]
       ]
       [{\textbf{4 Implementation}}
