@@ -219,8 +219,8 @@
 \newcommand{\weblink}[2]{\href{#1}{\textcolor{weblinkcolor}{\uline{#2}}}}
 
 % The Checks page of the draft: on every compile, the lint runs on the sources (shell escape, which
-% Overleaf and the Makefile enable) and writes lint-checks.tex, a table of rules and findings that is
-% input after the list of todos; its check findings also come out as package warnings in the log.
+% Overleaf and the Makefile enable) and writes lint-checks.tex, the essentials and the other checks,
+% input after the list of todos; its failing checks also come out as package warnings in the log.
 % Without shell escape nothing is written and nothing is input. \lintfalse turns it off.
 \newif\iflint\linttrue
 \newcommand{\lintchecks}{\iflint\immediate\write18{texlua scripts/lint.lua overleaf --tex > lint-checks.tex}\InputIfFileExists{lint-checks.tex}{}{}\fi}

@@ -7,7 +7,7 @@ local rule, fail, warn, note = C.rule, C.fail, C.warn, C.note
 local MAIN, CONTENT = C.MAIN, C.CONTENT
 
 -- template structure --------------------------------------------------------------------
-rule("structure", "source", "check", "always", "what the template provides is still there: the files, the tag lists, the running example, the gap matrix and the positioning figure, the leading figure; a paper that replaced the template sees here what it lost", function()
+rule("frame", "source", "check", "always", "the template's frame is still there: its files, the chapter roles the essentials need, the preamble's macros, the packages, the class options, the spacing, the phase and the running example's name; what a paper must contain is the essentials' job", function()
   -- the files thesis.tex includes are named NN-name.tex, numbered in reading order (00-abstract,
   -- 01-introduction, ...); the glossary, loaded by the preamble, has no number
   local last = -1
@@ -29,19 +29,6 @@ rule("structure", "source", "check", "always", "what the template provides is st
   if not C.FILES.aidecl then fail(nil, nil, "no AI declaration file (\\label{aidecl})") end
   if not C.FILES.glossary then fail(nil, nil, "no glossary file (\\newabbreviation or \\newglossaryentry in a file thesis.tex loads)") end
   if not (C.readfile("thesis.tex") or ""):match("\\newcommand{\\lintphase}{%a+}") then fail("thesis.tex", nil, "no \\lintphase in thesis.tex: the lint needs the phase (plan, draft, polish, final)") end
-  local labels = C.collect_labels_and_refs(MAIN)
-  local function atleast(prefix, what, where)
-    local n = 0; for k in pairs(labels) do if k:match("^" .. prefix .. ":") then n = n + 1 end end
-    if n == 0 then fail(where, nil, string.format("no %s (labels %s:...): the template's list is gone", what, prefix)) end
-    return n
-  end
-  atleast("req", "requirements", C.ROLE.intro); atleast("c", "contributions", C.ROLE.intro)
-  atleast("rq", "research questions", C.ROLE.evaluation); atleast("thr", "threats", C.ROLE.approach)
-  atleast("g", "guarantees", C.ROLE.approach); atleast("lim", "limitations", C.ROLE.conclusion)
-  if not labels["fig:overview"] then fail(C.ROLE.intro, nil, "no leading figure (fig:overview)") end
-  if not labels["tab:related"] then fail(C.ROLE.related, nil, "no gap matrix (tab:related)") end
-  if not labels["fig:positioning"] then fail(C.ROLE.related, nil, "no positioning figure (fig:positioning)") end
-  if not labels["tab:correctness"] then fail(C.ROLE.evaluation, nil, "no correctness table (tab:correctness)") end
   local pre = C.readfile("include/preamble.tex") or ""
   for _, m in ipairs({ "runningexample", "NewTagList", "beat", "gapyes", "atodo" }) do
     if not pre:find(m, 1, true) then fail("include/preamble.tex", nil, "the preamble no longer defines " .. m) end
@@ -60,15 +47,7 @@ end)
 
 -- build log ------------------------------------------------------------------------------
 -- the paper's shape --------------------------------------------------------------------
--- the main text's chapter files: the numbered chapters up to the appendix
-local function main_chapters()
-  local out = {}
-  for _, f in ipairs(MAIN) do
-    if C.file_has(f, "\\appendix") then break end
-    out[#out + 1] = f
-  end
-  return out
-end
+local main_chapters = C.main_chapters
 local function prose_words(f, skip_todo)
   local n = 0
   for _, l in ipairs(C.prose_lines(f)) do
@@ -124,31 +103,18 @@ rule("orphans", "source", "advice", "always", "every .tex file of the paper is i
   walk(".")
 end)
 
--- the template's skeleton chapters, copied into scripts/lint/skeleton by `make skeleton`: a line of
--- theirs is the template's, not the paper's, however long the skeleton chapter is
-local function skeleton_lines()
-  local set = {}
-  if not C.exists("scripts/lint/skeleton") then return set end
-  for e in lfs.dir("scripts/lint/skeleton") do
-    if e:match("%.tex$") then
-      for _, l in ipairs(C.prose_lines("scripts/lint/skeleton/" .. e)) do
-        local k = C.trim((C.prose(l):gsub("%s+", " ")))
-        if k ~= "" then set[k] = true end
-      end
-    end
-  end
-  return set
-end
-
-rule("stubs", "source", "check", "polish", "every main-text chapter is written: one with fewer than 150 words of its own prose, beyond the template's skeleton text and TODO lines, is still an outline", function()
-  local skel = skeleton_lines()
+-- the roles the essentials cover; a chapter with one of them is measured by the essentials instead
+local ESSENTIAL_ROLES = {}
+for _, row in ipairs(require("essentials")) do ESSENTIAL_ROLES[row.role] = true end
+rule("stubs", "source", "check", "polish", "every main-text chapter the essentials do not cover (background, implementation, a chapter of your own) is written: one with fewer than 150 words of its own prose, beyond the template's skeleton text and TODO lines, is still an outline", function()
   for _, f in ipairs(main_chapters()) do
-    local w = 0
-    for _, l in ipairs(C.prose_lines(f)) do
-      local p = C.prose(l)
-      if not l:match("TODO") and not skel[C.trim((p:gsub("%s+", " ")))] then for _ in p:gmatch("%a%a+") do w = w + 1 end end
+    local covered = false
+    for r in pairs(C.ROLES_OF[f] or {}) do if ESSENTIAL_ROLES[r] then covered = true end end
+    if not covered then
+      local w = 0
+      for _, l in ipairs(C.prose_lines(f)) do w = w + C.own_words(l) end
+      if w < 150 then fail(f, 1, string.format("%d word%s of its own prose beyond the template's skeleton: the chapter is still an outline", w, w == 1 and "" or "s")) end
     end
-    if w < 150 then fail(f, 1, string.format("%d word%s of its own prose beyond the template's skeleton: the chapter is still an outline", w, w == 1 and "" or "s")) end
   end
 end)
 
@@ -252,90 +218,11 @@ rule("pages", "source", "check", "final", "main text, from the first numbered ch
 end)
 
 -- the argument ---------------------------------------------------------------------------
-rule("traceability", "source", "check", "draft", "every tagged item is used where the argument needs it: requirements in the gap matrix and the correctness table, derived requirements in the evaluation, threats met in the approach, guarantees checked in the evaluation, contributions restated in the conclusion, research questions answered", function()
-  if not C.roles_ok({ "approach", "conclusion", "evaluation", "intro", "related" }) then return end
+-- what a paper must contain, and whether it is used where the argument needs it, is the
+-- essentials rule (rules-essentials.lua); here only the outline's own conventions
+rule("outline", "source", "check", "draft", "the outline is final: chapters renamed where the template says so, no TODO heading, no third level of headings, every chapter file has its \\chapter", function()
   if #MAIN == 0 then fail(nil, nil, "no chapter files"); return end
-  local labels = C.collect_labels_and_refs(MAIN)
-  -- references in any chapter of a role; the message names the file, or the role's chapters
-  local function refs(role, pattern)
-    local n = 0
-    for _, f in ipairs(C.role_files(role)) do n = n + C.refs_in(f, pattern) end
-    return n
-  end
-  local function where(role)
-    local fs = C.role_files(role)
-    return #fs == 1 and fs[1] or ("the " .. C.ROLE_NAME[role] .. "s (" .. table.concat(fs, ", ") .. ")")
-  end
-  local function need(prefix, role, what, optional)
-    local any = false
-    for key, at in pairs(labels) do
-      if key:match("^" .. prefix .. ":") then
-        any = true
-        if refs(role, "^" .. C.escape(key) .. "$") == 0 then fail(at.file, at.line, string.format("%s is never referenced in %s: %s", key, where(role), what)) end
-      end
-    end
-    if not any and not optional then fail(nil, nil, string.format("no %s: labels: %s", prefix, what)) end
-  end
-  need("req", "related", "every requirement comes up in the related work, usually as a row of the gap matrix")
-  need("req", "evaluation", "every requirement is checked in the evaluation")
-  need("c", "conclusion", "every contribution is restated with its evidence")
-  need("dr", "evaluation", "every derived requirement is checked in the evaluation, by a test or a proof", true)
-  need("rq", "evaluation", "every research question is answered")
-  need("thr", "approach", "every threat is met by a guarantee or an assumption")
-  need("g", "evaluation", "every guarantee has a row in the correctness table")
-  need("asm", "approach", "every assumption is used by a guarantee or a proof")
-  if refs("conclusion", "^ch:evaluation$") + refs("conclusion", "^ch:evaluation:") + refs("conclusion", "^rq:") + refs("conclusion", "^fig:") + refs("conclusion", "^tab:") + refs("conclusion", "^thm:") == 0 then
-    fail(C.ROLE.conclusion, 1, "the conclusion cites no evaluation result: restate each contribution with its evidence")
-  end
-  -- every contribution points at the chapter that delivers it
-  C.each_line(C.role_files("intro"), function(f, n, l)
-    if l:match("\\label{c:") and not l:match("\\[cC]ref{ch:") then warn(f, n, "a contribution without a pointer to the chapter that delivers it") end
-  end)
-end)
-
-rule("gapmatrix", "source", "check", "draft", "the gap matrix argues the gap: rows are requirements, this work's column is all met with a pointer to the result, and every other approach misses something", function()
-  if not C.roles_ok({ "related" }) then return end
-  local rel, s = C.ROLE.related, ""
-  for _, f in ipairs(C.role_files("related")) do
-    if C.file_has(f, "\\label{tab:related}") then rel = f; break end
-  end
-  s = C.readfile(rel) or ""
-  local tab = s:match("\\label{tab:related}(.-)\\end{tabularx}") or s:match("\\label{tab:related}(.-)\\end{tabular}")
-  if not tab then fail(rel, nil, "no gap matrix table labelled tab:related"); return end
-  local rows, ncols = {}, nil
-  for line in tab:gmatch("[^\n]+") do
-    line = C.strip_comment(line)
-    if line:match("\\ref{req:") and line:match("\\\\") then
-      local cells = {}
-      for cell in (line:gsub("\\\\.*$", "") .. "&"):gmatch("(.-)&") do cells[#cells + 1] = C.trim(cell) end
-      rows[#rows + 1] = cells; ncols = ncols or #cells
-      if #cells ~= ncols then fail(rel, nil, "gap matrix rows have different numbers of cells") end
-    end
-  end
-  if #rows == 0 then fail(rel, nil, "the gap matrix has no rows starting with \\ref{req:...}"); return end
-  local labels = C.collect_labels_and_refs(MAIN)
-  local nreq = 0; for k in pairs(labels) do if k:match("^req:") then nreq = nreq + 1 end end
-  if #rows < nreq then fail(rel, nil, string.format("the gap matrix has %d rows but there are %d requirements", #rows, nreq)) end
-  local approaches = ncols - 3 -- tag, name, approaches..., this work
-  if approaches < 2 then warn(rel, nil, "fewer than two other approaches in the gap matrix: the gap is argued against the closest existing work, plural") end
-  local allmet = {}
-  for _, r in ipairs(rows) do
-    local last = r[#r]
-    if not last:match("\\gapyes") then fail(rel, nil, string.format("row %s: this work does not meet its own requirement; if a requirement is not met, say so in the text and the limitations", r[1]))
-    elseif not last:match("\\[cC]ref{") and not last:match("\\ref{") then warn(rel, nil, string.format("row %s: this work's cell points at no evaluation result", r[1])) end
-    if r[2]:match("TODO") then warn(rel, nil, string.format("row %s: the requirement's short name is a TODO", r[1])) end
-    for c = 3, #r - 1 do allmet[c] = (allmet[c] == nil or allmet[c]) and r[c]:match("\\gapyes") ~= nil end
-  end
-  for c, met in pairs(allmet) do if met then fail(rel, nil, string.format("approach in column %d meets every requirement: then there is no gap, or a requirement is missing", c - 2)) end end
-  return string.format("rows=%d approaches=%d", #rows, approaches)
-end)
-
-rule("outline", "source", "check", "draft", "the outline follows the spine: chapters renamed where the template says so, no TODO heading, the running example named and in every chapter", function()
-  if not C.roles_ok({ "approach", "intro" }) then return end
-  if #MAIN == 0 then fail(nil, nil, "no chapter files"); return end
-  local box = (C.readfile("thesis.tex") or ""):match("\\newcommand{\\lintexamplebox}{(%a+)}") or "runningexample"
   for _, f in ipairs(MAIN) do
-    if not C.file_has(f, "\\begin{" .. box .. "}") then fail(f, 1, "no " .. box .. " box: every chapter returns to the running example") end
     if not C.file_has(f, "\\chapter") then fail(f, 1, "no \\chapter in a chapter file") end
   end
   for _, f in ipairs(C.role_files("approach")) do
@@ -346,13 +233,6 @@ rule("outline", "source", "check", "draft", "the outline follows the spine: chap
     if t and t:match("TODO") then fail(file, n, "heading still a TODO: " .. t) end
     if l:match("\\subsubsection") then warn(file, n, "a subsubsection: three levels of headings in 35 pages is one too many") end
   end)
-  local ex = (C.readfile("thesis.tex") or ""):match("\\newcommand{\\exname}{([^}]*)}") or ""
-  if ex:match("TODO") then fail("thesis.tex", 1, "\\exname is still a TODO: name the running example") end
-  -- the introduction's paragraphs in the template's order are a reporting aid, not a rule
-  local intro = C.role_text("intro")
-  local have = {}
-  for _, p in ipairs({ "Context", "Problem", "Requirements", "Gap", "Contributions", "Structure" }) do if intro:find("\\paragraph{" .. p, 1, true) then have[#have + 1] = p end end
-  return "intro=" .. table.concat(have, ",")
 end)
 
 rule("figures", "source", "check", "always", "every figure, table, listing, algorithm and numbered equation is referenced from the text; floats have captions and labels; raster images are flagged", function()
@@ -455,7 +335,7 @@ rule("tables", "source", "advice", "polish", "tables use booktabs rules, no vert
   end
 end)
 
-rule("labels", "source", "check", "always", "label prefixes match their environments (fig:, tab:, lst:, alg:, eq:, def:, thm:, lem:, ch:, sec: or subsec:), so references read right and the lint can trace them", function()
+rule("labels", "source", "check", "always", "label prefixes match their environments (fig:, tab:, lst:, alg:, eq:, def:, thm:, lem:, ch:, sec:, subsec: or par:), so references read right and the lint can trace them", function()
   local envpref = { figure = "fig", table = "tab", sidewaystable = "tab", listing = "lst", lstlisting = "lst", algorithm = "alg", equation = "eq", align = "eq", definition = "def", theorem = "thm", lemma = "lem", proposition = "prop", corollary = "cor", invariant = "inv", property = "prty", claim = "claim", remark = "rem", notation = "not", example = "ex", subfigure = "fig", subtable = "tab" }
   local listpref = { contributions = "c", requirements = "req", derivedrequirements = "dr", assumptions = "asm", guarantees = "g", threats = "thr", limitations = "lim", rqlist = "rq" }
   for _, f in ipairs(MAIN) do
@@ -464,7 +344,7 @@ rule("labels", "source", "check", "always", "label prefixes match their environm
     for n, raw in ipairs(C.lines(f)) do
       local l = C.strip_comment(raw)
       for e in l:gmatch("\\begin{([%a%*]+)}") do stack[#stack + 1] = e:gsub("%*", "") end
-      if l:match("\\chapter") then lastheading = "ch" elseif l:match("\\section") or l:match("\\subsection") then lastheading = "sec" end
+      if l:match("\\chapter") then lastheading = "ch" elseif l:match("\\section") or l:match("\\subsection") then lastheading = "sec" elseif l:match("\\paragraph") then lastheading = "par" end
       local lab = l:match("\\lstlisting%[.-label%s*=%s*{?([^},%]]+)") ; if lab and not lab:match("^lst:") then warn(f, n, "listing label should start with lst: " .. lab) end
       for key in l:gmatch("\\label{([^}]*)}") do
         if key:match(":%d+[%.%d]*$") then warn(f, n, "label " .. key .. " encodes a number, which lies once chapters move: name it after what it labels") end
