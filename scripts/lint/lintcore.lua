@@ -35,7 +35,7 @@ function M.count(s, pat) return select(2, s:gsub(pat, "")) end
 -- a role may span several chapters, and a chapter may have two roles. M.ROLES[R] lists the
 -- chapters of R in reading order, M.ROLES_OF[file] is the set of a file's roles, and M.ROLE[R] is
 -- the first chapter of R
-M.CONTENT, M.MAIN, M.ROLE, M.ROLES, M.ROLES_OF, M.FILES, M.BIB = {}, {}, {}, {}, {}, {}, {}
+M.CONTENT, M.MAIN, M.ROLE, M.ROLES, M.ROLES_OF, M.FILES, M.BIB, M.REACHED = {}, {}, {}, {}, {}, {}, {}, {}
 M.ROLE_LABEL = { intro = "ch:intro", background = "ch:background", approach = "ch:approach", implementation = "ch:implementation", evaluation = "ch:evaluation", related = "ch:related", conclusion = "ch:conclusion" }
 M.ROLE_NAME = { intro = "introduction", background = "background chapter", approach = "approach chapter", implementation = "implementation chapter", evaluation = "evaluation chapter", related = "related-work chapter", conclusion = "conclusion" }
 M.MANDATORY = { "intro", "approach", "evaluation", "related", "conclusion" }
@@ -47,6 +47,7 @@ do
     seen[f] = true
     local s = M.readfile(f)
     if not s then return end
+    M.REACHED[#M.REACHED + 1] = f
     if f ~= "thesis.tex" and not under(f, "include/") then M.CONTENT[#M.CONTENT + 1] = f end
     for l in s:gmatch("[^\n]*") do
       for cmd, arg in M.strip_comment(l):gmatch("\\(%a+)%s*(%b{})") do
@@ -85,6 +86,39 @@ do
     if body:match("\\DeclareAcronym") or body:match("\\newabbreviation") or body:match("\\newglossaryentry") then M.FILES.glossary = f end
   end
 end
+-- whether a file thesis.tex reaches, the frame included, loads package p, or defines the macro
+-- \m: a fix that writes \cref or \eg is only offered to a paper that has it, since a paper that
+-- left the template may not load cleveref
+local loads_cache, defines_cache = {}, {}
+function M.loads(p)
+  if loads_cache[p] == nil then
+    loads_cache[p] = false
+    for _, f in ipairs(M.REACHED) do
+      for l in (M.readfile(f) or ""):gmatch("[^\n]*") do
+        for list in M.strip_comment(l):gmatch("\\usepackage%s*%b[]%s*{([^}]*)}") do for q in list:gmatch("[^,%s]+") do if q == p then loads_cache[p] = true end end end
+        for list in M.strip_comment(l):gmatch("\\usepackage%s*{([^}]*)}") do for q in list:gmatch("[^,%s]+") do if q == p then loads_cache[p] = true end end end
+      end
+    end
+  end
+  return loads_cache[p]
+end
+function M.defines(m)
+  if defines_cache[m] == nil then
+    defines_cache[m] = false
+    local name = M.escape(m)
+    for _, f in ipairs(M.REACHED) do
+      for l in (M.readfile(f) or ""):gmatch("[^\n]*") do
+        local c = M.strip_comment(l)
+        for _, cmd in ipairs({ "newcommand", "renewcommand", "providecommand", "DeclareRobustCommand", "NewDocumentCommand" }) do
+          if c:find("\\" .. cmd .. "%*?%s*{?\\" .. name .. "[}%s%[{]") then defines_cache[m] = true end
+        end
+        if c:find("\\def\\" .. name .. "[^%a]") then defines_cache[m] = true end
+      end
+    end
+  end
+  return defines_cache[m]
+end
+
 -- the chapters of a role, in reading order; empty when no chapter has it
 function M.role_files(r) return M.ROLES[r] or {} end
 -- the text of all chapters of a role, joined in reading order
@@ -203,7 +237,7 @@ local function ignored(file, line)
     local rule, reason = l:match("%%%s*lint%-ignore:%s*([%w%-]+)%s*(.*)$")
     if rule == M.current_rule or rule == "all" then
       if not reason or #M.trim(reason) < 3 then
-        M.findings[#M.findings + 1] = { level = "warning", file = file, line = line, msg = "lint-ignore without a reason: say why" }
+        M.findings[#M.findings + 1] = { level = "warning", file = file, line = line, msg = "lint-ignore without a reason", help = "say why" }
         return false
       end
       M.ignored = M.ignored + 1
@@ -212,27 +246,163 @@ local function ignored(file, line)
   end
   return false
 end
-local function finding(level, file, line, msg)
-  if ignored(file, line) then return end
-  M.findings[#M.findings + 1] = { level = level, file = file, line = line, msg = msg }
+-- findings, help and fixes ----------------------------------------------------------------
+-- A finding says what is wrong, its help what to do, and its fix, when the lint can compute one,
+-- the text to write instead, the way a compiler reports them:
+--   fail(f, n, "a typed reference with \\ref", "write \\cref{...}", fix)
+-- Both help and fix are optional: a string after the message is the help, a table the fix. The
+-- help is the general instruction; the fix's own help names the change, and stands in for the
+-- help where a finding has none. A fix's safety says how far to trust it:
+--   safe         the exact inverse of a slip; `lint.lua fix` writes it
+--   review       most likely right, but read it first; `lint.lua fix --review` writes it
+--   placeholder  the text to write, with <holes> only the author can fill; shown, never written
+--   C.fix("safe", "write \\cref", C.replace("Figure~\\ref{" .. key .. "}", "\\cref{" .. key .. "}"))
+-- An edit replaces the first old on the finding's line (every old with all), adds a line after
+-- it, or names a command for the author to run; replace_at and after_at do the same elsewhere.
+-- C.matches makes one edit per match of a pattern, each at its own column. An edit never touches
+-- the comment after a %, which no rule reads. A fix covers every occurrence of its slip on its
+-- line, so a fix offered again after it was written has not cleared its finding. A fix whose old
+-- text is not on its line is dropped, never guessed (LINT_FIX_STRICT=1 makes that an error, for
+-- the tests).
+M.SAFETY = { safe = 1, review = 2, placeholder = 3 }
+function M.fix(safety, help, ...) return { safety = safety, help = help, edits = { ... } } end
+function M.replace(old, new, all) return { old = old, new = new, all = all } end
+function M.after(text) return { after = text } end
+function M.replace_at(file, line, old, new, all) return { file = file, line = line, old = old, new = new, all = all } end
+function M.after_at(file, line, text) return { file = file, line = line, after = text } end
+function M.command(cmd) return { cmd = cmd } end
+
+-- the file's lines as they are on disk, read once per run
+local raw_cache = {}
+function M.raw_lines(file)
+  if not raw_cache[file] then raw_cache[file] = M.lines(file) end
+  return raw_cache[file]
 end
+-- one edit applied to the code part of a line; nil when its old text is not there
+function M.apply_edit(l, e)
+  local code = M.strip_comment(l)
+  local rest = l:sub(#code + 1)
+  if e.at then
+    if code:sub(e.at, e.at + #e.old - 1) ~= e.old then return nil end
+    return code:sub(1, e.at - 1) .. e.new .. code:sub(e.at + #e.old) .. rest
+  end
+  local s, t = code:find(e.old, 1, true)
+  if not s then return nil end
+  if e.all then return (code:gsub(M.escape(e.old), (e.new:gsub("%%", "%%%%")))) .. rest end
+  return code:sub(1, s - 1) .. e.new .. code:sub(t + 1) .. rest
+end
+-- one edit per match of pattern in the code part of line l, right to left, so each column still
+-- holds when its edit comes; fn(match, column, code, captures...) gives the new text, nil skips it
+function M.matches(l, pattern, fn)
+  local code, found, init = M.strip_comment(l), {}, 1
+  while init <= #code + 1 do
+    local r = { code:find(pattern, init) }
+    if not r[1] then break end
+    local s, e = r[1], r[2]
+    local new = fn(code:sub(s, e), s, code, table.unpack(r, 3))
+    if new then found[#found + 1] = { at = s, old = code:sub(s, e), new = new } end
+    if pattern:sub(1, 1) == "^" then break end
+    init = e >= s and e + 1 or s + 1
+  end
+  local edits = {}
+  for i = #found, 1, -1 do edits[#edits + 1] = found[i] end
+  return edits
+end
+-- the number of matches of pattern in s
+function M.nmatch(s, pattern) local n = 0; for _ in s:gmatch(pattern) do n = n + 1 end; return n end
+-- the fix bound to the finding's place and checked against the file; nil when it does not apply
+local function bind(fx, file, line)
+  if not fx or #fx.edits == 0 then return nil end
+  assert(M.SAFETY[fx.safety], "unknown fix safety " .. tostring(fx.safety))
+  for _, e in ipairs(fx.edits) do
+    if not e.cmd then
+      e.file, e.line = e.file or file, e.line or line
+      local l = e.file and e.line and M.raw_lines(e.file)[e.line]
+      if not l or (e.old and not M.apply_edit(l, e)) then
+        if os.getenv("LINT_FIX_STRICT") then error(string.format("fix %q does not apply at %s:%s", fx.help, tostring(e.file), tostring(e.line))) end
+        return nil
+      end
+    end
+  end
+  return fx
+end
+local FIX_WHO = { safe = "make fix writes it", review = "make fix-review writes it; read it first", placeholder = "fill in the <holes>" }
+-- the fix as lines of text, under the finding: "fix (safe): ...", then "- old" and "+ new" for each
+-- line it changes, "@ file:line" before a line elsewhere, "$ command" for a command
+function M.fix_lines(f)
+  local fx = f.fix
+  local command = false
+  for _, e in ipairs(fx.edits) do if e.cmd then command = true end end
+  local out = { string.format("fix (%s): %s", fx.safety, command and "run it yourself" or FIX_WHO[fx.safety]) }
+  local groups, order = {}, {}
+  for _, e in ipairs(fx.edits) do
+    local k = e.cmd and ("$" .. #order) or (e.file .. ":" .. e.line)
+    if not groups[k] then groups[k] = { file = e.file, line = e.line, edits = {} }; order[#order + 1] = k end
+    table.insert(groups[k].edits, e)
+  end
+  for _, k in ipairs(order) do
+    local g = groups[k]
+    if g.file and (g.file ~= f.file or g.line ~= f.line) then out[#out + 1] = "@ " .. g.file .. ":" .. g.line end
+    local old = g.file and M.raw_lines(g.file)[g.line]
+    local new = old
+    for _, e in ipairs(g.edits) do if e.old then new = M.apply_edit(new, e) or new end end
+    if old and new ~= old then out[#out + 1] = "- " .. old:gsub("%s+$", ""); out[#out + 1] = "+ " .. new:gsub("%s+$", "") end
+    for _, e in ipairs(g.edits) do
+      if e.after then out[#out + 1] = "+ " .. e.after end
+      if e.cmd then out[#out + 1] = "$ " .. e.cmd end
+    end
+  end
+  return out
+end
+-- the columns of the first replaced text on the finding's own line, in characters, for annotations
+local function columns(f)
+  for _, e in ipairs(f.fix and f.fix.edits or {}) do
+    if e.old and e.file == f.file and e.line == f.line then
+      local l = M.raw_lines(f.file)[f.line]
+      local s = e.at or l:find(e.old, 1, true)
+      local c = (utf8.len(l:sub(1, s - 1)) or (s - 1)) + 1
+      return c, c + (utf8.len(e.old) or #e.old) - 1
+    end
+  end
+end
+
+local function finding(level, file, line, msg, help, fx)
+  if type(help) ~= "string" then help, fx = nil, help end
+  if ignored(file, line) then return end
+  M.findings[#M.findings + 1] = { level = level, file = file, line = line, msg = msg, help = help, fix = bind(fx, file, line) }
+end
+-- the help a finding shows: its own, or else its fix's
+function M.help_of(f) return f.help or (f.fix and f.fix.help) end
 -- findings are printed by M.report, after sorting, so the output is the same on every run
+-- GitHub's workflow commands end a message at a newline, and read % as an escape
+local function ghesc(s) return (s:gsub("%%", "%%25"):gsub("\r", "%%0D"):gsub("\n", "%%0A")) end
+-- a property (title=...) also ends at a comma or a colon
+local function ghprop(s) return (ghesc(s):gsub(":", "%%3A"):gsub(",", "%%2C")) end
 local function print_finding(f)
+  local lines = {}
+  local help = M.help_of(f)
+  if help then lines[1] = "help: " .. help end
+  for _, l in ipairs(f.fix and M.fix_lines(f) or {}) do lines[#lines + 1] = l end
   if gh then
+    -- the message is the annotation's title, the help and the fix its body
     local loc = f.file and ("file=" .. f.file .. (f.line and (",line=" .. f.line) or "")) or ""
-    io.write(string.format("::%s %s::%s\n", f.level, loc, f.msg))
+    local c1, c2 = columns(f)
+    if c1 then loc = loc .. string.format(",col=%d,endColumn=%d", c1, c2) end
+    if #lines == 0 then io.write(string.format("::%s %s::%s\n", f.level, loc, ghesc(f.msg)))
+    else io.write(string.format("::%s %s%stitle=%s::%s\n", f.level, loc, loc ~= "" and "," or "", ghprop(f.msg), ghesc(table.concat(lines, "\n")))) end
   else
     local tag = ({ error = " FAIL", warning = " warn", notice = "     " })[f.level]
     io.write(string.format("%s%s %s\n", f.file and (f.file .. (f.line and (":" .. f.line) or "") .. ":") or "", tag, f.msg))
+    for _, l in ipairs(lines) do io.write("    ", l, "\n") end
   end
 end
-function M.fail(file, line, msg) finding("error", file, line, msg) end
+function M.fail(file, line, msg, help, fx) finding("error", file, line, msg, help, fx) end
 -- the rule cannot run here (a tool is missing, the profile excludes it): its status is skipped,
 -- not pass, and the reason is its one finding
 M.skipped = nil
 function M.skip(reason) M.skipped = reason; finding("notice", nil, nil, reason .. ": skipped") end
-function M.warn(file, line, msg) finding("warning", file, line, msg) end
-function M.note(file, line, msg) finding("notice", file, line, msg) end
+function M.warn(file, line, msg, help, fx) finding("warning", file, line, msg, help, fx) end
+function M.note(file, line, msg, help, fx) finding("notice", file, line, msg, help, fx) end
 
 M.results = {}
 -- severity: check (fails on errors once its phase is reached), advice (warns, never fails), count (numbers)
@@ -256,7 +426,7 @@ function M.report(rule, r, counts)
     if (a.line or 0) ~= (b.line or 0) then return (a.line or 0) < (b.line or 0) end
     return a.msg < b.msg
   end)
-  local quiet = M.opts.tex or M.opts.json
+  local quiet = M.opts.tex or M.opts.json or M.opts.quiet
   if not quiet then for _, f in ipairs(M.findings) do print_finding(f) end end
   local errors, warnings = 0, 0
   for _, f in ipairs(M.findings) do
@@ -269,11 +439,14 @@ function M.report(rule, r, counts)
   if not quiet then
     io.write(string.format("%s %-13s %-7s %-18s %d error(s), %d warning(s)%s%s\n", gate and (ok and "ok  " or "FAIL") or "    ", rule, r.severity, status, errors, warnings, counts and (" " .. counts) or "", M.ignored > 0 and (" ignored=" .. M.ignored) or ""))
   end
-  if summary and r.summary ~= false then
+  if summary and r.summary ~= false and not M.opts.quiet then
     local h = io.open(summary, "a")
     if h then
       local P = require("pagemap")
       local found = r.severity == "count" and (counts or "") or ((errors + warnings == 0) and "" or string.format("%d error(s), %d warning(s)", errors, warnings))
+      local fixes = 0
+      for _, f in ipairs(M.findings) do if f.fix and f.fix.safety == "safe" then fixes = fixes + 1 end end
+      if fixes > 0 then found = found .. string.format(", %d with a safe fix (`make fix`)", fixes) end
       h:write(string.format("| %s | %s %s | %s | `%s` | %s |\n", P.group_title(P.group(rule)), ICON[status] or ":hourglass:", status, (P.title(rule):gsub("%-%-", "–")), rule, (found:gsub("|", "\\|"))))
       h:close()
     end
@@ -282,7 +455,7 @@ function M.report(rule, r, counts)
 end
 M.SUMMARY_HEADER = "| Group | Status | Check | Rule | Findings |\n|---|---|---|---|---|\n"
 function M.summary_header(title)
-  if not summary then return end
+  if not summary or M.opts.quiet then return end
   local h = io.open(summary, "a"); if h then h:write("\n## " .. title .. "\n\n" .. M.SUMMARY_HEADER); h:close() end
 end
 

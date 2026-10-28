@@ -414,7 +414,14 @@ local function eval_example(row, r)
   end
   if not found then return 0, row.add end
   r.where = place(found.file, found.line, found.last)
-  if not name or name:match("TODO") then return 1, "name the example: \\exname in thesis.tex is still a TODO" end
+  if not name or name:match("TODO") then
+    -- the finding sits on the example box; the fix shows the line to edit, in thesis.tex
+    for n, raw in ipairs(C.raw_lines("thesis.tex")) do
+      local def = C.strip_comment(raw):match("\\newcommand{\\exname}%b{}")
+      if def then r.fix = C.fix("placeholder", "name the running example", C.replace_at("thesis.tex", n, def, "\\newcommand{\\exname}{<the example's name>}")); break end
+    end
+    return 1, "name the example: \\exname in thesis.tex is still a TODO"
+  end
   local w, ps = 0, plines(found.file)
   for i = found.line, found.last do w = w + C.own_words(ps[i] or "") end
   if w < M.EXAMPLE_WORDS then return 2, "write the introduction's example box in your own words: the actors, what they want, what goes wrong" end
@@ -506,6 +513,18 @@ local function write_summary(rows)
   h:close()
 end
 
+-- the label of a row found by its heading, right after the heading; safe, since a label prints
+-- nothing, unless a file of the paper already defines it
+local function label_fix(r)
+  local label = "\\label{" .. r.label .. "}"
+  local taken = false
+  for _, f in ipairs(C.CONTENT) do if C.file_has(f, label) then taken = true end end
+  local first = true
+  return C.fix(taken and "review" or "safe", "add " .. label, table.unpack(C.matches(C.raw_lines(r.where.file)[r.where.line], "\\" .. r.cmd .. "%*?%s*%b{}", function(m)
+    if first then first = false; return m .. label end
+  end)))
+end
+
 C.rule("essentials", "source", "check", "always", "the essentials every paper of this kind contains, from scripts/lint/essentials.lua, each missing, a placeholder, started, written or used where the argument needs it; the phase asks for a level of every row (plan: present, draft: started, polish and final: used)", function()
   local rows = M.evaluate()
   C.ESSENTIALS = rows
@@ -515,13 +534,13 @@ C.rule("essentials", "source", "check", "always", "the essentials every paper of
     counts[r.level] = counts[r.level] + 1
     local file = r.home
     local line = r.where and r.where.line
-    local msg = string.format("%s %s: %s", M.GLYPH[r.level], r.row.title, r.next ~= "" and r.next or M.LEVEL_NAME[r.level])
-    if r.level < t then fail(file, line, msg) end
-    if r.via == "heading" then note(file, line, string.format("%s found by its heading; add \\label{%s} so it is found when the heading changes", r.row.title, r.label)) end
+    local msg = string.format("%s %s", M.GLYPH[r.level], r.row.title)
+    if r.level < t then fail(file, line, msg, r.next ~= "" and r.next or M.LEVEL_NAME[r.level], r.fix) end
+    if r.via == "heading" then note(file, line, string.format("%s found by its heading", r.row.title), string.format("add \\label{%s} so it is found when the heading changes", r.label), label_fix(r)) end
   end
   for _, w in ipairs(M.gapwarn) do warn(C.ROLE.related, nil, w) end
-  if not C.opts.tex and not C.opts.json then io.write(M.fingerprint(rows), "\n") end
-  write_summary(rows)
+  if not C.opts.tex and not C.opts.json and not C.opts.quiet then io.write(M.fingerprint(rows), "\n") end
+  if not C.opts.quiet then write_summary(rows) end
   return string.format("at-target=%d/%d %s=%d %s=%d %s=%d %s=%d %s=%d", M.at_target(rows), #rows, M.GLYPH[4], counts[4], M.GLYPH[3], counts[3], M.GLYPH[2], counts[2], M.GLYPH[1], counts[1], M.GLYPH[0], counts[0])
 end, { summary = false })
 

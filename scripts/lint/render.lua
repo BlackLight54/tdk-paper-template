@@ -153,6 +153,22 @@ local function status_cell(s)
   return esc(s)
 end
 
+-- what a fix writes, short enough for a cell: the replacement, the added line or the command;
+-- the cell's typewriter text breaks only at its spaces, so a long one is cut
+local function cut(s, n) if #s > n then return s:sub(1, n - 3):gsub("[\128-\191]*$", ""):gsub("[\192-\255]$", "") .. "..." end; return s end
+-- what an edit writes, in a few words: the new text, the added line, the command, or for a deletion
+-- the text it deletes
+local function edit_text(e)
+  if e.new == "" then return "delete " .. e.old end
+  return e.new or e.after or e.cmd
+end
+local FIX_NOTE = { review = "\\enspace{\\itshape read it first}", placeholder = "\\enspace{\\itshape fill in the <holes>}" }
+local function fix_cell(fx)
+  local t = {}
+  for _, e in ipairs(fx.edits) do t[#t + 1] = edit_text(e) end
+  return "\\newline\\hspace*{1em}$\\to$ \\texttt{" .. esc(cut(table.concat(t, " / "), 70)) .. "}" .. (FIX_NOTE[fx.safety] or "")
+end
+
 local function findings_cell(res)
   local shown, extra = {}, 0
   for _, f in ipairs(res.findings) do
@@ -161,7 +177,11 @@ local function findings_cell(res)
         local where = f.file and (loc(f.file, f.line) .. " ") or ""
         local msg = f.msg
         if #msg > 150 then msg = msg:sub(1, 147):gsub("[\128-\191]*$", "") .. "..." end
-        shown[#shown + 1] = where .. esc(msg)
+        -- under the message, the fix's text when there is one, or else the help, in italics
+        local under = ""
+        if f.fix then under = fix_cell(f.fix)
+        elseif f.help then under = "\\newline\\hspace*{1em}{\\itshape " .. esc(cut(f.help, 150)) .. "}" end
+        shown[#shown + 1] = where .. esc(msg) .. under
       else extra = extra + 1 end
     end
   end
@@ -170,6 +190,19 @@ local function findings_cell(res)
   -- a cell must not open with \newline: xltabular has no line to end there
   if res.ignored > 0 then s = s .. (s ~= "" and "\\newline " or "") .. string.format("(%d ignored)", res.ignored) end
   return s
+end
+
+-- the fix in a package warning, as the characters to type: \detokenize keeps \cref{fig:x} from
+-- expanding (it prints "\cref {fig:x}"); the braces must balance inside the warning's argument, so
+-- a fix whose braces do not balance loses them, and % and # would end or break the line
+local function log_fix(fx)
+  local t = {}
+  for _, e in ipairs(fx.edits) do t[#t + 1] = edit_text(e) end
+  local s = cut(table.concat(t, " / "), 120):gsub("[%%#\n]", " ")
+  local depth, balanced = 0, true
+  for c in s:gmatch("[{}]") do depth = depth + (c == "{" and 1 or -1); if depth < 0 then balanced = false end end
+  if depth ~= 0 or not balanced then s = s:gsub("[{}]", " ") end
+  return " -- fix: \\detokenize{" .. s .. "}"
 end
 
 local function other_checks(results)
@@ -254,14 +287,15 @@ function M.checks_page(results)
   w(other_checks(C.results))
   w(counts_table(C.results))
   w("\\par\\medskip\\noindent\\rule{.4\\linewidth}{.4pt}\\par")
-  w(string.format("{\\footnotesize\\color{lintmute}\\noindent Generated %s by \\texttt{texlua scripts/lint.lua overleaf}. The build log's own warnings and the PDF rules are not here: Overleaf shows the first, CI runs the second. A finding judged and rejected is silenced by \\texttt{\\%% lint-ignore: <id> <reason>} on its line.\\par}", os.date("%Y-%m-%d")))
+  w(string.format("{\\footnotesize\\color{lintmute}\\noindent Generated %s by \\texttt{texlua scripts/lint.lua overleaf}. The build log's own warnings and the PDF rules are not here: Overleaf shows the first, CI runs the second. A finding judged and rejected is silenced by \\texttt{\\%% lint-ignore: <id> <reason>} on its line. Under a finding, after $\\to$, is the text to write instead, or else in italics what to do; in a local clone, \\texttt{make fix} writes the safe fixes and prints the diff.\\par}", os.date("%Y-%m-%d")))
   -- failing checks as package warnings, for Overleaf's log panel
   for _, res in ipairs(C.results) do
     if res.severity == "check" and res.status == "fix" then
       for _, f in ipairs(res.findings) do
         if f.level == "error" then
           local where = f.file and (f.file .. (f.line and (":" .. f.line) or "") .. ": ") or ""
-          w(string.format("\\PackageWarningNoLine{tdk-lint}{%s: %s%s}", res.rule, where, (f.msg:gsub("[%%#{}\\]", " "):gsub("\n", " "))))
+          local text = f.msg .. (C.help_of(f) and (" -- " .. C.help_of(f)) or "")
+          w(string.format("\\PackageWarningNoLine{tdk-lint}{%s: %s%s%s}", res.rule, where, (text:gsub("[%%#{}\\]", " "):gsub("\n", " ")), f.fix and log_fix(f.fix) or ""))
         end
       end
     end
@@ -358,7 +392,12 @@ function M.json(ok)
   for _, res in ipairs(C.results) do
     out.rules[#out.rules + 1] = { rule = res.rule, family = res.family, severity = res.severity, phase = res.phase, status = res.status,
       errors = res.errors, warnings = res.warnings, ignored = res.ignored, counts = res.counts }
-    for _, f in ipairs(res.findings) do out.findings[#out.findings + 1] = { rule = res.rule, level = f.level, file = f.file, line = f.line, msg = f.msg } end
+    -- every finding with its help and its fix, for editors and agents
+    for _, f in ipairs(res.findings) do
+      local fix
+      if f.fix then fix = { safety = f.fix.safety, help = f.fix.help, edits = f.fix.edits, text = C.fix_lines(f) } end
+      out.findings[#out.findings + 1] = { rule = res.rule, level = f.level, file = f.file, line = f.line, msg = f.msg, help = f.help, fix = fix }
+    end
   end
   if C.ESSENTIALS then
     local E = C.ESS
