@@ -64,13 +64,7 @@ Links: \url{https://github.com/ftsrg} prints the address, \href{https://ftsrg.mi
 The PDF bookmarks in the viewer's sidebar come from hyperref and bookmark.
 Icons: \faGithub~source code, \faFilePdf~paper, \faEnvelope~contact. Author ORCID: \orcidlink{0000-0000-0000-0000}.
 
-\paragraph{Quoting.} Put every verbatim quotation in \texttt{\textbackslash enquote} and follow it with a citation. Cite paraphrases too. Cite each borrowed result, concept, tool or product at first use, however familiar it is. Unmarked quotations count as plagiarism, and criterion B/2 also rewards proper citation.
-
-\paragraph{Web pages.} The faculty guideline in \texttt{include/guideline.tex} requires: \enquote{Internetes hivatkozások megadásakor fontos, hogy az elérési út előtt megadjuk az oldal tulajdonosát és tartalmát (mivel a link egy idő után akár elérhetetlenné is válhat), valamint az elérés időpontját.} Use a \texttt{misc} entry. Set the author to the page owner in double braces, such as \texttt{author = \{\{W3C\}\}}, to keep its name intact. Give the page a descriptive title, a \texttt{url} and a \texttt{urldate} recording when you read it.
-
 Zotero records the access date on saving and exports it as \texttt{urldate}. The template's \texttt{tdkieee.bst} prints it after the URL, for example \enquote{Accessed: 2026-10-25}; stock styles would omit it. Follow the \texttt{w3c2025vcdm} entry in \texttt{bib/references.bib}. The \texttt{bib} rule flags missing access dates. Use \cref{app:writing:refs} to decide whether a link belongs in the bibliography or a footnote.
-
-\paragraph{Where the entries come from: Zotero.} Add sources to the group library with the browser's \href{https://www.zotero.org/download/connectors}{Zotero Connector}. Click it on the paper or DOI page, then correct the fetched metadata in Zotero so everyone gets the fix. Do not write literature entries by hand.
 
 Overleaf's Zotero integration imports the group as \texttt{bib/zotero.bib} (\cref{app:start:access}). Use \emph{Refresh} to pull in additions. Zotero generates the citation keys; Overleaf suggests them when you type \texttt{\textbackslash cite\{}. For help, see the \href{https://www.zotero.org/support/quick_start_guide}{Zotero quick start guide}, \href{https://www.zotero.org/support/groups}{group libraries} and Overleaf's \href{https://www.overleaf.com/learn/how-to/How_to_link_your_Overleaf_account_to_Mendeley_and_Zotero}{linking your account to Zotero}. Locally, \href{https://retorque.re/zotero-better-bibtex/}{Better BibTeX} can keep an exported \texttt{.bib} in sync and provide stable citation keys.
 
@@ -194,7 +188,6 @@ Compact lists:
 \end{figure}
 
 \Cref{fig:latex:svg} is an SVG file included with \texttt{\textbackslash includesvg}. Overleaf converts it with Inkscape; local builds need \texttt{-shell-escape}.
-Export draw.io and Inkscape drawings as SVG and include them this way, so the text stays sharp.
 \begin{figure}[!ht]
   \centering
   \includesvg[width=0.35\linewidth]{guide/figures/example}

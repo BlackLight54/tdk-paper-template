@@ -4,6 +4,7 @@
 Plan the phases in \cref{tab:lifecycle} backwards from the official dates in \cref{app:tdk}. Each step has an owner, a completion condition and a link to guidance.
 We use these steps to track each student's progress at the weekly consultation (\cref{app:consult}).
 Set \texttt{\textbackslash lintphase} in \texttt{thesis.tex} to your phase's name in lower case, from \texttt{topic} to \texttt{submit}; the lint's checks come due by phase (\cref{app:code:paperci}). After the upload, leave it at \texttt{submit}: the paper is submitted and needs no further checks.
+Inspect this PDF every week. It is the version reviewers will read.
 
 Three steps are \anchor{}s: the topic manifest, the spine and the full draft. An anchor is a one-page artefact agreed with us that later work must follow. The topic starts as a direction. The spine fixes its claims and names; the full draft leaves only polishing. You can continue working at an anchor, but work that contradicts it is drift. Revisit the agreement first, or you may have to redo everything built on it.
 
@@ -83,46 +84,8 @@ Red rows mark anchors. Yellow rows marked \official{} are faculty steps with fix
 \end{xltabular}
 }
 
-\section{Reviewer passes}\label{app:lifecycle:reviewers}
-Two reviewers each spend an evening reading and scoring the paper against the review sheet (\cref{app:tdk:sheet}). The section jury, mostly from other fields, hears your talk. Prepare for these different readings with a \emph{reviewer pass}: an agent in your paper repository reads as a simulated reader with a narrow brief. A pass takes minutes, so run it early and repeat it. Personas can miss problems or invent them. Treat their output as objections to check, not an authoritative assessment.
-
-\paragraph{The skim pass.} The template aims to earn the maximum score from a reviewer who reads only the outline, figures, labelled items and coloured boxes. Test this with a \emph{skim view} made from the reviewer PDF, which paper CI builds on every push. It keeps the title, abstract, labelled items and boxes verbatim. Headings retain their page and length; figures retain their captions; tables retain their captions and a thumbnail. Paragraphs, equations, listings and plain lists become length markers, such as \enquote{paragraph, 7 lines}.
-
-The skim reviewer reads only this view and the review sheet. It scores each criterion and, for any shortfall, names the item that should have made the point clear. For example, a security goal may lack a row in the correctness table. During polish, repeat the pass until every criterion reaches the maximum. This is the review sheet hill climb for a reader who skims.
-
-\paragraph{The panel.} \Cref{tab:reviewers} lists the expert personas. Their responsibilities are \emph{disjoint}: each concern has one owner and one place for an answer. A persona that notices a concern outside its remit hands it to the owner in one line, without arguing it.
-
-Five rules define these responsibilities. The cryptographer and formal methods expert handle claims inside the formal model; the networking and cybersecurity expert handles what happens outside it. The mean mathematician checks pen-and-paper proofs; the formal methods expert checks tool-assisted proofs. The systems modeling expert checks system structure; the process modeling expert checks behaviour. The distributed systems expert checks which faults and scales are studied; the empiricist checks how they are measured. Every persona checks overclaiming in its own area. Only the champion looks for results stated more weakly than the evidence supports.
-
-The first four personas read every paper. The others read papers that touch their field.
-{\small
-\begin{xltabular}{\linewidth}{>{\raggedright\arraybackslash}p{0.2\linewidth} X >{\raggedright\arraybackslash}p{0.22\linewidth}}
-  \caption{Reviewer personas, their responsibilities and the papers they read. Each concern has one owner.}\label{tab:reviewers}\\
-  \toprule \textbf{Persona} & \textbf{Owns} & \textbf{Reads} \\ \midrule \endfirsthead
-  \toprule \textbf{Persona} & \textbf{Owns} & \textbf{Reads} \\ \midrule \endhead
-  \bottomrule \endlastfoot
-  Skim reviewer & Whether the skim view alone earns the maximum on every criterion & every paper \\
-  Out-of-field reviewer & The problem and why it matters on the first page; every term explained before it is used; the leading figure without the text; the conclusion in plain words & every paper \\
-  Reviewer two & Novelty against the closest neighbour; the gap matrix and the positioning figure; recent research in the literature; whether the topic is still open & every paper \\
-  Champion & Results reported weaker than the evidence allows; contributions missing from the abstract, the leading figure or the conclusion & every paper \\
-  Mean mathematician & Definitions and notation; theorem statements with every assumption named; each step of the pen-and-paper proofs & definitions, theorems, proofs \\
-  Formal methods expert & What the formal model leaves out; whether each property says what the prose claims; vacuity, bounds and what the tool trusts; translations into the tool's input & model checkers, provers, formal semantics \\
-  Cryptographer & The adversary in the model; the primitives and their assumptions; security properties as definitions, and the argument for them; composition & cryptography, credentials, privacy \\
-  Systems modeling expert & The metamodel or system model and its constraints; a modelling language the paper defines; requirements traced to model elements; one name per element across figures and text & metamodels, DSLs, system and architecture models \\
-  Distributed systems expert & Timing and fault models; safety and liveness; consistency and finality; whether the scalability and robustness scenarios exercise the fault model & ledgers, consensus, replication, clocks \\
-  Networking and cybersecurity expert & Attacks outside the model: the network, keys and identities in practice, implementation and deployment, metadata; a reason for every exclusion & networks, smart contracts, keys \\
-  Process modeling expert & Conformance to the notation; deadlock and proper completion; exception and timeout paths; the execution semantics assumed & BPMN, workflows, choreographies, sequence and state diagrams \\
-  Empiricist & Setup, workloads, baselines, repetitions and statistics; precision and recall of a tool; threats to validity; whether \texttt{just reproduce} regenerates the figures & measurements, tool evaluations \\
-\end{xltabular}
-}
-
+\section{When to run reviewer passes}
 \paragraph{When.} Run the passes at four steps of \cref{tab:lifecycle}. First, use the panel for the spine's premortem: predict objections to the claims and answer them in the plan before drafting. Second, have every relevant persona read the draft. Fix each blocker or acknowledge it in the limitations before sending the full draft to us. Third, repeat the skim pass during polish. Fourth, after the deadline, use remaining panel objections to prepare likely reviewer questions for the rehearsal.
-
-\paragraph{Running them.} Push your commit and wait for paper CI, which builds the evidence of every push (\cref{app:code:paperci}). Then, in your paper repository, ask your agent to run the reviewer passes, or name one persona: \enquote{review as the cryptographer}. The skill in \path{.claude/skills/reviewer-passes/} fetches the CI artifact of that commit with \texttt{scripts/review/review.py}, which refuses an artifact whose hashes do not match. It gives each persona a directory holding only that persona's inputs: the reviewer PDF, the skim view, or both, and your spine if you name the file. Without a spine, a persona judges overclaiming against the abstract and the introduction. Each persona runs apart from the others and never sees another persona's findings or an earlier run. The chat response gives each persona's worst finding, the criterion and page, and the cheapest fix. It then lists the three cheapest changes overall. Ask a persona for more to see its remaining findings.
-
-\paragraph{Recording a run.} By default the skill writes no files and never edits the paper. You choose the fixes; the consultation (\cref{app:consult}) records your decisions. We record a run at three milestones (the spine premortem, the full draft and before upload), and you may record any run you choose. A recorded run becomes one issue on your paper repository: the panel, the skim scores, one checkbox per finding, and the hashes of the artifact and of each persona's inputs. Propose a disposition for each finding in a comment on the issue: \texttt{F3 fixed in <sha>}, \texttt{F4 rejected: <reason>} or \texttt{F5 deferred}. We confirm the dispositions with the label \texttt{review-confirmed}. The issue is not an input to the next run, and the skill keeps no memory between runs. Rerun it on the revised paper to check whether the fixes answer the objections.
-
-Ignore findings that do not identify a place in the paper. Verify every suggested source before citing it; a persona may invent one. Tell us if two personas raise the same concern or one argues outside its remit, so we can fix their boundaries in the persona files.
 
 \section{Last week's checklist}\label{app:lifecycle:polish}
 Use the polish phase for checks. Any row that takes more than an hour should have been completed in the draft phase. Mechanical checks are rules in \texttt{scripts/lint.lua}. Run all of them against the last build with \texttt{make check}, or against the reviewer build with \texttt{make check-reviewer}. Before you upload, run \texttt{make check-submit}: it checks the reviewer build at the submit phase whatever \texttt{\textbackslash lintphase} says, because the reviewer PDF hides todos and gap markers. Run an individual rule with, for example, \texttt{make lint-essentials}; list the rules with \texttt{texlua scripts/lint.lua list}. The paper CI (\cref{app:code:paperci}) runs the same rules on every push, so keep them passing before the last week. Check the remaining rows by reading.
@@ -160,3 +123,9 @@ Use the polish phase for checks. Any row that takes more than an hour should hav
   Review sheet & You scored the paper on criteria A--E yourself, and nothing cheap is left to fix (\cref{app:tdk:sheet}). \\
 \end{xltabular}
 }
+
+\section{The presentation}\label{app:lifecycle:presentation}
+\advisortodo{Link the group's slide template (Beamer and PowerPoint) here and in the Talk row of \cref{tab:lifecycle}.}
+\begin{itemize}
+  \item \href{https://www.youtube.com/watch?v=Unzc731iCUY}{MIT: How to Speak}, for the conference talk.
+\end{itemize}

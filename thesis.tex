@@ -131,21 +131,9 @@
 % The guide: how we work, the TDK lifecycle, and how to use this template
 %~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 % Nothing to delete before submission: reviewer.tex builds the paper without the guide and
-% the notes. The part heading is in guide/01-getting-started.tex, so that its contents line
-% lands in that file's .aux before the chapter's.
+% the notes. guide/guide.tex lists the guide's chapters; a template update replaces it.
 \ifdefined\reviewermode\else
-\renewcommand{\exname}{the credential revocation registry} % the guide's own running example
-\include{guide/01-getting-started}
-\include{guide/02-tdk-essentials}
-\include{guide/03-weekly-consultations}
-\include{guide/04-lifecycle}
-\include{guide/05-writing}
-\include{guide/chapter-by-chapter}
-\include{guide/06-code-tools-ai}
-\include{guide/07-zenodo}
-\include{guide/08-glossary}
-\include{guide/09-latex-template}
-\include{guide/10-references}
+\input{guide/guide}
 \fi
 
 %\label{page:last}

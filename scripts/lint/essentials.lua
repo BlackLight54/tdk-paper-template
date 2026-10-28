@@ -16,7 +16,7 @@
 --   words            text and front rows: own words that make the row written
 --   used             when the row is used where the argument needs it; empty when written is enough
 --   add              the next step when the row is missing
---   example          the label of the row in action in the guide (guide/chapter-by-chapter.tex, or
+--   example          the label of the row in action in the guide (guide/05-chapter-by-chapter.tex, or
 --                    the abstract's section); `make essentials` fails when no guide file defines it
 -- A paper that misses a row gets it from the template's own chapter files: work/essentials-labels.py
 -- cuts the row's block out of them, so the skeleton is written once, in content/.

@@ -84,10 +84,10 @@ if not cmd or cmd == "list" then
 end
 if guide then io.write(R.guide()); os.exit(0) end
 -- the template's own check, not a rule: the criteria each role carries (lintcore.lua) are the ones
--- its section of guide/chapter-by-chapter.tex names, since the skim reports them as the guide's
+-- its section of guide/05-chapter-by-chapter.tex names, since the skim reports them as the guide's
 if cmd == "criteria" then
   local g = C.guide_criteria()
-  if not g then io.stderr:write("lint: no guide/chapter-by-chapter.tex\n"); os.exit(2) end
+  if not g then io.stderr:write("lint: no guide/05-chapter-by-chapter.tex\n"); os.exit(2) end
   local bad = 0
   for _, role in ipairs(C.ROLE_SEQ) do
     local want, have, missing, extra = {}, g[role] or {}, {}, {}

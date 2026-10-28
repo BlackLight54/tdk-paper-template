@@ -255,6 +255,7 @@ Drawing it also checks the skeleton before any prose exists. Every arrow should 
 
 \section{Figures}\label{app:writing:figures}
 Use vector figures. Draw final versions in TikZ in the paper repository to match its fonts, scale cleanly and allow late edits; \cref{app:latex} covers the template's TikZ and pgfplots setup. Sketch in \href{https://www.drawio.com/}{draw.io} while exploring, then redraw in TikZ after agreeing the spine. Use an exported PDF only as a last resort, for example for a figure from another paper or a screenshot. Generate plots with pgfplots from the CSV written by \texttt{just reproduce}, so measurements update the figures automatically. Label every axis with its unit. Figure text must be at least 10\,pt in print.
+Export draw.io and Inkscape drawings as SVG and include them this way, so the text stays sharp.
 
 \section{Captions}\label{app:writing:captions}
 Figures and captions alone should let a reader follow the paper. Start each caption with the claim the figure supports. Then give the context needed to understand it: the question answered, the concept measured, assumptions in the setup, or why a curve bends. Avoid repeating information already clear from the axes and legend. Use two or three sentences for a diagram and as many as needed to explain a result. For examples, read the Nature captions in \citet{guide:gulyas2015navigable}; \cref{fig:caption-example} applies this style in the template.
@@ -305,10 +306,15 @@ The reference list demonstrates your knowledge of the field and affects two revi
 \end{enumerate}
 The \texttt{bib} lint rule checks titles, years and authors, access dates for web sources, and bare DOIs (\cref{app:code:paperci}). The \texttt{sources} rule only advises: it names each arXiv preprint you cite, and warns when the list exceeds 50 entries or contains only web pages. You must judge whether each source is suitable and supports the claim.
 
+\paragraph{Quoting.} Put every verbatim quotation in \texttt{\textbackslash enquote} and follow it with a citation. Cite paraphrases too. Cite each borrowed result, concept, tool or product at first use, however familiar it is. Unmarked quotations count as plagiarism, and criterion B/2 also rewards proper citation.
+
+\paragraph{Web pages.} The faculty guideline in \texttt{include/guideline.tex} requires: \enquote{Internetes hivatkozások megadásakor fontos, hogy az elérési út előtt megadjuk az oldal tulajdonosát és tartalmát (mivel a link egy idő után akár elérhetetlenné is válhat), valamint az elérés időpontját.} Use a \texttt{misc} entry. Set the author to the page owner in double braces, such as \texttt{author = \{\{W3C\}\}}, to keep its name intact. Give the page a descriptive title, a \texttt{url} and a \texttt{urldate} recording when you read it.
+
+\paragraph{Where the entries come from: Zotero.} Add sources to the group library with the browser's \href{https://www.zotero.org/download/connectors}{Zotero Connector}. Click it on the paper or DOI page, then correct the fetched metadata in Zotero so everyone gets the fix. Do not write literature entries by hand.
+
 \section{Style}
 \begin{itemize}
   \item The Chicago School of Writing lectures: \href{https://www.youtube.com/watch?v=vtIzMaLkCaM}{part I}, \href{https://www.youtube.com/watch?v=aFwVf5a3pZM}{part II}, \href{https://www.youtube.com/watch?v=gphdfSwYMWU}{part III}.
-  \item \href{https://www.youtube.com/watch?v=Unzc731iCUY}{MIT: How to Speak}, for the conference talk.
   \item Good examples: Leslie Lamport's papers, the Raft paper, and the figures and captions of \citet{guide:gulyas2015navigable}.
   \item Compare the original Paxos and PBFT papers with Raft. All three introduce strong ideas; Raft is particularly useful for studying how to explain one clearly.
 \end{itemize}
@@ -323,3 +329,15 @@ This template follows the faculty's \href{https://vik.bme.hu/page/1346/}{guideli
   \item \textbf{Keep the essential work your own.} The supervisor decides whether enough of the results are yours. A submission will not be approved if AI use is disproportionately large or touches the essential parts of the work. The faculty states: \enquote{If the task was to develop software and most of it was produced with generative AI, this is not acceptable}. AI-supported software serving your own algorithm, procedure or analysis is acceptable.
 \end{itemize}
 You are responsible for verifying every AI answer; it cannot stand as a reference by itself. \Cref{app:code:ai} covers the tools.
+
+\paragraph{Disclose.} For both TDK papers and theses, complete the faculty's AI declaration (\tplref{aidecl}, after the bibliography) and cite AI-generated facts as described in \cref{app:writing:ai}.
+
+\paragraph{Keep every conversation.} Save every AI conversation about the work. Do not use temporary or incognito chats. The declaration needs the essential part of each prompt; an AI citation needs its date and a link. Transcripts also let you recover decisions, arguments and text. Check that your tools retain them, and do not delete them.
+\begin{itemize}[noitemsep]
+  \item Claude Code keeps every session as a transcript under \path{~/.claude/projects/}, one file per session; Codex keeps them under \path{~/.codex/sessions/}.
+  \item ChatGPT and Claude on the web keep conversations in your account history; create a share link for any conversation you cite.
+  \item Other tools: check where they store history, and export it regularly if they do not keep it.
+\end{itemize}
+These transcripts can contain everything you pasted in, so keep them out of public repositories.
+
+\paragraph{Do not wipe your machine.} Retained histories let you reconstruct the declaration and earlier decisions. During the TDK, avoid reinstalling the operating system or clearing your home directory. If necessary, first back up \path{~/.claude/}, \path{~/.codex/}, \path{~/.t3/} and any other tool histories, then restore them afterwards.

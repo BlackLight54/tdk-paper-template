@@ -75,7 +75,7 @@ it besides the rule results and findings:
   The table lives in `scripts/lint/lintcore.lua` (`ROLE_CRITERIA`), beside the role labels.
   Criterion A is scored on the whole paper and belongs to no role. `texlua scripts/lint.lua
   criteria`, a template-only CI step, fails when the bold `\textbf{Criteri...}` heads of a role's
-  section in `guide/chapter-by-chapter.tex` name other criteria. (`roles`, role → files, stays as
+  section in `guide/05-chapter-by-chapter.tex` name other criteria. (`roles`, role → files, stays as
   it was for `work/essentials-labels.py`.)
 - `tag_lists`: every tag list the paper declares with `\NewTagList{<environment>}{<tag>}{<Name>}{<Names>}`,
   the template's eight and any the paper adds:
