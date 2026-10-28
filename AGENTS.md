@@ -73,7 +73,8 @@ and their steps are in `guide/02-lifecycle.tex` (`tab:lifecycle`).
 | The elements the lint measures in every paper | `guide/04-writing.tex` (`app:writing:essentials`) |
 | What must hold before upload | `guide/02-lifecycle.tex` (`tab:polish`) |
 | What each lint rule checks | `guide/07-code-tools-checks.tex` (`app:code:paperci`) |
-| Reviewer passes and self-score | `guide/07-code-tools-checks.tex` (`app:lifecycle:reviewers`) |
+| Reviewer passes: what they are and when to run them | `guide/02-lifecycle.tex` (`app:lifecycle:reviewers`) |
+| Running the reviewer passes and self-score | `guide/07-code-tools-checks.tex` (`app:code:reviewers`) |
 | AI use and the declaration | `guide/04-writing.tex` (`app:writing:ai`) |
 | The faculty's dates, form rules and review sheet | `guide/06-tdk-rules-and-dates.tex` (`app:tdk`) |
 | LaTeX syntax: notes, glossary, citations, figures, listings | `guide/09-latex-template.tex` (`app:latex`) |

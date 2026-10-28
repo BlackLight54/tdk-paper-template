@@ -12,8 +12,8 @@ Do not load amssymb, amsthm or any package the template already loads with other
 A note prints inline, as a block across the text width under the line it is written on. The margins are 15\,mm, too narrow for a note that neither covers the text nor runs off the page:
 \todo{An inline note: a block across the text width.}
 \todoinline{The same, with the \texttt{\textbackslash todoinline} shortcut.}
-\atodo{A longer review comment: \texttt{\textbackslash atodo} pre-fills the color and the author, and takes every \texttt{\textbackslash todo} option.}
-\atodo[author=IK, color=yellow!30]{The same with another author and color, given as options.}
+\atodo{A longer review comment: \texttt{\textbackslash atodo} pre-fills the colour and the author, and takes every \texttt{\textbackslash todo} option.}
+\atodo[author=IK, color=yellow!30]{The same with another author and colour, given as options.}
 \missingfigure{A placeholder for a figure that does not exist yet.}
 \beat{what a paragraph establishes}{its evidence}{what the running example shows in it}{the next paragraph}
 \advisortodo{A note for the advisors: a draft to confirm or a link to add.}
@@ -231,7 +231,7 @@ The \texttt{\textbackslash FloatBarrier} command from placeins, used above, prev
 Use it before a section that must follow all earlier floats.
 
 %----------------------------------------------------------------------------
-\section{Colored boxes (tcolorbox)}\label{app:latex:boxes}
+\section{Coloured boxes (tcolorbox)}\label{app:latex:boxes}
 \begin{infobox}[Information]
   A general-purpose box for background facts.
 \end{infobox}
@@ -239,15 +239,15 @@ Use it before a section that must follow all earlier floats.
   A box for warnings and limitations.
 \end{warnbox}
 \begin{keybox}[Key insight]
-  The \texttt{theo} style; any color works: \texttt{\textbackslash begin\{tcolorbox\}[theo=red, title=...]}.
+  The \texttt{theo} style; any colour works: \texttt{\textbackslash begin\{tcolorbox\}[theo=red, title=...]}.
 \end{keybox}
 
 %----------------------------------------------------------------------------
 \section{Tables (booktabs, array, tabularx, xltabular, multirow, makecell, rotating)}\label{app:latex:tables}
-\Cref{tab:latex:booktabs} demonstrates booktabs rules and array's \texttt{>\{\textbackslash bfseries\}} for a bold first column. It also uses a stretching tabularx column, multirow, makecell and an xcolor row.
+\Cref{tab:latex:booktabs} demonstrates booktabs rules and array's \texttt{>\{\textbackslash bfseries\}} for a bold first column. It also uses a stretching tabularx column, multirow, makecell and a coloured row.
 \begin{table}[!ht]
   \centering
-  \caption{A booktabs table with tabularx, multirow, makecell and a colored row.}\label{tab:latex:booktabs}
+  \caption{A booktabs table with tabularx, multirow, makecell and a coloured row.}\label{tab:latex:booktabs}
   \begin{tabularx}{\linewidth}{>{\bfseries}l X c}
     \toprule
     Platform & Revocation mechanism & \makecell{Latency\\{[s]}} \\

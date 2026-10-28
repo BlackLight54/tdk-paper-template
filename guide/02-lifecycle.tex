@@ -1,14 +1,14 @@
 %----------------------------------------------------------------------------
 \chapter{The TDK lifecycle}\label{app:lifecycle}
 %----------------------------------------------------------------------------
-Plan the phases in \cref{tab:lifecycle} backwards from the official dates in \cref{app:tdk}. Each step has an owner, a completion condition and a link to guidance.
-We use these steps to track each student's progress at the weekly consultation (\cref{app:consult}).
+Plan the phases in \cref{tab:lifecycle} backwards from the official dates in \cref{app:tdk}: the upload date is fixed, so every step before it is that date minus the time the rest needs. Each step has an owner, a condition that says when it is done, and a link to the guidance for it.
+We track every student's progress in the same steps, so at the weekly consultation (\cref{app:consult}) we look at the row you are in and the row you are heading for. Some steps are marked \emph{a hill climb}: you repeat them, scoring the work, fixing its weakest point and scoring again, until the row's condition says stop.
 Set \texttt{\textbackslash lintphase} in \texttt{thesis.tex} to your phase's name in lower case, from \texttt{topic} to \texttt{submit}; the lint's checks come due by phase (\cref{app:code:paperci}). After the upload, leave it at \texttt{submit}: the paper is submitted and needs no further checks.
 Inspect the reviewer PDF every week. It is the version reviewers will read.
 
-Three steps are \anchor{}s: the topic manifest, the spine and the full draft. An anchor is an artefact we approve before the next phase, and later work must follow it. The topic manifest and the spine are one page each; we approve the full draft at a revision recorded in the consultation summary. The topic starts as a direction. The spine fixes its claims and names; the full draft leaves only polishing. You can continue working at an anchor, but work that contradicts it is drift. Revisit the agreement first, or you may have to redo everything built on it.
+Three steps are \anchor{}s: the topic manifest, the spine and the full draft. An anchor is an artifact we approve before the next phase, and everything after it is measured against it. The topic manifest and the spine are one page each; we approve the full draft at a revision recorded in the consultation summary. Each anchor narrows the topic: before the manifest it is a direction, after the spine it is a fixed set of claims with fixed names, and after the full draft it is a paper that only gets polished. Nothing stops at an anchor, but work that contradicts one is drift, and drift is the most expensive mistake in the process, because everything built on the old anchor has to be redone. If an anchor turns out to be wrong, say so at the next consultation and we change it together; a claim changed silently costs weeks when a reviewer finds the seam.
 
-Red rows mark anchors. Yellow rows marked \official{} are faculty steps with fixed portal dates (\cref{app:tdk:dates}); missing one ends that semester's TDK. Green rows marked \department{} are department sessions for all its TDK students. We organise them to resolve the final problems together.
+Red rows mark anchors. Yellow rows marked \official{} are the faculty's steps: their portal dates (\cref{app:tdk:dates}) are fixed, and missing one ends that semester's TDK. Green rows marked \department{} are the department's sessions, where every TDK student of the department comes and the last problems get fixed in company; we organise them.
 
 \newcommand{\lcphase}[2]{\midrule\multicolumn{4}{l}{\textbf{#1}\quad\textit{#2}}\\\midrule}
 % Support cells are links with a name, not references with a number: \lcref{label}{name}.
@@ -34,7 +34,7 @@ Red rows mark anchors. Yellow rows marked \official{} are faculty steps with fix
   Zotero & both & You are in the group, the connector is installed, \texttt{bib/zotero.bib} is linked to the group & \lcref{app:start:access}{Accounts and access} \\
   Calendar and weekly slot & you & Neptun timetable synced, calendars shared, a recurring Teams event & \lcref{app:start:calendar}{Calendar}, \lcref{app:consult}{Weekly consultations} \\
   Virtual machine & both & You asked for the VM and can reach it over SSH & \lcref{app:start:env}{Development environment} \\
-  Context upload & we & Our papers and notes on the topic are in your notes repository & --- \\
+  Background material & we & Our papers and notes on the topic are in your notes repository & --- \\
   \lcphase{2. Research}{first half of September}
   Problem & you & The problem is stated, with a running example & \lcref{ch:intro}{Introduction} \\
   Literature review and gap & you & The search is logged in one notes file, with its search strings, databases and dates; the sources are in Zotero; the positioning figure and the gap matrix are filled; the gap is one sentence & \lcref{fig:positioning}{positioning figure}, \lcref{tab:related}{gap matrix}, \lcref{app:writing:refs}{The reference list} \\
@@ -62,7 +62,7 @@ Red rows mark anchors. Yellow rows marked \official{} are faculty steps with fix
   \lcphase{5. Polish}{22--28 October}
   Advisor review & both & Our comments are resolved and the todo list is empty & \lcref{app:latex:todo}{Todo notes} \\
   Review sheet hill climb & you & You have scored A--E, fixed the weakest criterion and repeated until no cheap fixes remain & \lcref{app:tdk:sheet}{The review sheet} \\
-  Skim pass (a hill climb) & you & At most three passes, or fewer once we accept the remaining objections; the maximum on every criterion from the skim view alone is the target, not the done condition & \lcref{app:lifecycle:reviewers}{Reviewer passes} \\
+  Skim pass (a hill climb) & you & Three passes done, or fewer once we accept what remains; aim for the maximum on every criterion from the skim view alone & \lcref{app:lifecycle:reviewers}{Reviewer passes} \\
   Code archive & you & The code is on Zenodo, cited by its concept DOI, and the results tag is named in the paper & \lcref{app:zenodo}{Zenodo} \\
   \rowcolor{department}
   Writing session \department & both & You attended with pizza, closed the last todos and had an advisor check the reviewer PDF & \lcref{tab:polish}{Requirements} \\
@@ -84,13 +84,45 @@ Red rows mark anchors. Yellow rows marked \official{} are faculty steps with fix
 \end{xltabular}
 }
 
-\section{When to run reviewer passes}\label{app:lifecycle:when-passes}
-Run the reviewer passes (\cref{app:lifecycle:reviewers}) at four steps of \cref{tab:lifecycle}: the premortem, the panel pass, the skim pass, and the reviews and questions. Each row says when the step is done.
+\section{Reviewer passes}\label{app:lifecycle:reviewers}
+Two reviewers each spend an evening reading and scoring the paper against the review sheet (\cref{app:tdk:sheet}); the section jury, mostly from other fields, hears your presentation and reads little else. These are different readings, and a paper that satisfies you and us can still fail one of them. Prepare for each with a \emph{reviewer pass}: an agent in your paper repository reads the paper as a simulated reader with a narrow brief and reports what that reader would hold against it. A pass takes minutes, so run it early and repeat it. Personas can miss problems or invent them, so treat their output as objections to check, not as an assessment. \Cref{app:code:reviewers} says how to run them.
+
+\paragraph{The skim pass.} The template aims to earn the maximum score from a reviewer who reads only the outline, figures, labelled items and coloured boxes, because a tired reviewer on the second evening reads exactly that. Test this with a \emph{skim view} made from the reviewer PDF, which paper CI builds on every push. It keeps the title, abstract, labelled items and boxes verbatim. Headings retain their page and length; figures retain their captions; tables retain their captions and a thumbnail. Paragraphs, equations, listings and plain lists become length markers, such as \enquote{paragraph, 7 lines}.
+
+The skim reviewer reads only this view and the review sheet. It scores each criterion and, for any shortfall, names the item that should have made the point clear. For example, a guarantee may lack a row in the correctness table. During polish, repeat the pass and fix what it names. Aim for the maximum on every criterion, but stop after three passes, or earlier once we accept the remaining objections: past that point the fixes cost more than the points they recover. This is the review sheet hill climb for a reader who skims.
+
+\paragraph{The panel.} \Cref{tab:reviewers} lists the expert personas. Their responsibilities are \emph{disjoint}: each concern has one owner and one place for an answer, so two personas never argue the same point and you never get the same objection twice in different words. A persona that notices a concern outside its remit hands it to the owner in one line, without arguing it.
+
+Five rules define these responsibilities. The cryptographer and formal methods expert handle claims inside the formal model, and the formal methods expert owns the choice of abstraction: what the model leaves out and whether leaving it out is safe. The networking and cybersecurity expert owns the attacks the paper excludes. The mean mathematician checks pen-and-paper proofs; the formal methods expert checks tool-assisted proofs. The systems modelling expert checks system structure; the process modelling expert checks behaviour. The distributed systems expert checks which faults and scales are studied; the empiricist checks how they are measured. Every persona checks overclaiming in its own area. Only the champion looks for results stated more weakly than the evidence supports.
+
+The first four personas read every paper. The others read papers that touch their field.
+{\small
+\begin{xltabular}{\linewidth}{>{\raggedright\arraybackslash}p{0.2\linewidth} X >{\raggedright\arraybackslash}p{0.22\linewidth}}
+  \caption{Reviewer personas, their responsibilities and the papers they read. Each concern has one owner.}\label{tab:reviewers}\\
+  \toprule \textbf{Persona} & \textbf{Owns} & \textbf{Reads} \\ \midrule \endfirsthead
+  \toprule \textbf{Persona} & \textbf{Owns} & \textbf{Reads} \\ \midrule \endhead
+  \bottomrule \endlastfoot
+  Skim reviewer & Whether the skim view alone earns the maximum on every criterion & every paper \\
+  Out-of-field reviewer & The problem and why it matters on the first page; every term explained before it is used; the leading figure without the text; the conclusion in plain words & every paper \\
+  Reviewer two & Novelty against the closest neighbour; the gap matrix and the positioning figure; recent research in the literature; whether the topic is still open & every paper \\
+  Champion & Results reported weaker than the evidence allows; contributions missing from the abstract, the leading figure or the conclusion & every paper \\
+  Mean mathematician & Definitions and notation; theorem statements with every assumption named; each step of the pen-and-paper proofs & definitions, theorems, proofs \\
+  Formal methods expert & The choice of abstraction: what the formal model leaves out and whether leaving it out is safe; whether each property says what the prose claims; vacuity, bounds and what the tool trusts; translations into the tool's input & model checkers, provers, formal semantics \\
+  Cryptographer & The adversary in the model; the primitives and their assumptions; security properties as definitions, and the argument for them; composition & cryptography, credentials, privacy \\
+  Systems modelling expert & The metamodel or system model and its constraints; a modelling language the paper defines; requirements traced to model elements; one name per element across figures and text & metamodels, DSLs, system and architecture models \\
+  Distributed systems expert & Timing and fault models; safety and liveness; consistency and finality; whether the scalability and robustness scenarios exercise the fault model & ledgers, consensus, replication, clocks \\
+  Networking and cybersecurity expert & Attacks the paper excludes: the network, keys and identities in practice, implementation and deployment, metadata; a reason for every exclusion & networks, smart contracts, keys \\
+  Process modelling expert & Conformance to the notation; deadlock and proper completion; exception and timeout paths; the execution semantics assumed & BPMN, workflows, choreographies, sequence and state diagrams \\
+  Empiricist & Setup, workloads, baselines, repetitions and statistics; precision and recall of a tool; threats to validity; whether \texttt{just reproduce} regenerates the figures & measurements, tool evaluations \\
+\end{xltabular}
+}
+
+\paragraph{When.}\label{app:lifecycle:when-passes} Run the passes at four steps of \cref{tab:lifecycle}. First, use the panel for the spine's premortem: predict the objections to the claims and answer them in the plan, while changing a claim still costs a sentence rather than a chapter. Second, have every relevant persona read the draft, and fix each blocker or acknowledge it in the limitations before the full draft reaches us, so that our reading goes to what only we can see. Third, repeat the skim pass during polish. Fourth, after the deadline, turn the remaining panel objections into the reviewer questions you rehearse answers to.
 
 \section{Requirements}\label{app:lifecycle:polish}
 The words \emph{must}, \emph{we recommend} and \emph{you can} mean what \cref{app:here:words} says.
 
-\Cref{tab:polish} lists the requirements, in the order they come due. A rule name marks a row the lint checks; \emph{reading} marks a row you check yourself. The lint's rows are checked by \texttt{make check-reviewer}, which runs every rule against the reviewer PDF (\cref{app:code:paperci}); keep them passing before the last week, as the paper CI runs them on every push. Use the polish phase for checks. Any row that takes more than an hour should have been completed in the draft phase. Before upload, set \texttt{\textbackslash lintphase} to \texttt{submit}, run \texttt{make check-submit}, which runs the lint at that phase whatever \texttt{\textbackslash lintphase} says, and go through every row due by \texttt{submit}.
+\Cref{tab:polish} lists the requirements, in the order they come due. A rule name marks a row the lint checks; \emph{reading} marks a row you check yourself. The lint's rows are checked by \texttt{make check-reviewer}, which runs every rule against the reviewer PDF (\cref{app:code:paperci}). The paper CI runs the same rules on every push, so by the last week they should have been green for a while: a red row in the last week is a surprise, and the last week has no room for surprises. The polish phase is for checking, not writing: if a row needs more than an hour, it belonged to the draft phase, and the full draft was not full. A row that restates a step of \cref{tab:lifecycle} only names the step and points there. Before upload, set \texttt{\textbackslash lintphase} to \texttt{submit}, run \texttt{make check-submit}, which runs the lint at that phase whatever \texttt{\textbackslash lintphase} says, and go through every row due by \texttt{submit}.
 {\small
 \begin{xltabular}{\linewidth}{X >{\raggedright\arraybackslash}p{0.12\linewidth} >{\raggedright\arraybackslash}p{0.15\linewidth} >{\raggedright\arraybackslash}p{0.1\linewidth}}
   \caption{Requirements, their source, what checks them and the phase they are due by. Rule names identify lint rules (\cref{app:code:paperci}); \emph{reading} means you check the row yourself.}\label{tab:polish}\\
@@ -109,15 +141,15 @@ The words \emph{must}, \emph{we recommend} and \emph{you can} mean what \cref{ap
   \textbf{AI conversations kept.} Every AI conversation about the work is saved, none in a temporary or incognito chat (\cref{app:writing:ai}). & Advisors & reading & every week \\
   \textbf{AI answers verified.} You verified every AI answer you used; you are responsible for all AI-generated content. & Faculty: AI guideline & reading & every week \\
   \textbf{Essential work your own.} AI use is not disproportionately large and does not touch the essential parts of the work (\cref{app:writing:ai}). & Faculty: AI guideline & reading & every week \\
-  \textbf{Topic manifest.} One page, approved by us before the semester: the problem, why it matters, the expected contribution. & Advisors & reading & \texttt{topic} \\
+  \textbf{Topic manifest.} The anchor is approved (\cref{tab:lifecycle}, Topic manifest). & Advisors & reading & \texttt{topic} \\
   \textbf{Repositories.} The notes repository has \texttt{paper/} and \texttt{code/} as submodules; both advisors are added to all three (\cref{app:start:access}). & Advisors & reading & \texttt{setup} \\
   \textbf{Literature search log.} One notes file logs the search: its search strings, databases and dates. & Advisors & reading & \texttt{research} \\
   \textbf{Registration.} You registered on the portal with the Hungarian and English abstract by 30 September; missing it ends this semester's TDK (\cref{app:tdk:dates}). & Faculty: call & reading & \texttt{plan} \\
   \textbf{Spine.} One page of claims, terms and notation, approved by us (\cref{app:writing:spine}). & Advisors & reading & \texttt{plan} \\
   \textbf{Running example.} It is named with \texttt{\textbackslash exname}, introduced in \tplref{ch:intro} and shown in a box in every chapter (\cref{app:writing:spine}). & Advisors & \texttt{frame}, \texttt{essentials} & \texttt{plan} \\
-  \textbf{Complete, testable implementation.} By 30 September every component exists, the evaluation workloads run, and a test suite runs. & Advisors & reading & \texttt{plan} \\
+  \textbf{Complete, testable implementation.} The step is done by 30 September (\cref{tab:lifecycle}, Complete, testable implementation). & Advisors & reading & \texttt{plan} \\
   \textbf{Outline.} Chapters are renamed where the template says so, no heading is a TODO; each chapter is one file in reading order, the introduction first and nothing after the conclusion. & Advisors & \texttt{outline}, \texttt{chapters}, \texttt{spine} (chapter order) & \texttt{draft} \\
-  \textbf{Full draft.} Every chapter is written and in our hands ten days before the deadline; we approve it at a revision recorded in the consultation summary. & Advisors & reading & \texttt{draft} \\
+  \textbf{Full draft.} The anchor is in our hands ten days before the deadline and approved (\cref{tab:lifecycle}, Full draft). & Advisors & reading & \texttt{draft} \\
   \textbf{Essentials.} Every essential has reached its highest level, written and used (\cref{app:writing:essentials}). & Advisors & \texttt{essentials} & \texttt{polish} \\
   \textbf{Every chapter written.} Chapters outside the essentials, such as background or implementation, have at least 150 words of their own, beyond the template skeleton or an outline. Every file containing text is included in the paper. & Advisors & \texttt{stubs}, \texttt{orphans} & \texttt{polish} \\
   \textbf{Figure sources.} Every figure is TikZ in the paper repository or an SVG included with \texttt{\textbackslash includesvg}; a raster image or screenshot has a written reason and is not called vector (\cref{app:writing:figures}). & Advisors & \texttt{figures}, reading & \texttt{polish} \\
@@ -143,8 +175,8 @@ The words \emph{must}, \emph{we recommend} and \emph{you can} mean what \cref{ap
   \textbf{Read-only passes.} Three readers can each follow one layer alone: figures and captions; running-example boxes; or the abstract and each chapter's first paragraph. Fill in any step missing from a layer. & Advisors & reading & \texttt{polish} \\
   \textbf{Reproducibility.} \texttt{docker run \dots{} reproduce} regenerates every figure and table from the results tag named in the paper (\cref{app:code:readme}). & Advisors & reading & \texttt{polish} \\
   \textbf{Code archive.} The code is on Zenodo, cited by its concept DOI, and the results tag is named in the paper (\cref{app:zenodo:cite}). & Advisors & \texttt{essentials}, \texttt{placeholders} & \texttt{polish} \\
-  \textbf{Review sheet hill climb.} You have scored A--E, fixed the weakest criterion and repeated until no cheap fixes remain (\cref{app:tdk:sheet}). & Advisors & reading & \texttt{polish} \\
-  \textbf{Reviewer passes.} The skim pass is done after at most three passes, or earlier once we accept the remaining objections; the maximum on every criterion is the target. A run of the panel raises no blocker (\cref{app:lifecycle:reviewers}). & Advisors & reading & \texttt{polish} \\
+  \textbf{Review sheet hill climb.} Finished: no cheap fix is left on any criterion (\cref{tab:lifecycle}, Review sheet hill climb; \cref{app:tdk:sheet}). & Advisors & reading & \texttt{polish} \\
+  \textbf{Reviewer passes.} The skim pass is finished and a run of the panel raises no blocker (\cref{tab:lifecycle}, Skim pass; \cref{app:lifecycle:reviewers}). & Advisors & reading & \texttt{polish} \\
   \textbf{Page count.} The main text, from the first page of \tplref{ch:intro} to the last page of the conclusion (\path{content/07-conclusion.tex}), is 30--35 pages; the title page, the abstracts, the acknowledgements, the glossary lists, the bibliography, the AI declaration and the appendices do not count (\cref{app:tdk:form}). & Faculty: call; the counting rule: us & \texttt{pages}, \texttt{pdf-pages} & \texttt{submit} \\
   \textbf{Both abstracts.} The Kivonat and the Abstract are in the PDF (\cref{app:writing:abstract}). & Advisors & \texttt{essentials}, \texttt{pdf-parts} & \texttt{submit} \\
   \textbf{AI declaration.} It is filled in: one box marked and, if you used AI, each use with its tool, parts, share and prompt, and the overall share justified (\cref{app:writing:ai}). & Advisors & \texttt{aidecl}, \texttt{pdf-parts} & \texttt{submit} \\
@@ -152,7 +184,7 @@ The words \emph{must}, \emph{we recommend} and \emph{you can} mean what \cref{ap
   \textbf{Front and back matter.} Title page variables, both abstracts, the AI declaration, acknowledgements and appendices are complete. No faculty-template placeholder text, \enquote{TODO} or placeholder figure remains. & Advisors & \texttt{placeholders}, \texttt{stock}, \texttt{titlepage} & \texttt{submit} \\
   \textbf{Notes gone.} Every beat has become prose and every todo and advisor note is resolved; the burn-down counts are zero. & Advisors & \texttt{beats}, \texttt{markers} & \texttt{submit} \\
   \textbf{Upload.} The reviewer PDF is uploaded under \emph{Dolgozataim} by 1 November; missing it ends this semester's TDK (\cref{app:tdk:dates}). & Faculty: call & reading & \texttt{submit} \\
-  \textbf{Code polish.} Within about two days of upload, the README, the Docker images and the results map are finished and released as a new Zenodo version; the results tag is untouched (\cref{app:zenodo:versions}). & Advisors & reading & after the deadline \\
+  \textbf{Code polish.} Released as a new Zenodo version within about two days of upload, the results tag untouched (\cref{tab:lifecycle}, Code polish; \cref{app:zenodo:versions}). & Advisors & reading & after the deadline \\
   \textbf{Demo.} The demonstration is recorded by a script and published by CI on every push (\cref{app:code:demo}). & Advisors & reading & after the deadline \\
   \textbf{Presentation.} You give it in your section on 18 November, in fifteen minutes plus five for questions; missing it ends this semester's TDK (\cref{app:tdk:dates}). & Faculty: call & reading & conference \\
 \end{xltabular}
