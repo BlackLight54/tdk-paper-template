@@ -964,7 +964,7 @@ end)
 -- looked up in the .bib files to tell papers, arXiv preprints and web pages apart
 rule("sources", "source", "advice", "always", "the reference list has the shape the guide asks for: no more than 50 references in a TDK paper, not web pages alone, and no arXiv preprint without a reason; the counts are references, web pages and preprints", function()
   local bbl = C.readfile(C.bpath(C.opts.doc .. ".bbl"))
-  if not bbl then warn(nil, nil, C.opts.doc .. ".bbl not found: build the paper first, BibTeX writes it"); return end
+  if not bbl then C.skip(C.opts.doc .. ".bbl not found: build the paper first, BibTeX writes it"); return end
   local cited, seen = {}, {}
   local pos = 1
   while true do
@@ -1001,7 +1001,7 @@ rule("sources", "source", "advice", "always", "the reference list has the shape 
       local url = field(b, "url") ~= "" or b:find("\\url", 1, true) ~= nil or en.type == "online" or en.type == "electronic" or en.type == "www"
       if not venue and (marks:find("arxiv", 1, true) or marks:find("10.48550/", 1, true)) then
         arxiv = arxiv + 1
-        warn(en.file, entry_line(en.file, key), key .. ": an arXiv preprint; search dblp for its title and cite the published version, unless the work is too recent to be published")
+        warn(en.file, entry_line(en.file, key), key .. ": an arXiv preprint", "search dblp for its title and cite the published version, unless the work is too recent to be published")
       elseif url and not scholarly then
         web = web + 1
       end
@@ -1009,10 +1009,10 @@ rule("sources", "source", "advice", "always", "the reference list has the shape 
   end
   local total = #cited
   if C.opts.profile ~= "thesis" and total > 50 then
-    warn(nil, nil, string.format("%d references: a TDK paper typically needs no more than 50; cut the weakest first, starting with those another entry already covers", total))
+    warn(nil, nil, string.format("%d references: a TDK paper typically needs no more than 50", total), "cut the weakest first, starting with those another entry already covers")
   end
   if total > 0 and web == total then
-    warn(nil, nil, "every reference is a web page, which the review sheet's B/2 places at step 1; cite the papers, standards and specifications behind them, and move links that back no claim to footnotes")
+    warn(nil, nil, "every reference is a web page, which the review sheet's B/2 places at step 1", "cite the papers, standards and specifications behind them, and move links that back no claim to footnotes")
   end
   return string.format("references=%d web=%d arxiv=%d", total, web, arxiv)
 end)
