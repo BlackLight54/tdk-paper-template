@@ -46,6 +46,9 @@ jobs:
       - name: source / roles (check, draft)
         if: always()
         run: texlua scripts/lint.lua roles
+      - name: source / markers (check, draft)
+        if: always()
+        run: texlua scripts/lint.lua markers
       - name: source / chapters (check)
         if: always()
         run: texlua scripts/lint.lua chapters

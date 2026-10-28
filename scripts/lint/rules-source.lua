@@ -90,6 +90,29 @@ rule("roles", "source", "check", "draft", "every chapter has a role: its label i
   return string.format("chapters=%d", n)
 end)
 
+-- a gap is a \tbd or \citeneeded marker, which the draft shows and the todo list counts; typed
+-- markers (TBD, [CITE: ...], [?], [forrás?], [link?], XXX, FIXME) print in the reviewer PDF
+local TYPED = { { "%f[%w]TBD%f[%W]", "TBD" }, { "%[[Cc][Ii][Tt][Ee]", "[CITE" }, { "%[%?%]", "[?]" },
+  { "%[forrás%?%]", "[forrás?]" }, { "%[link%?%]", "[link?]" }, { "%f[%w]XXX+%f[%W]", "XXX" }, { "%f[%w]FIXME%f[%W]", "FIXME" } }
+rule("markers", "source", "check", "draft", "gaps are marked with \\tbd{...} or \\citeneeded[...], which the draft shows and the reviewer build hides: never typed as TBD, [CITE], [?] or XXX; at the final phase no marker is left", function()
+  local final = C.phase_reached("final")
+  local gaps = 0
+  for _, f in ipairs(CONTENT) do
+    for n, l in ipairs(C.prose_lines(f)) do
+      for _, t in ipairs(TYPED) do
+        if l:find(t[1]) then fail(f, n, "a typed " .. t[2] .. " prints in the reviewer PDF: write \\tbd{what is missing} or \\citeneeded[which source] instead") end
+      end
+      for m in l:gmatch("\\(%a+)") do
+        if m == "tbd" or m == "citeneeded" then
+          gaps = gaps + 1
+          if final then fail(f, n, "\\" .. m .. " is still here: fill the gap before the final version") end
+        end
+      end
+    end
+  end
+  return string.format("gaps=%d", gaps)
+end)
+
 rule("chapters", "source", "check", "always", "one chapter per file: no file holds two numbered chapters, and a chapter keeps its text in its own file instead of \\input pieces", function()
   for _, f in ipairs(main_chapters()) do
     local n = 0

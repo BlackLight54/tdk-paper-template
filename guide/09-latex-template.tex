@@ -19,6 +19,20 @@ The margins are 15\,mm, so margin notes are shifted into the text edge to stay r
 \beat{what a paragraph establishes}{its evidence}{what the running example shows in it}{the next paragraph}
 \advisortodo{A note for the advisors: a draft to confirm or a link to add.}
 A margin comment from the supervisor.\atodo[nolist]{Cite this.}
+
+A gap the paper still has to fill gets a marker in the sentence: proving one slice takes \tbd{the proving time} on a laptop, and a claim that still needs its source gets one too\citeneeded[the 2023 survey]. A float has no margin, so a margin note cannot sit in a table cell or a caption, while these markers can (\cref{tab:latex:gaps}). Both are listed with the todos and disappear in the reviewer build. Never type a placeholder word or a bracketed citation mark by hand instead: the lint fails on typed markers, and on any \texttt{\textbackslash tbd} or \texttt{\textbackslash citeneeded} still there at the final phase.
+\begin{table}[!ht]
+  \centering
+  \caption{A table with a value still to measure, marked in its cell.}
+  \label{tab:latex:gaps}
+  \begin{tabular}{lrr}
+    \toprule
+    Proof & Cycles & Time \\
+    \midrule
+    real & 120\,000 & \tbd{after the runs} \\
+    \bottomrule
+  \end{tabular}
+\end{table}
 \begin{runningexample}[a box]
 The running example's appearance in a chapter; \texttt{\textbackslash exname} is set in \texttt{thesis.tex}. A paper with its own environment for the example names it there in \texttt{\textbackslash lintexamplebox}, and the lint looks for that one instead.
 \end{runningexample}
