@@ -276,7 +276,11 @@ rule("figures", "source", "check", "always", "every figure, table, listing, algo
     end
     local sv = l:match("\\includesvg%[?[^%]]*%]?{([^}]*)}")
     if sv and not (C.exists(sv) or C.exists(sv .. ".svg")) then fail(f, n, "SVG file not in the repository: " .. sv) end
-    if l:match("\\begin{figure}%[h%]") or l:match("\\begin{table}%[h%]") then warn(f, n, "[h] alone: use [!ht] or [tbp], LaTeX ignores a bare h") end
+    if l:match("\\begin{figure}%[h%]") or l:match("\\begin{table}%[h%]") then
+      warn(f, n, "[h] alone: use [!ht] or [tbp], LaTeX ignores a bare h", C.fix("safe", "write [!ht]", table.unpack(C.matches(l, "\\begin{(%a+)}%[h%]", function(_, _, _, env)
+        if env == "figure" or env == "table" then return "\\begin{" .. env .. "}[!ht]" end
+      end))))
+    end
   end)
   for _, f in ipairs(MAIN) do
     local ls = C.lines(f); local infloat, hascap, haslab, hascenter, start = nil, false, false, false, 0
@@ -386,25 +390,30 @@ rule("labels", "source", "check", "always", "label prefixes match their environm
   end
 end)
 
--- a typed "Figure~\ref{key}" and the \cref that prints the same (cleveref is loaded with capitalise
--- and noabbrev), \Cref at the start of a sentence
+-- the fixes of the crefs rule: the \cref that prints what the typed reference printed (cleveref is
+-- loaded with capitalise and noabbrev, so \cref{fig:x} prints "Figure 1.1"), \Cref where a
+-- sentence starts; each covers every occurrence on the line
+local function opens_sentence(code, s)
+  local before = code:sub(1, s - 1)
+  return before:match("^%s*$") ~= nil or before:match("[%.%?!]%s+$") ~= nil
+end
+local function cref(code, s, key) return (opens_sentence(code, s) and "\\Cref{" or "\\cref{") .. key .. "}" end
 local TYPED = { figure = true, table = true, section = true, chapter = true, listing = true }
-local function typed_ref(l)
-  for s, word, tie, key in l:gmatch("()(%a+)(~?)\\ref{([^}]*)}") do
-    if TYPED[word:lower()] then
-      local before = l:sub(1, s - 1)
-      local start = before:match("^%s*$") or before:match("[%.%?!]%s+$")
-      return C.fix("safe", start and "write \\Cref" or "write \\cref", C.replace(word .. tie .. "\\ref{" .. key .. "}", (start and "\\Cref{" or "\\cref{") .. key .. "}"))
-    end
-  end
+local FACULTY_REF = { fig = true, tab = true, sect = true, list = true }
+local function cref_fix(l, pattern, ok)
+  return C.fix("safe", "write \\cref, or \\Cref where a sentence starts", table.unpack(C.matches(l, pattern, function(_, s, code, a, b)
+    if ok(a) then return cref(code, s, b) end
+  end)))
 end
 
 rule("crefs", "source", "check", "always", "references go through \\cref: no 'Figure~\\ref', no \\autoref, \\Cref at the start of a sentence, and no bare \\ref outside table cells", function()
   C.each_line(MAIN, function(f, n, l)
-    if l:match("[Ff]igure~?\\ref") or l:match("[Tt]able~?\\ref") or l:match("[Ss]ection~?\\ref") or l:match("[Cc]hapter~?\\ref") or l:match("[Ll]isting~?\\ref") then fail(f, n, "a typed reference with \\ref: write \\cref{...}", typed_ref(l)) end
-    if l:match("\\autoref") then fail(f, n, "\\autoref: the template uses cleveref, write \\cref") end
-    if l:match("\\figref") or l:match("\\tabref") or l:match("\\sectref") or l:match("\\listref") then fail(f, n, "the faculty template's \\figref family: write \\cref") end
-    if l:match("^%s*\\cref") or l:match("[%.%?!]%s+\\cref") then warn(f, n, "\\cref at the start of a sentence: use \\Cref") end
+    if l:match("[Ff]igure~?\\ref") or l:match("[Tt]able~?\\ref") or l:match("[Ss]ection~?\\ref") or l:match("[Cc]hapter~?\\ref") or l:match("[Ll]isting~?\\ref") then fail(f, n, "a typed reference with \\ref: write \\cref{...}", cref_fix(l, "(%a+)~?\\ref{([^}]*)}", function(w) return TYPED[w:lower()] end)) end
+    if l:match("\\autoref") then fail(f, n, "\\autoref: the template uses cleveref, write \\cref", cref_fix(l, "\\(auto)ref{([^}]*)}", function() return true end)) end
+    if l:match("\\figref") or l:match("\\tabref") or l:match("\\sectref") or l:match("\\listref") then fail(f, n, "the faculty template's \\figref family: write \\cref", cref_fix(l, "\\(%a+)ref{([^}]*)}", function(w) return FACULTY_REF[w] end)) end
+    if l:match("^%s*\\cref") or l:match("[%.%?!]%s+\\cref") then
+      warn(f, n, "\\cref at the start of a sentence: use \\Cref", C.fix("safe", "write \\Cref", table.unpack(C.matches(l, "\\cref{", function(_, s, code) if opens_sentence(code, s) then return "\\Cref{" end end))))
+    end
     if l:match("\\ref{") and not l:match("&") and not l:match("\\ref{req:") and not l:match("\\ref{g:") and not l:match("\\ref{c:") and not l:match("\\ref{asm:") and not l:match("\\ref{thr:") and not l:match("\\ref{dr:") then warn(f, n, "bare \\ref in prose: \\cref names the kind of thing for you") end
     if l:match("\\pageref") then note(f, n, "\\pageref: rarely needed with hyperlinks") end
   end)
@@ -573,25 +582,74 @@ end)
 -- the units a number takes a thin space before; Lua patterns have no alternation, so a set
 local UNITS = { ms = true, s = true, MB = true, GB = true, KB = true, kB = true, Hz = true, MHz = true, GHz = true, mm = true, cm = true, pt = true, KiB = true, MiB = true, GiB = true, bytes = true, B = true }
 
+-- a typography fix covers every occurrence of its slip on the raw line, and goes with the line's
+-- first finding of that slip; it is safe when the raw line holds exactly the occurrences the rule
+-- saw in the prose, and review when it holds more (in a \todo, a \url, maths) or fewer. A line of
+-- the template's skeleton gets none: the author replaces it, and a polished copy would no longer
+-- be recognised as the template's text, so it would count as the author's own words
+local function typo_fix(f, n, seen, kind, help, count, pattern, fn)
+  if seen[kind] then return nil end
+  seen[kind] = true
+  if C.skeleton_lines()[C.prose_key(C.prose_lines(f)[n] or "")] then return nil end
+  local edits = C.matches(C.raw_lines(f)[n], pattern, fn)
+  return C.fix(#edits == count and "safe" or "review", help, table.unpack(edits))
+end
+local function is_range(code, s, e) return not code:sub(s - 1, s - 1):match("[%w%-%.]") and not code:sub(e + 1, e + 1):match("[%w%-]") end
+
 rule("typography", "source", "advice", "polish", "the small things the reviewer sees: number ranges with --, a thin space before units, no straight quotes, no doubled words, \\eg and \\ie macros, no manual line breaks in prose", function()
   C.each_prose_line(MAIN, function(f, n, l)
     local p = C.prose(l)
+    local seen = {}
     -- a range stands alone: BLS12-381 and i7-9750H are names, not ranges
+    local ranges = {}
     for s, a, b, e in p:gmatch("()(%d+)%-(%d+)()") do
-      local before, after = p:sub(s - 1, s - 1), p:sub(e, e)
-      if not before:match("[%w%-%.]") and not after:match("[%w%-]") and not l:match("\\label") and not l:match("label=") then warn(f, n, string.format("range %s-%s with a hyphen: write %s--%s", a, b, a, b)) end end
-    for num, unit in p:gmatch("(%d) (%a+)%f[%A]") do if UNITS[unit] then warn(f, n, string.format("'%s %s': use a thin space, %s\\,%s", num, unit, num, unit)) end end
+      if is_range(p, s, e - 1) and not l:match("\\label") and not l:match("label=") then ranges[#ranges + 1] = { a, b } end
+    end
+    for _, r in ipairs(ranges) do
+      warn(f, n, string.format("range %s-%s with a hyphen: write %s--%s", r[1], r[2], r[1], r[2]), typo_fix(f, n, seen, "range", "write an en dash, --", #ranges, "(%d+)%-(%d+)", function(m, s, code, a, b)
+        if is_range(code, s, s + #m - 1) then return a .. "--" .. b end
+      end))
+    end
+    local units = 0
+    for _, unit in p:gmatch("(%d) (%a+)%f[%A]") do if UNITS[unit] then units = units + 1 end end
+    for num, unit in p:gmatch("(%d) (%a+)%f[%A]") do
+      if UNITS[unit] then warn(f, n, string.format("'%s %s': use a thin space, %s\\,%s", num, unit, num, unit), typo_fix(f, n, seen, "unit", "write a thin space, \\,", units, "(%d) (%a+)%f[%A]", function(_, _, _, d, u)
+        if UNITS[u] then return d .. "\\," .. u end
+      end)) end
+    end
     if p:match('"') then warn(f, n, "straight double quote: use \\enquote{...}") end
-    if p:match("%f[%a]e%.g%.") or p:match("%f[%a]i%.e%.") then warn(f, n, "e.g./i.e. typed out: use \\eg and \\ie, which get the spacing right") end
-    if p:match("%f[%a]et al%.") and not l:match("\\etal") then warn(f, n, "et al. typed out: use \\etal") end
+    if p:match("%f[%a]e%.g%.") or p:match("%f[%a]i%.e%.") then
+      warn(f, n, "e.g./i.e. typed out: use \\eg and \\ie, which get the spacing right", typo_fix(f, n, seen, "eg", "write \\eg and \\ie", C.nmatch(p, "%f[%a]e%.g%.") + C.nmatch(p, "%f[%a]i%.e%."), "%f[%a]([ei])%.([ge])%.", function(_, _, _, a, b)
+        if a .. b == "eg" then return "\\eg" elseif a .. b == "ie" then return "\\ie" end
+      end))
+    end
+    if p:match("%f[%a]et al%.") and not l:match("\\etal") then
+      warn(f, n, "et al. typed out: use \\etal", typo_fix(f, n, seen, "etal", "write \\etal", C.nmatch(p, "%f[%a]et al%."), "%f[%a]et al%.", function() return "\\etal" end))
+    end
     for w in p:gmatch("%f[%a](%a+) %1%f[%A]") do if #w > 2 then warn(f, n, "doubled word: " .. w .. " " .. w) end end
-    if l:match("[%w%)]%s+[,%.;:]%f[%s]") then warn(f, n, "space before punctuation") end
+    if l:match("[%w%)]%s+[,%.;:]%f[%s]") then
+      -- a ratio, 3 : 1, keeps its spaces
+      warn(f, n, "space before punctuation", typo_fix(f, n, seen, "punct", "delete the space", C.nmatch(l, "[%w%)]%s+[,%.;:]%f[%s]"), "([%w%)])%s+([,%.;:])%f[%s]", function(_, _, _, c, q)
+        if not (q == ":" and c:match("%d")) then return c .. q end
+      end))
+    end
     if l:match("\\\\%s*$") and not l:match("&") and not l:match("\\\\%[") and not l:match("^%s*\\\\") then
       if not (l:match("\\end{") or l:match("\\hline") or l:match("rule")) then note(f, n, "manual line break at the end of a prose line") end
     end
-    if p:match("%.%.%.") then warn(f, n, "three dots: use \\dots") end
-    if l:match("\\footnote") and l:match("%s\\footnote") then warn(f, n, "space before \\footnote: the mark should sit on the word or the punctuation") end
-    if l:match("\\cite") and not l:match("~\\cite") and not l:match("{\\cite") and not l:match("\\citet") and not l:match("\\cite[tp]") and not l:match("^%s*\\cite") and not l:match("&%s*\\cite") and not l:match("\\\\%s*\\cite") then warn(f, n, "\\cite without a tie: write text~\\cite{...} so the number cannot start a line") end
+    if p:match("%.%.%.") then
+      -- \dots{} where text follows, since \dots takes the space after it
+      warn(f, n, "three dots: use \\dots", typo_fix(f, n, seen, "dots", "write \\dots", C.nmatch(p, "%.%.%."), "%.%.%.", function(m, s, code)
+        return code:sub(s + 3, s + 3):match("[%w%s]") and "\\dots{}" or "\\dots"
+      end))
+    end
+    if l:match("\\footnote") and l:match("%s\\footnote") then
+      warn(f, n, "space before \\footnote: the mark should sit on the word or the punctuation", typo_fix(f, n, seen, "footnote", "delete the space", C.nmatch(l, "%s+\\footnote"), "%s+\\footnote", function() return "\\footnote" end))
+    end
+    if l:match("\\cite") and not l:match("~\\cite") and not l:match("{\\cite") and not l:match("\\citet") and not l:match("\\cite[tp]") and not l:match("^%s*\\cite") and not l:match("&%s*\\cite") and not l:match("\\\\%s*\\cite") then
+      warn(f, n, "\\cite without a tie: write text~\\cite{...} so the number cannot start a line", typo_fix(f, n, seen, "cite", "write a tie, ~", C.nmatch(l, "%S%s+\\cite"), "(%S)%s+\\cite", function(_, _, _, c)
+        if c ~= "&" then return c .. "~\\cite" end
+      end))
+    end
   end)
 end)
 

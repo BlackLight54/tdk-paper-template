@@ -170,8 +170,11 @@ end
 --        C.fix("safe", "write \\cref", C.replace("Figure~\\ref{" .. key .. "}", "\\cref{" .. key .. "}")))
 -- An edit replaces the first old on the finding's line (every old with all), adds a line after
 -- it, or names a command for the author to run; replace_at and after_at do the same elsewhere.
--- A fix whose old text is not on its line is dropped, never guessed (LINT_FIX_STRICT=1 makes that
--- an error, for the tests).
+-- C.matches makes one edit per match of a pattern, each at its own column. An edit never touches
+-- the comment after a %, which no rule reads. A fix covers every occurrence of its slip on its
+-- line, so a fix offered again after it was written has not cleared its finding. A fix whose old
+-- text is not on its line is dropped, never guessed (LINT_FIX_STRICT=1 makes that an error, for
+-- the tests).
 M.SAFETY = { safe = 1, review = 2, placeholder = 3 }
 function M.fix(safety, help, ...) return { safety = safety, help = help, edits = { ... } } end
 function M.replace(old, new, all) return { old = old, new = new, all = all } end
@@ -186,16 +189,41 @@ function M.raw_lines(file)
   if not raw_cache[file] then raw_cache[file] = M.lines(file) end
   return raw_cache[file]
 end
--- one edit applied to a line; nil when its old text is not there
+-- one edit applied to the code part of a line; nil when its old text is not there
 function M.apply_edit(l, e)
-  local s, t = l:find(e.old, 1, true)
+  local code = M.strip_comment(l)
+  local rest = l:sub(#code + 1)
+  if e.at then
+    if code:sub(e.at, e.at + #e.old - 1) ~= e.old then return nil end
+    return code:sub(1, e.at - 1) .. e.new .. code:sub(e.at + #e.old) .. rest
+  end
+  local s, t = code:find(e.old, 1, true)
   if not s then return nil end
-  if e.all then return (l:gsub(M.escape(e.old), (e.new:gsub("%%", "%%%%")))) end
-  return l:sub(1, s - 1) .. e.new .. l:sub(t + 1)
+  if e.all then return (code:gsub(M.escape(e.old), (e.new:gsub("%%", "%%%%")))) .. rest end
+  return code:sub(1, s - 1) .. e.new .. code:sub(t + 1) .. rest
 end
+-- one edit per match of pattern in the code part of line l, right to left, so each column still
+-- holds when its edit comes; fn(match, column, code, captures...) gives the new text, nil skips it
+function M.matches(l, pattern, fn)
+  local code, found, init = M.strip_comment(l), {}, 1
+  while init <= #code + 1 do
+    local r = { code:find(pattern, init) }
+    if not r[1] then break end
+    local s, e = r[1], r[2]
+    local new = fn(code:sub(s, e), s, code, table.unpack(r, 3))
+    if new then found[#found + 1] = { at = s, old = code:sub(s, e), new = new } end
+    if pattern:sub(1, 1) == "^" then break end
+    init = e >= s and e + 1 or s + 1
+  end
+  local edits = {}
+  for i = #found, 1, -1 do edits[#edits + 1] = found[i] end
+  return edits
+end
+-- the number of matches of pattern in s
+function M.nmatch(s, pattern) local n = 0; for _ in s:gmatch(pattern) do n = n + 1 end; return n end
 -- the fix bound to the finding's place and checked against the file; nil when it does not apply
 local function bind(fx, file, line)
-  if not fx then return nil end
+  if not fx or #fx.edits == 0 then return nil end
   assert(M.SAFETY[fx.safety], "unknown fix safety " .. tostring(fx.safety))
   for _, e in ipairs(fx.edits) do
     if not e.cmd then
@@ -239,7 +267,7 @@ local function columns(f)
   for _, e in ipairs(f.fix and f.fix.edits or {}) do
     if e.old and e.file == f.file and e.line == f.line then
       local l = M.raw_lines(f.file)[f.line]
-      local s = l:find(e.old, 1, true)
+      local s = e.at or l:find(e.old, 1, true)
       local c = (utf8.len(l:sub(1, s - 1)) or (s - 1)) + 1
       return c, c + (utf8.len(e.old) or #e.old) - 1
     end
