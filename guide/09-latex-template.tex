@@ -9,16 +9,15 @@ Do not load amssymb, amsthm or any package the template already loads with other
 
 %----------------------------------------------------------------------------
 \section{Todo notes (todonotes)}\label{app:latex:todo}
-A margin note sits next to the line it refers to.\todo{A margin note.}
-With 15\,mm margins, margin notes extend into the text edge to remain readable. Use inline notes for more than a few words:
-\todo[inline]{An inline note: a block across the text width.}
+A note prints inline, as a block across the text width under the line it is written on. The margins are 15\,mm, too narrow for a note that neither covers the text nor runs off the page:
+\todo{An inline note: a block across the text width.}
 \todoinline{The same, with the \texttt{\textbackslash todoinline} shortcut.}
-\atodo[inline]{A longer review comment: \texttt{\textbackslash atodo} pre-fills the color and the author, and takes every \texttt{\textbackslash todo} option, here \texttt{inline}.}
-\atodo[inline, author=IK, color=yellow!30]{The same with another author and color, given as options.}
+\atodo{A longer review comment: \texttt{\textbackslash atodo} pre-fills the color and the author, and takes every \texttt{\textbackslash todo} option.}
+\atodo[author=IK, color=yellow!30]{The same with another author and color, given as options.}
 \missingfigure{A placeholder for a figure that does not exist yet.}
 \beat{what a paragraph establishes}{its evidence}{what the running example shows in it}{the next paragraph}
 \advisortodo{A note for the advisors: a draft to confirm or a link to add.}
-A margin comment from an advisor.\atodo[nolist]{Cite this.}
+A word or two can still go in the margin, clear of the text, with \texttt{noinline}.\atodo[noinline, nolist]{Cite this.}
 
 Mark missing content in the sentence: proving one slice takes \tbd{the proving time} on a laptop; an unsupported claim needs a source\citeneeded[the 2023 survey]. These gap markers also work in table cells and captions, where margin notes cannot go (\cref{tab:latex:gaps}). Both appear in the todo list and disappear from the reviewer PDF. Use them instead of typed marker words or bracketed citation marks. The lint rejects typed markers and, at the submit phase, any remaining \texttt{\textbackslash tbd} or \texttt{\textbackslash citeneeded}.
 \begin{table}[!ht]
@@ -278,19 +277,19 @@ Use it before a section that must follow all earlier floats.
   \bottomrule
 \end{xltabular}
 
-\Cref{tab:latex:sideways} uses rotating to put a wide table sideways on its own page.
-\begin{sidewaystable}
+\Cref{tab:latex:sideways} has narrow columns under long headings, so rotating's \texttt{sideways} environment turns each heading upright and the columns stay as narrow as their cells. A table too wide even then goes into a \texttt{sidewaystable}, which turns the whole table onto a landscape page of its own; it costs that page however few rows it has.
+\begin{table}[!ht]
   \centering
-  \caption{A sideways table from rotating.}\label{tab:latex:sideways}
+  \caption{Headings turned with rotating, so that narrow columns can carry long headings.}\label{tab:latex:sideways}
   \begin{tabular}{l c c c c c c}
     \toprule
-    Approach & Offline check & Privacy & Finality & Open source & Throughput & Standardised \\
+    Approach & \begin{sideways}Offline check\end{sideways} & \begin{sideways}Privacy\end{sideways} & \begin{sideways}Finality\end{sideways} & \begin{sideways}Open source\end{sideways} & \begin{sideways}Throughput\end{sideways} & \begin{sideways}Standardised\end{sideways} \\
     \midrule
     Status list & \gapyes & -- & \gapyes & \gapyes & high & \gapyes \\
     Accumulator & \gapyes & \gapyes & \gapyes & \gappartial & medium & -- \\
     \bottomrule
   \end{tabular}
-\end{sidewaystable}
+\end{table}
 
 %----------------------------------------------------------------------------
 \section{Algorithms (algorithm, algpseudocode)}\label{app:latex:alg}
@@ -522,7 +521,7 @@ This sentence is in the source but not in the PDF.
   \midrule
   \endhead
   \ctan{todonotes} & \cref{app:latex:todo} \\
-  \ctan{glossaries-extra} & \cref{app:latex:acro}, and the three lists after the acknowledgements \\
+  \ctan{glossaries-extra}, \ctan{needspace} & \cref{app:latex:acro}, and the three lists after the acknowledgements \\
   \ctan{natbib}, \ctan{hyperref}, \ctan{bookmark}, \ctan{orcidlink}, \ctan{fontawesome5} & \cref{app:latex:cite} \\
   \ctan{cleveref} & \cref{app:latex:cref}, and every reference in this chapter \\
   \ctan{amsmath}, \ctan{unicode-math} (\ctan{newtx} under pdfLaTeX), \ctan{ntheorem} & \cref{app:latex:theorems} \\

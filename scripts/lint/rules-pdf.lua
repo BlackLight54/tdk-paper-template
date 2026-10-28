@@ -126,7 +126,7 @@ rule("pdf-margins", "pdf", "check", "polish", "margins on every text page are wi
     local body = 0; for _, t in ipairs(page.texts) do if t.font == bf.id then body = body + 1 end end
     if body >= 10 then
       local l, r, tp, b = 1e9, 0, 1e9, 0
-      -- the text column's right edge: the draft's todonotes margin notes start 4 mm inside it and reach the page edge by design (the reviewer build has none)
+      -- the text column's right edge: a draft's todonotes margin notes (\todo[noinline]) sit just right of it, in the margin (the reviewer build has none)
       local edge = 0; for _, t in ipairs(page.texts) do if t.font == bf.id then edge = math.max(edge, t.left + t.w) end end
       for _, t in ipairs(page.texts) do
         local f = d.fonts[t.font]

@@ -265,7 +265,7 @@ Figures and captions alone should let a reader follow the paper. Start each capt
   \centering
   \begin{tikzpicture}
     \begin{groupplot}[group style={group size=2 by 1, horizontal sep=1.6cm}, width=0.5\linewidth, height=5cm,
-      xmode=log, log basis x=10, xlabel={Issuers in the registry}, grid=major, tick label style={font=\scriptsize}, label style={font=\footnotesize}, legend style={font=\scriptsize, at={(0.03,0.97)}, anchor=north west}]
+      xmode=log, log basis x=10, xlabel={Issuers in the registry}, grid=major, tick label style={font=\footnotesize}, label style={font=\footnotesize}, legend style={font=\footnotesize, at={(0.03,0.97)}, anchor=north west}]
       \nextgroupplot[ylabel={Median check latency [ms]}, ymode=log, title={(a)}, title style={font=\footnotesize}]
         \addplot+[mark=*, blue!70!black] coordinates {(10,31) (100,33) (1000,35) (10000,38)};
         \addplot+[mark=square*, gray] coordinates {(10,34) (100,61) (1000,310) (10000,2900)};
