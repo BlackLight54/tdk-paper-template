@@ -58,7 +58,7 @@ local function is_serif(fam)
 end
 local function is_times(fam) fam = fam:lower(); return fam:find("times", 1, true) or fam:find("termes", 1, true) or fam:find("nimbus", 1, true) or fam:find("newtx", 1, true) or fam:find("liberation serif", 1, true) end
 
-rule("pdf-file", "pdf", "check", "polish", "the PDF exists, is A4, under the faculty's 15 MB, with title and author metadata, all fonts embedded and none Type 3", function()
+rule("pdf-file", "pdf", "check", "polish", "the PDF exists, is A4, under 15 MB (our safeguard, from the faculty's thesis guideline), with title and author metadata, all fonts embedded and none Type 3", function()
   if not C.exists(pdf()) then fail(nil, nil, "no " .. pdf() .. ": build first"); return end
   if not C.have("pdfinfo") then C.skip("pdfinfo not installed (poppler-utils)"); return end
   local info = C.run(string.format("pdfinfo %q", pdf())) or ""
@@ -70,8 +70,8 @@ rule("pdf-file", "pdf", "check", "polish", "the PDF exists, is A4, under the fac
   if title == "" or title:match("TODO") or title:match("Elektronikus terel") then fail("thesis.tex", nil, "PDF title metadata is empty or a placeholder", "set \\vikcim") end
   if author == "" or author:match("Gipsz") then fail("thesis.tex", nil, "PDF author metadata is empty or the sample author") end
   local size = lfs.attributes(pdf(), "size") or 0
-  if size > 15 * 1024 * 1024 then fail(nil, nil, string.format("PDF is %.1f MB; the faculty allows 15 MB", size / 1048576))
-  elseif size > 10 * 1024 * 1024 then warn(nil, nil, string.format("PDF is %.1f MB; the faculty allows 15 MB", size / 1048576)) end
+  if size > 15 * 1024 * 1024 then fail(nil, nil, string.format("PDF is %.1f MB; we allow 15 MB, the limit in the faculty's thesis guideline", size / 1048576))
+  elseif size > 10 * 1024 * 1024 then warn(nil, nil, string.format("PDF is %.1f MB; we allow 15 MB, the limit in the faculty's thesis guideline", size / 1048576)) end
   local fonts = C.run(string.format("pdffonts %q", pdf())) or ""
   local n = 0
   for l in fonts:gmatch("[^\n]+") do
@@ -193,7 +193,7 @@ rule("pdf-pages", "pdf", "check", "submit", "main text pages counted from the PD
   return string.format("pages=%d", n)
 end)
 
-rule("pdf-parts", "pdf", "check", "submit", "the parts the form requires are in the PDF: abstracts in both languages, the AI declaration, the table of contents; and the parts it forbids are not", function()
+rule("pdf-parts", "pdf", "check", "submit", "the parts we require are in the PDF: abstracts in both languages, the AI declaration, the table of contents; and the parts that must not be there are not", function()
   if not C.have("pdftotext") then C.skip("pdftotext not installed"); return end
   local p = profile()
   local text = C.run(string.format("pdftotext -layout %q -", pdf())) or ""

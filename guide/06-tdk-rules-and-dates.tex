@@ -80,13 +80,26 @@ The portal publishes dates each year. These are the 2026 dates, shown in \cref{f
 \end{figure}
 
 \section{Form requirements}\label{app:tdk:form}
-These are the faculty call's requirements, already reflected in the template.
+The faculty's call states these requirements under \enquote{A dolgozat formai és terjedelmi követelményei}; the template already follows them. Each part of the call is quoted, then summarised.
 \begin{itemize}
-  \item \textbf{Length}: 30--35 pages of main text. The title page, the optional task description, the table of contents, the bibliography, the abstract and the appendices do not count.
-  \item \textbf{Layout}, whether you use \LaTeX{} or Word: A4 paper, single column, Times New Roman or another readable serif font, 12\,pt, single line spacing, margins between 1.5 and 3.5\,cm on every side.
-  \item \textbf{Figures and tables} are part of the main text, so they count towards the page limit. Their size is free, but they must be readable in print: avoid text below 10\,pt, labels included.
-  \item The faculty's templates under \emph{Letöltések} are diploma thesis templates, so they need small changes for the TDK, such as margins and headings. This template has them.
+  \item \textbf{Terjedelem:} \enquote{A dolgozat hossza 30--35 oldal, amely a törzsszövegre vonatkozik. A fedlap, az opcionális feladatkiírás, a tartalomjegyzék, az irodalomjegyzék, az absztrakt és a mellékletek (appendix) nem számítanak bele az oldalszámba.}
+  \textbf{Length}: 30--35 pages of main text. The title page, the optional task description, the table of contents, the bibliography, the abstract and the appendices do not count.
+  \item \textbf{Formai követelmények (függetlenül attól, hogy LaTeX vagy Word kerül használatra):}
+  \begin{itemize}[noitemsep]
+    \item \enquote{Papírméret: A4}
+    \item \enquote{Elrendezés: egyhasábos szöveg}
+    \item \enquote{Betűtípus: Times New Roman (vagy más, jól olvasható serif betűtípus)}
+    \item \enquote{Betűméret: 12 pt}
+    \item \enquote{Sorköz: egyszeres}
+    \item \enquote{Margók: minden oldalon 1,5--3,5 cm közötti tartományban kell lenniük.}
+  \end{itemize}
+  \textbf{Layout}, whether you use \LaTeX{} or Word: A4 paper, single column, Times New Roman or another readable serif font, 12\,pt, single line spacing, margins between 1.5 and 3.5\,cm on every side.
+  \item \textbf{Ábrák és táblázatok:} \enquote{Az ábrák és táblázatok a törzsszöveg részét képezik, tehát beleszámítanak az oldalszámba. Méretükre nincs formai megkötés, de a tartalomnak nyomtatásban is olvashatónak kell lennie (10 pt alatti betűméret kerülendő címkéken is).}
+  \textbf{Figures and tables} are part of the main text, so they count towards the page limit. Their size is free, but they must be readable in print: avoid text below 10\,pt, labels included.
+  \item \textbf{Hasznos segédanyagok:} \enquote{A dolgozat elkészítéséhez sablonok érhetők el a Letöltések menüpont alatt. Ezek alapvetően diplomaterv-sablonok, ezért a formai követelményekhez igazodva előfordulhat, hogy kisebb módosításokra lesz szükség (pl.\ margók, címsorok beállítása).}
+  The faculty's templates under \emph{Letöltések} are diploma thesis templates, so they need small changes for the TDK, such as margins and headings. This template has them.
 \end{itemize}
+Our reading of the length: the main text (törzsszöveg) runs from the first page of \tplref{ch:intro} to the last page of the conclusion (\path{content/07-conclusion.tex}). The acknowledgements, the glossary lists and the AI declaration are not main text. The lint counts the pages this way and fails outside 30--35 at \texttt{submit}; that is our requirement.
 
 \section{Two papers in one year}\label{app:tdk:companion}
 A topic sometimes yields two TDK papers in the same year: you write both, or you and a fellow student write neighbouring parts of one project, such as a system in one paper and its formal verification in the other. Each paper is then the other's \emph{companion paper}, and three rules hold.
@@ -100,7 +113,7 @@ The \texttt{companion} rule of the lint (\cref{app:code:paperci}) fails on a cit
 \section{The review sheet}\label{app:tdk:sheet}
 The review sheet (bírálói lap), saved in \texttt{docs/}, awards 35 points across five criteria: A form and style, B figures and literature, C topic, D originality and soundness, and E introduction and evaluation. \Cref{app:chapters} explains how to argue relevance, non-triviality, novelty and correctness throughout the paper. Each of its sections quotes the steps below the top that cost that chapter points, so you can assess your work against the reviewer's wording. The top scores are defined as follows:
 \begin{description}[noitemsep]
-  \item[A. Szerkesztés, stílus (0--5)] \enquote{4--5: kiváló (ha a dolgozat közel hibamentes, jól tagolt, követhető, gördülékeny stílusú)}. The sheet also says: \enquote{Terjedelmi korlát 30--35 oldal. Ettől eltérés esetén 3 oldalanként 1 pont levonás javasolt.}
+  \item[A. Szerkesztés, stílus (0--5)] \enquote{4--5: kiváló (ha a dolgozat közel hibamentes, jól tagolt, követhető, gördülékeny stílusú)}. The sheet also says: \enquote{Terjedelmi korlát 30--35 oldal. Ettől eltérés esetén 3 oldalanként 1 pont levonás javasolt.} \enquote{Műszaki tudományi OTDK szekcióba 50 oldal felett nem fogadnak dolgozatot.} The sheet recommends that reviewers deduct the point; it does not require them to.
   \item[B/1. Ábrák, táblázatok] \enquote{4: kiváló (a dolgozat megfelelő számú és jól átgondolt ábrát, táblázatot tartalmaz, és a szakirodalmi hivatkozások pontosak)}.
   \item[B/2. Hivatkozások, irodalom feldolgozás] \enquote{3--4: újszerű ipari megoldások és kutatási eredmények (a dolgozat -- az újszerű ipari megoldásokon túl -- bemutatja a dolgozat témakörében releváns kutatási eredményeket a szakterületen)}. B is the average of B/1 and B/2.
   \item[C. A dolgozat témája (0--8)] \enquote{7--8: tudományos vizsgálat szükséges (ha a dolgozat témája korszerű, nem lezárt, vizsgálata magas szintű, tudományos, elmélyült tudást igényel)}.

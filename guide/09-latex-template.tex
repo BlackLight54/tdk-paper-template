@@ -55,7 +55,7 @@ Use the template's \texttt{\textbackslash makenoidxglossaries} workflow. TeX sor
 
 %----------------------------------------------------------------------------
 \section{Citations, links and icons (natbib, hyperref, bookmark, orcidlink, fontawesome5)}\label{app:latex:cite}
-The bibliography uses IEEE style through \texttt{tdkieee.bst}: entries are numbered by first citation, with abbreviated given names and IEEE punctuation. This meets the faculty's requirement for numbered references. Numeric citations are sorted and compressed~\cite{guide:w3c2025vcdm,guide:lamport1978time}.
+The bibliography uses IEEE style through \texttt{tdkieee.bst}: entries are numbered by first citation, with abbreviated given names and IEEE punctuation. Numbered references through \texttt{tdkieee.bst} are our requirement; the faculty's guideline (\texttt{include/guideline.tex}) prefers them and also allows the Harvard style. Numeric citations are sorted and compressed~\cite{guide:w3c2025vcdm,guide:lamport1978time}.
 \texttt{\textbackslash citet} names the author: \citet{guide:lamport1978time} introduced logical clocks.
 \texttt{\textbackslash citep} brackets the reference~\citep{guide:lamport1978time}.
 
@@ -67,7 +67,7 @@ Zotero records the access date on saving and exports it as \texttt{urldate}. The
 
 Overleaf's Zotero integration imports the group as \texttt{bib/zotero.bib} (\cref{app:start:access}). Zotero generates the citation keys; Overleaf suggests them when you type \texttt{\textbackslash cite\{}. For help, see the \href{https://www.zotero.org/support/quick_start_guide}{Zotero quick start guide}, \href{https://www.zotero.org/support/groups}{group libraries} and Overleaf's \href{https://www.overleaf.com/learn/how-to/How_to_link_your_Overleaf_account_to_Mendeley_and_Zotero}{linking your account to Zotero}. Locally, \href{https://retorque.re/zotero-better-bibtex/}{Better BibTeX} can keep an exported \texttt{.bib} in sync and provide stable citation keys.
 
-When saving an entry, check its type and title capitalisation. Protect names and acronyms with braces, such as \texttt{\{BPMN\}}. Keep hand-written Zenodo artifact and AI entries in \texttt{bib/references.bib}, because refresh overwrites \texttt{zotero.bib}.
+When saving an entry, check its type and title capitalisation. Protect names and acronyms with braces, such as \texttt{\{BPMN\}}. Keep the hand-written Zenodo artifact entry in \texttt{bib/references.bib}, because refresh overwrites \texttt{zotero.bib}.
 
 %----------------------------------------------------------------------------
 \section{Cross-references (cleveref)}\label{app:latex:cref}
@@ -186,7 +186,7 @@ Compact lists:
   \caption{A TikZ diagram: roles and the revocation registry.}\label{fig:latex:tikz}
 \end{figure}
 
-\Cref{fig:latex:svg} is an SVG file included with \texttt{\textbackslash includesvg}. Overleaf converts it with Inkscape; local builds need \texttt{-shell-escape}.
+\Cref{fig:latex:svg} is an SVG file included with \texttt{\textbackslash includesvg}, the way to include draw.io and Inkscape exports; we recommend TikZ where you can (\cref{app:writing:figures}). Overleaf converts it with Inkscape; local builds need \texttt{-shell-escape}.
 \begin{figure}[!ht]
   \centering
   \includesvg[width=0.35\linewidth]{guide/figures/example}

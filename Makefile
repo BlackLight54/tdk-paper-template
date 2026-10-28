@@ -14,7 +14,7 @@ clean:
 	latexmk -C $(DOCUMENT).tex reviewer.tex
 	rm -rf _minted-$(DOCUMENT) _minted-reviewer svg-inkscape *.tdo *.lol *.thm lint-checks.tex content/*.aux guide/*.aux include/*.aux
 
-# Last week's checklist, the mechanical rows: every lint rule against the last build.
+# The requirements table's rows with a rule name (guide, Requirements): every lint rule against the last build.
 # "make lint-<rule>" runs one; "texlua scripts/lint.lua list" names them.
 check:
 	$(LINT) all
