@@ -11,9 +11,10 @@
 --   texlua scripts/lint.lua fix [<rule>...] [--dry-run] [--review]    write the fixes the rules suggest (fixes.lua)
 --
 -- Severity: check (fails once its phase is reached), advice (warns, never fails), count (numbers).
--- Phase: --phase, else LINT_PHASE, else \newcommand{\lintphase}{plan|draft|polish|final} in
--- thesis.tex, else plan; any other value stops the lint with exit 2. A check whose phase is not
--- reached yet only reports. The essentials (scripts/lint/essentials.lua) are one check whose
+-- Phase: --phase, else LINT_PHASE, else \newcommand{\lintphase}{...} in thesis.tex, else plan: the
+-- lifecycle phase, one of topic, setup, research, plan, draft, polish, submit; the first four
+-- share the checks' first level, and any other value (final included) stops the lint with exit 2.
+-- A check whose phase is not reached yet only reports. The essentials (scripts/lint/essentials.lua) are one check whose
 -- level rises with the phase. Chapters are found by their labels (ch:intro, ...), not by file
 -- name. "% lint-ignore: <rule> <reason>" silences one finding. A finding may carry a fix, printed
 -- under it: safe, review or placeholder (lintcore.lua says what each means). Exit: 0 when every
@@ -44,7 +45,7 @@ do
     else args[#args + 1] = arg[i]; i = i + 1 end
   end
 end
--- an unknown phase stops everything: run as plan, a typo for final would pass what final fails
+-- an unknown phase stops everything: run as plan, a typo for submit would pass what submit fails
 do
   local ok, err = C.resolve_phase()
   if not ok then

@@ -3,7 +3,9 @@ local lfs = require("lfs")
 local M = {}
 
 M.opts = { dir = ".", doc = "thesis", profile = os.getenv("LINT_PROFILE") or "tdk", tex = false, json = false }
-M.PHASES = { plan = 1, draft = 2, polish = 3, final = 4 } -- the order of the manual phase in thesis.tex
+-- the manual phase in thesis.tex is the lifecycle phase; the four before draft share the checks' first level
+M.PHASE_ORDER = { "topic", "setup", "research", "plan", "draft", "polish", "submit" }
+M.PHASES = { topic = 1, setup = 1, research = 1, plan = 1, draft = 2, polish = 3, submit = 4 }
 
 function M.readfile(p) local h = io.open(p, "r"); if not h then return nil end; local s = h:read("a"); h:close(); return s end
 function M.lines(p)
@@ -253,7 +255,8 @@ function M.setting(name)
   end
 end
 -- the manual phase: --phase, else LINT_PHASE, else \lintphase in thesis.tex, else plan. A value
--- that is none of the four is an error, never read as plan: lint.lua stops on it before any rule
+-- that is none of the seven (final included: the lint has no aliases) is an error, never read as
+-- plan: lint.lua stops on it before any rule
 function M.resolve_phase()
   local p, src = M.opts.phase, "--phase"
   if not p then
@@ -263,14 +266,16 @@ function M.resolve_phase()
   if not p then p, src = M.setting("lintphase"), "\\lintphase in thesis.tex" end
   if not p then p, src = "plan", "the default" end
   M.opts.phase, M.opts.phase_source = p, src
-  if not M.PHASES[p] then return nil, string.format("unknown phase '%s' from %s: use plan, draft, polish or final", p, src) end
+  if not M.PHASES[p] then return nil, string.format("unknown phase '%s' from %s: use one of %s", p, src, table.concat(M.PHASE_ORDER, ", ")) end
   return p
 end
 function M.phase()
   if not M.opts.phase_source then M.resolve_phase() end
   return M.opts.phase
 end
-function M.phase_reached(due) if due == "always" then return true end; return M.PHASES[M.phase()] >= M.PHASES[due] end
+-- the level of the checks the phase asks for: 1 for topic to plan, then 2, 3, 4
+function M.level() return M.PHASES[M.phase()] end
+function M.phase_reached(due) if due == "always" then return true end; return M.level() >= M.PHASES[due] end
 
 -- findings and reporting -------------------------------------------------------------
 local gh = os.getenv("GITHUB_ACTIONS") ~= nil

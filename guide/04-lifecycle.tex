@@ -3,6 +3,7 @@
 %----------------------------------------------------------------------------
 Plan the phases in \cref{tab:lifecycle} backwards from the official dates in \cref{app:tdk}. Each step has an owner, a completion condition and a link to guidance.
 We use these steps to track each student's progress at the weekly consultation (\cref{app:consult}).
+Set \texttt{\textbackslash lintphase} in \texttt{thesis.tex} to your phase's name in lower case, from \texttt{topic} to \texttt{submit}; the lint's checks come due by phase (\cref{app:code:paperci}). After the upload, leave it at \texttt{submit}: the paper is submitted and needs no further checks.
 
 Three steps are \anchor{}s: the topic manifest, the spine and the full draft. An anchor is a one-page artefact agreed with us that later work must follow. The topic starts as a direction. The spine fixes its claims and names; the full draft leaves only polishing. You can continue working at an anchor, but work that contradicts it is drift. Revisit the agreement first, or you may have to redo everything built on it.
 
@@ -57,24 +58,25 @@ Red rows mark anchors. Yellow rows marked \official{} are faculty steps with fix
   Panel pass & you & Every relevant persona has read the draft; blockers are fixed or acknowledged in the limitations before we receive it & \lcref{app:lifecycle:reviewers}{Reviewer passes} \\
   \rowcolor{anchorrow}
   Full draft \anchor & both & Every chapter is written and in our hands ten days before the deadline & --- \\
-  \lcphase{5. Polish}{the last ten days of October}
+  \lcphase{5. Polish}{21--28 October}
   Advisor review & both & Our comments are resolved and the list of todos is empty & \lcref{app:latex:todo}{Todo notes} \\
   Review sheet hill climb & you & You have scored A--E, fixed the weakest criterion and repeated until no cheap fixes remain & \lcref{app:tdk:sheet}{The review sheet} \\
   Skim pass (a hill climb) & you & The skim reviewer gives the maximum on every criterion from the skim view alone & \lcref{app:lifecycle:reviewers}{Reviewer passes} \\
-  Last week's checklist & you & Every row is checked and \texttt{make check-reviewer} is clean & \lcref{tab:polish}{the checklist} \\
   Code archive & you & The code is on Zenodo, cited by its concept DOI, and the results tag is named in the paper & \lcref{app:zenodo}{Zenodo} \\
   \rowcolor{department}
   Writing session \department & both & You attended with pizza, closed the last todos and had an advisor check the reviewer PDF & \lcref{tab:polish}{the checklist} \\
+  \lcphase{6. Submit}{29 October -- 1 November, or earlier once the paper is complete}
+  Last week's checklist & you & \texttt{\textbackslash lintphase} is \texttt{submit}, every row is checked and \texttt{make check-reviewer} is clean & \lcref{tab:polish}{the checklist} \\
   \rowcolor{official}
   Paper upload \official & you & AI declaration filled in, main text 30--35 pages, the reviewer PDF uploaded under \emph{Dolgozataim} by 1 November & \lcref{app:tdk:form}{Form requirements} \\
-  \lcphase{6. After the deadline}{2--16 November, while the reviewers read}
+  \lcphase{7. After the deadline}{2--16 November, while the reviewers read}
   Code polish & you & README complete, Docker images build, a new Zenodo version published; the results tag untouched & \lcref{app:zenodo:versions}{Release a new version} \\
   Demo & you & The demonstration is recorded by a script and published by CI on every push, with captions that carry the insight & \lcref{app:code:demo}{Demos} \\
   Talk & you & Slides in the group's template, the leading figure second, one story in fifteen minutes, rehearsed about ten times & \href{https://github.com/ftsrg/cheat-sheets/wiki/TDK-Howto}{FTSRG TDK Howto} \\
   Reviews and questions & you & Every review question, doubt and remaining panel objection has an answer prepared, with backup slides where useful & \lcref{app:tdk:sheet}{The review sheet}, \lcref{app:lifecycle:reviewers}{Reviewer passes} \\
   \rowcolor{department}
   Talk rehearsal \department & both & You rehearsed two days before the conference, practised answering the reviewers' questions and fixed the problems found & --- \\
-  \lcphase{7. Conference}{18 November}
+  \lcphase{8. Conference}{18 November}
   \rowcolor{official}
   Conference \official & you & Fifteen minutes of talk and five of questions in your section; the awards the same evening & \lcref{app:tdk:dates}{Official dates} \\
   After the TDK & both & Decided together: the OTDK if nominated, a conference paper, or a thesis & \lcref{app:tdk:dates}{Placements} \\
@@ -123,7 +125,7 @@ The first four personas read every paper. The others read papers that touch thei
 Ignore findings that do not identify a place in the paper. Verify every suggested source before citing it; a persona may invent one. Tell us if two personas raise the same concern or one argues outside its remit, so we can fix their boundaries in the persona files.
 
 \section{Last week's checklist}\label{app:lifecycle:polish}
-Use the polish phase for checks. Any row that takes more than an hour should have been completed in the draft phase. Mechanical checks are rules in \texttt{scripts/lint.lua}. Run all of them against the last build with \texttt{make check}, or against the reviewer build with \texttt{make check-reviewer}. Before you upload, run \texttt{make check-final}: it checks the reviewer build at the final phase whatever \texttt{\textbackslash lintphase} says, because the reviewer PDF hides todos and gap markers. Run an individual rule with, for example, \texttt{make lint-essentials}; list the rules with \texttt{texlua scripts/lint.lua list}. The paper CI (\cref{app:code:paperci}) runs the same rules on every push, so keep them passing before the last week. Check the remaining rows by reading.
+Use the polish phase for checks. Any row that takes more than an hour should have been completed in the draft phase. Mechanical checks are rules in \texttt{scripts/lint.lua}. Run all of them against the last build with \texttt{make check}, or against the reviewer build with \texttt{make check-reviewer}. Before you upload, run \texttt{make check-submit}: it checks the reviewer build at the submit phase whatever \texttt{\textbackslash lintphase} says, because the reviewer PDF hides todos and gap markers. Run an individual rule with, for example, \texttt{make lint-essentials}; list the rules with \texttt{texlua scripts/lint.lua list}. The paper CI (\cref{app:code:paperci}) runs the same rules on every push, so keep them passing before the last week. Check the remaining rows by reading.
 {\small
 \begin{xltabular}{\linewidth}{>{\raggedright\arraybackslash}p{0.26\linewidth} X}
   \caption{Final checks. Rule names in brackets identify mechanical checks run by \texttt{make check} and the paper CI.}\label{tab:polish}\\

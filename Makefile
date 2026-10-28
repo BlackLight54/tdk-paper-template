@@ -38,10 +38,10 @@ fix-review:
 check-reviewer: reviewer
 	$(LINT) all --doc reviewer
 
-# The check before you upload: the reviewer build against every rule at the final phase, whatever
+# The check before you upload: the reviewer build against every rule at the submit phase, whatever
 # \lintphase says. The reviewer PDF hides todos and gap markers, so how it looks says nothing.
-check-final: reviewer
-	$(LINT) all --doc reviewer --phase final
+check-submit: reviewer
+	$(LINT) all --doc reviewer --phase submit
 
 # The lint's copy of the skeleton chapters (scripts/lint/skeleton), after editing content/01-07 of the template.
 skeleton:
@@ -55,4 +55,4 @@ essentials:
 guide-bib:
 	texlua scripts/guide-bib.lua
 
-.PHONY: all reviewer clean check check-reviewer check-final fix fix-dry fix-review guide-bib skeleton essentials
+.PHONY: all reviewer clean check check-reviewer check-submit fix fix-dry fix-review guide-bib skeleton essentials

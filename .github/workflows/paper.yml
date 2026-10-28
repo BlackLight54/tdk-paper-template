@@ -165,14 +165,14 @@ jobs:
       - name: source / stock (check, draft)
         if: always()
         run: texlua scripts/lint.lua stock
-      - name: source / pages (check, final)
+      - name: source / pages (check, submit)
         if: always()
         continue-on-error: ${{ github.ref_name != 'main' }}
         run: texlua scripts/lint.lua pages --doc reviewer
-      - name: source / aidecl (check, final)
+      - name: source / aidecl (check, submit)
         if: always()
         run: texlua scripts/lint.lua aidecl
-      - name: source / titlepage (check, final)
+      - name: source / titlepage (check, submit)
         if: always()
         run: texlua scripts/lint.lua titlepage
       - name: pdf / pdf-file (check, polish)
@@ -190,20 +190,20 @@ jobs:
       - name: pdf / pdf-smalltext (advice, polish)
         if: always()
         run: texlua scripts/lint.lua pdf-smalltext --doc reviewer
-      - name: pdf / pdf-pages (check, final)
+      - name: pdf / pdf-pages (check, submit)
         if: always()
         continue-on-error: ${{ github.ref_name != 'main' }}
         run: texlua scripts/lint.lua pdf-pages --doc reviewer
-      - name: pdf / pdf-parts (check, final)
+      - name: pdf / pdf-parts (check, submit)
         if: always()
         run: texlua scripts/lint.lua pdf-parts --doc reviewer
       - name: source / markers (check, draft)
         if: always()
         run: texlua scripts/lint.lua markers
-      - name: source / placeholders (count, final)
+      - name: source / placeholders (count, submit)
         if: always()
         run: texlua scripts/lint.lua placeholders
-      - name: source / beats (count, final)
+      - name: source / beats (count, submit)
         if: always()
         run: texlua scripts/lint.lua beats
       - name: tools / words (count, polish)

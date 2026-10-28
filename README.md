@@ -11,7 +11,7 @@ student's paper repository, including the build and lint workflow.
   "The paper, chapter by chapter" in `guide/chapter-by-chapter.tex`, where the
   instructions and worked examples live. `reviewer.tex` builds the PDF in submission
   format. It hides the notes and gap markers, so how it looks says nothing about
-  readiness: it is ready to upload only when `make check-final` passes and the advisors
+  readiness: it is ready to upload only when `make check-submit` passes and the advisors
   have reviewed it.
 - `content/` holds the chapters, abstract, glossary and AI declaration; `guide/` holds
   the advisors' guide; `include/` the preamble; `bib/` the bibliographies; and `docs/`
@@ -28,5 +28,5 @@ for the code repository. The guide explains all three after the draft's appendic
 
 Build locally with `make all` for the draft and `make reviewer` for the reviewer PDF.
 Use TeX Live with XeLaTeX, Inkscape and shell escape enabled.
-`make check-reviewer` runs the lint on the reviewer build, and `make check-final` runs it
-at the final phase: the check before you upload.
+`make check-reviewer` runs the lint on the reviewer build, and `make check-submit` runs it
+at the submit phase: the check before you upload.

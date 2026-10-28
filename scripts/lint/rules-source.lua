@@ -57,7 +57,7 @@ rule("frame", "source", "check", "always", "the template's frame is still there:
   if not C.FILES.abstract then fail(nil, nil, "no abstract file (a content file with \\chapter*{Abstract})") end
   if not C.FILES.aidecl then fail(nil, nil, "no AI declaration file (\\label{aidecl})") end
   if not C.FILES.glossary then fail(nil, nil, "no glossary file (\\newabbreviation or \\newglossaryentry in a file thesis.tex loads)") end
-  if not (C.readfile("thesis.tex") or ""):match("\\newcommand{\\lintphase}{%a+}") then fail("thesis.tex", nil, "no \\lintphase in thesis.tex: the lint needs the phase (plan, draft, polish, final)") end
+  if not (C.readfile("thesis.tex") or ""):match("\\newcommand{\\lintphase}{%a+}") then fail("thesis.tex", nil, "no \\lintphase in thesis.tex: the lint needs the phase (topic, setup, research, plan, draft, polish or submit)") end
   local pre = C.readfile("include/preamble.tex") or ""
   for _, m in ipairs({ "runningexample", "NewTagList", "beat", "gapyes", "atodo" }) do
     if not pre:find(m, 1, true) then fail("include/preamble.tex", nil, "the preamble no longer defines " .. m) end
@@ -223,8 +223,8 @@ local function marker_fix(f, n, l, t)
   return C.fix(known and "review" or "placeholder", gap and "write \\tbd" or "write \\citeneeded", table.unpack(edits))
 end
 
-rule("markers", "source", "check", "draft", "gaps are marked with \\tbd{...} or \\citeneeded[...], which the draft shows and the reviewer build hides: never typed as TBD, [CITE], [?] or XXX; at the final phase no marker is left", function()
-  local final = C.phase_reached("final")
+rule("markers", "source", "check", "draft", "gaps are marked with \\tbd{...} or \\citeneeded[...], which the draft shows and the reviewer build hides: never typed as TBD, [CITE], [?] or XXX; at the submit phase no marker is left", function()
+  local final = C.phase_reached("submit")
   local gaps = 0
   for _, f in ipairs(CONTENT) do
     for n, l in ipairs(C.prose_lines(f)) do
@@ -234,7 +234,7 @@ rule("markers", "source", "check", "draft", "gaps are marked with \\tbd{...} or 
       for m in l:gmatch("\\(%a+)") do
         if m == "tbd" or m == "citeneeded" then
           gaps = gaps + 1
-          if final then fail(f, n, "\\" .. m .. " is still here", "fill the gap before the final version") end
+          if final then fail(f, n, "\\" .. m .. " is still here", "fill the gap before you submit") end
         end
       end
     end
@@ -382,7 +382,7 @@ local function main_pages()
   return stop - first, first, stop - 1
 end
 
-rule("pages", "source", "check", "final", "main text, from the first numbered chapter to the page before the back matter (read from the .toc), is 30-35 pages", function()
+rule("pages", "source", "check", "submit", "main text, from the first numbered chapter to the page before the back matter (read from the .toc), is 30-35 pages", function()
   local p, s, e = main_pages()
   if not p then fail(nil, nil, "no numbered chapter followed by an unnumbered one in " .. C.opts.doc .. ".toc (build first; pdf-pages counts from the outline instead)"); return end
   if p < 30 or p > 35 then fail(C.ROLE.intro, 2, string.format("main text is %d pages (%d-%d); the call asks for 30-35, about 1 point off per 3 pages", p, s, e))
@@ -1238,7 +1238,7 @@ rule("numbers", "source", "advice", "polish", "the headline numbers of the abstr
   return string.format("missing=%d", missing)
 end)
 
-rule("aidecl", "source", "check", "final", "the AI declaration is filled in: exactly one box marked, and if AI was used, at least one row, the overall share and its justification", function()
+rule("aidecl", "source", "check", "submit", "the AI declaration is filled in: exactly one box marked, and if AI was used, at least one row, the overall share and its justification", function()
   local f = C.FILES.aidecl
   local s = f and C.readfile(f); if not s then fail(nil, nil, "no AI declaration file (\\label{aidecl})"); return end
   local body = s:gsub("\\newcommand{\\aiboxmarked}[^\n]*", "")
@@ -1255,7 +1255,7 @@ rule("aidecl", "source", "check", "final", "the AI declaration is filled in: exa
   if s:match("\\todo") then warn(f, nil, "the declaration's instructions todo is still in the file") end
 end)
 
-rule("titlepage", "source", "check", "final", "the title page variables are filled in: title, author, year, the second author where there is one", function()
+rule("titlepage", "source", "check", "submit", "the title page variables are filled in: title, author, year, the second author where there is one", function()
   local th = C.readfile("thesis.tex") or ""
   local title = th:match("\\newcommand{\\vikcim}{([^}]*)}") or ""
   if title == "" or title:match("TODO") then fail("thesis.tex", nil, "\\vikcim (the title) is not set") end
@@ -1269,7 +1269,7 @@ rule("titlepage", "source", "check", "final", "the title page variables are fill
 end)
 
 -- burn-down --------------------------------------------------------------------------------
-rule("placeholders", "source", "count", "final", "what the template left for you: TODO strings, placeholder figures and tables, sample citations in the gap matrix, the Zenodo DOI", function()
+rule("placeholders", "source", "count", "submit", "what the template left for you: TODO strings, placeholder figures and tables, sample citations in the gap matrix, the Zenodo DOI", function()
   local todo, ph = 0, 0
   local files = {}
   for _, f in ipairs(CONTENT) do files[#files + 1] = f end
@@ -1288,7 +1288,7 @@ rule("placeholders", "source", "count", "final", "what the template left for you
   return string.format("todo=%d placeholders=%d", todo, ph)
 end)
 
-rule("beats", "source", "count", "final", "beats and notes still printing: the skeleton is done when every beat has become prose", function()
+rule("beats", "source", "count", "submit", "beats and notes still printing: the skeleton is done when every beat has become prose", function()
   local beats, todos = 0, 0
   C.each_line(MAIN, function(f, n, l)
     if l:match("\\beat{") then beats = beats + 1; note(f, n, "beat") end

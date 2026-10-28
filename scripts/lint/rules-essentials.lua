@@ -3,7 +3,7 @@
 --   ○ missing, ◔ placeholder (only TODO or the template's own text), ◑ started (own text, not
 --   enough yet), ◕ written, ● written and used where the argument needs it.
 -- A row with no "used" condition is ● once written. The phase asks every row for a level
--- (plan ◔, draft ◑, polish and final ●), and a row below it fails. The rows, with their level,
+-- (topic to plan ◔, draft ◑, polish and submit ●), and a row below it fails. The rows, with their level,
 -- place and next step, stay in C.ESSENTIALS for the Checks page, the job summary and --json.
 local C = require("lintcore")
 local ROWS = require("essentials")
@@ -13,14 +13,14 @@ local M = {}
 M.ROWS = ROWS
 M.GLYPH = { [0] = "○", "◔", "◑", "◕", "●" }
 M.LEVEL_NAME = { [0] = "missing", "placeholder", "started", "written", "used" }
-M.TARGET = { plan = 1, draft = 2, polish = 4, final = 4 }
+M.TARGET = { 1, 2, 4, 4 } -- by the phase's level: topic to plan, draft, polish, submit
 M.ROLE_ORDER = { "front", "intro", "approach", "evaluation", "related", "conclusion" }
 M.ROLE_TITLE = { front = "Front matter", intro = "Introduction", approach = "Approach", evaluation = "Evaluation", related = "Related work", conclusion = "Conclusion" }
 M.ROLE_SHORT = { front = "front", intro = "intro", approach = "approach", evaluation = "evaluation", related = "related", conclusion = "concl." }
 M.EXAMPLE_WORDS = 10 -- own words that make the introduction's example box written
 C.ESS = M
 
-function M.target() return M.TARGET[C.phase()] or 1 end
+function M.target() return M.TARGET[C.level()] end
 
 -- lines, comment-stripped, and prose lines, read once per file
 local raw_cache, prose_cache = {}, {}
@@ -502,7 +502,7 @@ local function write_summary(rows)
   local t = M.target()
   h:write(string.format("## Essentials: %d of %d at the %s level\n\n", M.at_target(rows), #rows, C.phase()))
   h:write("`" .. M.fingerprint(rows) .. "`\n\n")
-  h:write("○ missing · ◔ placeholder · ◑ started · ◕ written · ● used where the argument needs it. The phase asks for: plan ◔, draft ◑, polish ●, final ●. **Bold** rows are below it.\n\n")
+  h:write("○ missing · ◔ placeholder · ◑ started · ◕ written · ● used where the argument needs it. The phase asks for: topic to plan ◔, draft ◑, polish ●, submit ●. **Bold** rows are below it.\n\n")
   h:write("| | Essential | Next step | Where |\n|---|---|---|---|\n")
   for _, r in ipairs(rows) do
     local name = r.level < t and ("**" .. r.row.title .. "**") or r.row.title
@@ -525,7 +525,7 @@ local function label_fix(r)
   end)))
 end
 
-C.rule("essentials", "source", "check", "always", "the essentials every paper of this kind contains, from scripts/lint/essentials.lua, each missing, a placeholder, started, written or used where the argument needs it; the phase asks for a level of every row (plan: present, draft: started, polish and final: used)", function()
+C.rule("essentials", "source", "check", "always", "the essentials every paper of this kind contains, from scripts/lint/essentials.lua, each missing, a placeholder, started, written or used where the argument needs it; the phase asks for a level of every row (topic to plan: present, draft: started, polish and submit: used)", function()
   local rows = M.evaluate()
   C.ESSENTIALS = rows
   local t = M.target()

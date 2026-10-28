@@ -257,7 +257,7 @@ MUTATIONS = [
     ("tracked build output", "repo-hygiene", track("reviewer.pdf"), "reviewer.pdf: FAIL build output is tracked"),
     ("a typed TBD", "markers", append(BG, "The proving time is TBD for now."), "a typed TBD"),
     ("a typed citation marker", "markers", append(BG, "This is well known [CITE: the survey]."), "a typed [CITE"),
-    ("a gap marker left at the final phase", "markers", append(BG, "Proving takes \\tbd{the proving time}."), "is still here"),
+    ("a gap marker left at the submit phase", "markers", append(BG, "Proving takes \\tbd{the proving time}."), "is still here"),
     ("a TBD inside a todo is not typed into the text", "markers", append(BG, "Text.\\todo{TBD later}"), "!a typed TBD"),
     # a TDK paper of the same year is a companion paper: never cited or linked
     ("a TDK paper of this year cited", "companion", tdk_entry(YEAR), "is a TDK paper of"),
@@ -276,7 +276,7 @@ MUTATIONS = [
     ("this paper's own repository, cited in the implementation chapter", "companion", both(append("bib/references.bib", f"@misc{{owncode, title = {{The Code}}, year = {{{YEAR}}}, url = {{https://github.com/someone/tdk{YEAR % 100:02d}-code}}}}"),
         sub("content/04-implementation.tex", "\\url{https://github.com/TODO}", "\\cite{owncode}")), "!companion paper"),
     ("another same-year repository next to this paper's own", "companion", both(OWN_REPO, append(BG, f"The model is at \\url{{https://github.com/someone/tdk{YEAR % 100:02d}-model}}.")), "links the repository of a"),
-    ("the thesis profile skips the companion rule", "companion", tdk_entry(YEAR), "skipped", {"args": "--doc reviewer --phase final --profile thesis", "exit": 0, "fresh": True}),
+    ("the thesis profile skips the companion rule", "companion", tdk_entry(YEAR), "skipped", {"args": "--doc reviewer --phase submit --profile thesis", "exit": 0, "fresh": True}),
     ("a companion paper cited", "companion", append(BG, "A companion paper~\\cite{lamport1978time} verifies the protocol."), "attached to a companion paper"),
     ("a companion paper linked", "companion", append(BG, "The protocol is verified in \\href{https://example.org/paper.pdf}{a companion paper}."), "attached to a companion paper"),
     ("a companion paper named, its tool cited", "companion", append(BG, "A companion paper verifies the protocol in Tamarin~\\cite{lamport1978time}."), "!attached to a companion paper"),
@@ -288,19 +288,21 @@ MUTATIONS = [
     ("a citation in a comment environment is not read", "bib", append(BG, "\\begin{comment}\nSee~\\cite{nosuchref}.\n\\end{comment}"), "!nosuchref"),
     ("a citation in a picture is read", "bib", append(BG, "\\begin{tikzpicture}\\node {Prior work~\\cite{nosuchref}};\\end{tikzpicture}"), "nosuchref is in no .bib file"),
     ("a citation in a code listing is not read", "bib", append(BG, "\\begin{lstlisting}\n\\cite{nosuchref}\n\\end{lstlisting}"), "!nosuchref"),
-    # the phase is one of four, wherever it comes from
+    # the phase is one of the lifecycle's seven, wherever it comes from; final is no alias of submit
+    ("an old phase name is no alias", "markers", append(BG, "Proving takes \\tbd{the proving time}."), "unknown phase 'final'", {"args": "--doc reviewer --phase final", "exit": 2, "fresh": True}),
+    ("the first four phases share a level", "markers", append(BG, "Proving takes \\tbd{the proving time}."), "!is still here", {"args": "--doc reviewer --phase research", "fresh": True}),
     ("an unknown phase stops the lint", "markers", append(BG, "Proving takes \\tbd{the proving time}."), "unknown phase 'fnial'", {"args": "--doc reviewer --phase fnial", "exit": 2, "fresh": True}),
     ("an unknown phase in thesis.tex stops the lint", "markers", sub("thesis.tex", "\\newcommand{\\lintphase}{plan}", "\\newcommand{\\lintphase}{fnial}"), "from \\lintphase in thesis.tex", {"args": "--doc reviewer", "exit": 2}),
     ("an unknown phase on the Checks page", "markers", sub("thesis.tex", "\\newcommand{\\lintphase}{plan}", "\\newcommand{\\lintphase}{fnial}"), "The lint did not run", {"args": "overleaf --tex", "exit": 2}),
     # a rule that cannot run says skipped, and --json carries every rule's result
     ("an offline link check is skipped, not passed", "links", lambda d: None, "links         advice  skipped", {"fresh": True}),
-    ("a PDF rule without a PDF is skipped", "pdf-margins", lambda d: None, "skipped", {"args": "--doc nosuchdoc --phase final", "fresh": True}),
-    ("json carries the findings of every rule", "bib", append(BG, "See~\\cite{nosuchref}."), '"msg":"cited key nosuchref is in no .bib file","rule":"bib"', {"args": "all --doc reviewer --phase final --json", "exit": 1}),
+    ("a PDF rule without a PDF is skipped", "pdf-margins", lambda d: None, "skipped", {"args": "--doc nosuchdoc --phase submit", "fresh": True}),
+    ("json carries the findings of every rule", "bib", append(BG, "See~\\cite{nosuchref}."), '"msg":"cited key nosuchref is in no .bib file","rule":"bib"', {"args": "all --doc reviewer --phase submit --json", "exit": 1}),
     ("a misspelt title", "spelling", sub("thesis.tex", "\\newcommand{\\vikcim}{TODO Title of the paper}", "\\newcommand{\\vikcim}{Revocation and revovation of credentials}"), "revovation"),
 ]
 
 
-ARGS = "--doc reviewer --phase final"
+ARGS = "--doc reviewer --phase submit"
 
 
 def lint(d, rule, args=ARGS):

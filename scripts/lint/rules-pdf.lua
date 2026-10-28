@@ -174,7 +174,7 @@ rule("pdf-smalltext", "pdf", "advice", "polish", "text below 8 pt, too small to 
   return string.format("runs<8pt=%d pages=%d", total, #pages)
 end)
 
-rule("pdf-pages", "pdf", "check", "final", "main text pages counted from the PDF outline, first chapter to the page before the back matter: 30-35 for the TDK", function()
+rule("pdf-pages", "pdf", "check", "submit", "main text pages counted from the PDF outline, first chapter to the page before the back matter: 30-35 for the TDK", function()
   local d, why = doc(); if not d then C.skip(why); return end
   local p = profile()
   local start, stop
@@ -193,7 +193,7 @@ rule("pdf-pages", "pdf", "check", "final", "main text pages counted from the PDF
   return string.format("pages=%d", n)
 end)
 
-rule("pdf-parts", "pdf", "check", "final", "the parts the form requires are in the PDF: abstracts in both languages, the AI declaration, the table of contents; and the parts it forbids are not", function()
+rule("pdf-parts", "pdf", "check", "submit", "the parts the form requires are in the PDF: abstracts in both languages, the AI declaration, the table of contents; and the parts it forbids are not", function()
   if not C.have("pdftotext") then C.skip("pdftotext not installed"); return end
   local p = profile()
   local text = C.run(string.format("pdftotext -layout %q -", pdf())) or ""
