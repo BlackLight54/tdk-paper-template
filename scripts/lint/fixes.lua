@@ -13,7 +13,7 @@ local M = {}
 
 local function signature(rule, fx)
   local t = { rule }
-  for _, e in ipairs(fx.edits) do t[#t + 1] = table.concat({ e.file, e.line, e.old or "", e.new or "", e.after or "" }, "\2") end
+  for _, e in ipairs(fx.edits) do t[#t + 1] = table.concat({ e.file, e.line, e.at or "", e.old or "", e.new or "", e.after or "" }, "\2") end
   return table.concat(t, "\1")
 end
 
