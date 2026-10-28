@@ -166,7 +166,8 @@ local function findings_cell(res)
   end
   local s = table.concat(shown, "\\newline ")
   if extra > 0 then s = s .. string.format("\\newline and %d more", extra) end
-  if res.ignored > 0 then s = s .. string.format("\\newline (%d ignored)", res.ignored) end
+  -- a cell must not open with \newline: xltabular has no line to end there
+  if res.ignored > 0 then s = s .. (s ~= "" and "\\newline " or "") .. string.format("(%d ignored)", res.ignored) end
   return s
 end
 
