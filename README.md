@@ -1,3 +1,13 @@
+---
+role: paper-template
+canonical: https://github.com/BlackLight54/TDK-template
+mirror: https://github.com/BlackLight54/tdk-paper-template
+overleaf: https://www.overleaf.com/project/6aa7d78f4bf131387fb7c710
+related:
+  notes: https://github.com/BlackLight54/tdk-notes-template
+  code: https://github.com/BlackLight54/tdk-code-template
+---
+
 # FTSRG TDK paper template
 
 This is the FTSRG advisors' LaTeX template for a TDK paper at BME VIK. The advisors'
@@ -5,6 +15,10 @@ guide is included in the draft PDF. **This repository is the canonical source.**
 template's Overleaf project is synced with it through Overleaf's GitHub integration.
 Students receive a copy of that Overleaf project; its GitHub integration creates each
 student's paper repository, including the build and lint workflow.
+
+Use `main` here for template maintenance. The public
+[tdk-paper-template](https://github.com/BlackLight54/tdk-paper-template) is a mirror
+of the same source. Overleaf receives updates through its GitHub sync menu.
 
 - `thesis.tex` builds the draft with notes, the Checks page and the guide.
   The chapter files contain headings, stubs and notes linking to
