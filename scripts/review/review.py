@@ -263,18 +263,27 @@ def cmd_bundle(a):
     for doc in DOCS:
         pdf, log = built / f"{doc}.pdf", built / f"{doc}.log"
         if not log.is_file():
-            raise Fail(f"{log} is missing: the {doc} build left no log")
+            if exits[doc] == 0:
+                raise Fail(f"{log} is missing, but --exit {doc}=0 says the build succeeded")
+            # the build never ran (a step before it failed, or it was skipped): the bundle still
+            # carries the other evidence, and the manifest says this one has none
+            print(f"review.py: warning: {log} is missing; the {doc} build is recorded as not started", file=sys.stderr)
+            builds.append({"doc": doc, "engine": None, "latexmk_exit": exits[doc], "started": False, "errors": None, "undefined": None, "pages": None})
+            continue
         if not pdf.is_file() and exits[doc] == 0:
             raise Fail(f"{pdf} is missing, but --exit {doc}=0 says the build succeeded")
         text = log.read_text(encoding="utf-8", errors="replace")
-        builds.append({"doc": doc, "engine": engine_of(text), "latexmk_exit": exits[doc], "errors": count_errors(text),
+        builds.append({"doc": doc, "engine": engine_of(text), "latexmk_exit": exits[doc], "started": True, "errors": count_errors(text),
                        "undefined": count_undefined(text), "pages": count_pages(pdf) if pdf.is_file() else None})
+    if not any(b["started"] for b in builds):
+        raise Fail("neither build left a log: there is no evidence to bundle")
 
     (out / "logs").mkdir(parents=True, exist_ok=True)
     for doc in DOCS:
         if (built / f"{doc}.pdf").is_file():
             shutil.copy2(built / f"{doc}.pdf", out / f"{doc}.pdf")
-        shutil.copy2(built / f"{doc}.log", out / "logs" / f"{doc}.log")
+        if (built / f"{doc}.log").is_file():
+            shutil.copy2(built / f"{doc}.log", out / "logs" / f"{doc}.log")
     shutil.copy2(lint, out / "lint.json")
     if skim_ok:
         shutil.copytree(skim, out / "skim")
@@ -360,10 +369,22 @@ def parse_frontmatter(text):
     return fm
 
 
-def persona_reads(personas_dir, persona):
+def persona_file(personas_dir, persona):
     path = Path(personas_dir, f"{persona}.md")
     if not re.fullmatch(r"[a-z0-9-]+", persona) or not path.is_file():
         raise Fail(f"no persona {persona!r} in {personas_dir}")
+    return path
+
+
+def persona_version(personas_dir, persona):
+    """The persona file's SHA-256 and the commit of the checkout it came from (None outside git):
+    the bundle's SHA names the paper, not the persona that read it, so a run records both."""
+    path = persona_file(personas_dir, persona)
+    return {"file": path.name, "sha256": sha256_file(path), "commit": git(path.parent, "rev-parse", "HEAD")}
+
+
+def persona_reads(personas_dir, persona):
+    path = persona_file(personas_dir, persona)
     fm = parse_frontmatter(path.read_text(encoding="utf-8"))
     if fm.get("name") != persona:
         raise Fail(f"{path}: frontmatter name is {fm.get('name')!r}, expected {persona!r}")
@@ -405,7 +426,7 @@ def cmd_inputs(a):
         for src, name in copies:
             (d / name).parent.mkdir(parents=True, exist_ok=True)
             shutil.copy2(src, d / name)
-        result[p] = {"dir": str(d), "files": hash_tree(d), "spine": (d / "spine.md").is_file()}
+        result[p] = {"dir": str(d), "files": hash_tree(d), "spine": (d / "spine.md").is_file(), "persona": persona_version(personas_dir, p)}
     print(json.dumps(result, indent=2))
 
 
@@ -505,7 +526,7 @@ def finding_line(x):
             f"{one_line(x['where'])}: {objection}. Answer: {one_line(x['answer'])}")
 
 
-def render_issue(f, manifest, inputs, today):
+def render_issue(f, manifest, inputs, today, versions=None):
     sha7, sha, repo, built = f["sha"][:7], f["sha"], manifest["repo"], manifest["built"]
     title = f"Review {today} {sha7}"
     run_url = built.get("run_url")
@@ -533,6 +554,10 @@ def render_issue(f, manifest, inputs, today):
     for p in f["panel"]:
         lines.append(p)
         lines += [f"  {h}  {n}" for n, h in sorted(inputs[p].items())]
+    lines += ["```", "", "</details>", "", "<details><summary>Persona versions (SHA-256 of the persona file, and the commit it was read from)</summary>", "", "```text"]
+    for p in f["panel"]:
+        v = (versions or {}).get(p)
+        lines.append(f"{p}  {v['sha256']}  {v.get('commit') or 'no commit'}" if isinstance(v, dict) and v.get("sha256") else f"{p}  not recorded (run `review.py inputs` and pass --inputs)")
     lines += ["```", "", "</details>"]
     return title, "\n".join(lines) + "\n"
 
@@ -540,9 +565,11 @@ def render_issue(f, manifest, inputs, today):
 def cmd_record(a):
     f = load_json(a.findings, "findings")
     inputs = f.get("inputs") if isinstance(f, dict) else None
+    versions = {}
     if inputs is None and a.inputs:
         saved = load_json(a.inputs, "--inputs")
         inputs = {p: v.get("files") for p, v in saved.items() if isinstance(v, dict)} if isinstance(saved, dict) else {}
+        versions = {p: v.get("persona") for p, v in saved.items() if isinstance(v, dict)} if isinstance(saved, dict) else {}
     if inputs is None:
         raise Fail("findings.json has no inputs: pass --inputs with the output saved from `review.py inputs`")
     if not isinstance(inputs, dict):
@@ -551,13 +578,16 @@ def cmd_record(a):
     if errs:
         raise Fail(f"{a.findings} does not match the contract:\n" + "\n".join(f"  - {e}" for e in errs))
     manifest = verified(a.bundle, f["sha"])
+    if (manifest.get("built") or {}).get("dirty"):
+        raise Fail("the bundle was built from a dirty tree (built.dirty is true): an ad hoc run, not evidence of "
+                   f"{f['sha'][:7]}; record a CI bundle, or a local bundle of a clean tree")
     for p in f["panel"]:
         for name, h in inputs[p].items():
             src = bundle_name(name)
             if src and manifest["files"].get(src) != h:
                 raise Fail(f"inputs: {p}/{name} has SHA-256 {h}, but the bundle's {src} differs or is missing")
     repo = check_repo(a.repo or manifest["repo"])
-    title, body = render_issue(f, manifest, inputs, datetime.date.today().isoformat())
+    title, body = render_issue(f, manifest, inputs, datetime.date.today().isoformat(), versions)
     if len(body) > BODY_LIMIT:
         raise Fail(f"the issue body is {len(body)} characters; GitHub accepts at most 65536")
     if a.dry_run:

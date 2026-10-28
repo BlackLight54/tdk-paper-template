@@ -52,7 +52,12 @@ review-<sha7>/
 
 - `built.by` is `ci` or `local`. A local bundle has no `run_url` and names the host instead. It
   is evidence only when its source tree was clean, so `review.py bundle` refuses a dirty tree
-  unless given `--allow-dirty`, and then writes `"dirty": true` into `built`.
+  unless given `--allow-dirty`, and then writes `"dirty": true` into `built`. Such a bundle is
+  for an ad hoc run: `review.py record` refuses it.
+- `builds[].started` is false when a build never ran (a step before it failed, or it was
+  skipped): its log is absent, its exit is the one CI recorded, and `errors`, `undefined` and
+  `pages` are `null`. A bundle with neither build started is refused. A build that ran but
+  left no PDF keeps its log in the bundle, so a failed build is still evidence of the commit.
 - An exit that was not passed to `review.py bundle` (`--exit lint=N`, `--exit skim=N`) is `null`,
   never a made-up 0; so are `image.ref` and `image.digest` when not given. CI passes them all.
 - `image.digest` is the digest that actually ran. CI uses `latest` on purpose; the digest is how a
@@ -152,9 +157,12 @@ checks that its manifest names the commit findings.json names and that the perso
 are the bundle's, and opens one issue on the paper repository (the manifest's `repo` unless
 `--repo` says otherwise), titled
 `Review <YYYY-MM-DD> <sha7>`. Its body has the panel, the skim scores, one task-list entry per
-finding (`F1 cryptographer · D/2 · blocker · p. 14 "...": objection. Answer: ...`), the manifest
-and the persona input hashes in collapsed blocks, and a link to the CI run that holds the
-bundle. Nothing is written into any repository.
+finding (`F1 cryptographer · D/2 · blocker · p. 14 "...": objection. Answer: ...`), the manifest,
+the persona input hashes and the persona versions (the SHA-256 of each persona file and the
+commit of the checkout it was read from, as `review.py inputs` reports them under `persona`) in
+collapsed blocks, and a link to the CI run that holds the bundle. A bundle built from a dirty
+tree is refused: it is an ad hoc run, not evidence of the commit. Nothing is written into any
+repository.
 
 The student proposes a disposition per finding in a comment: `F3 fixed in <sha>`,
 `F4 rejected: <reason>` or `F5 deferred`. The advisor confirms them with the `review-confirmed`

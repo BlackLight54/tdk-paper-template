@@ -72,7 +72,7 @@ Every piece of evidence in the rubric map has one of four states:
 |---|---|
 | `detected` | The structure is in the PDF. This says nothing about whether it is good. |
 | `placeholder` | Detected, but it shows template text. |
-| `unsure` | The `.aux` or the sources declare it, but the skim could not read it from the PDF. |
+| `unsure` | The `.aux` or the sources declare it, but the skim could not read it from the PDF; or the build file that would say is missing (no `.bbl`: the bibliography's size is unknown, not zero). |
 | `missing` | Neither the PDF nor the sources have it. |
 
 Nothing is shown in green, because the skim checks nothing. Colour marks only `placeholder`

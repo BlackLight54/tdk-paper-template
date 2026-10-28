@@ -1252,8 +1252,19 @@ def read_links(P):
         u = Counter(re.findall(r"(Reference|Citation) `[^']*' on page", t))
         if u:
             P.notes.append(f"LaTeX log: {u['Reference']} undefined reference(s), {u['Citation']} undefined citation(s)")
+    # the bibliography's size comes from BibTeX's .bbl; without it the count is unknown, not zero:
+    # a missing build file is missing evidence about the paper, never evidence of a missing bibliography
     bbl = P.built / f"{P.stem}.bbl"
-    P.bib_entries = len(re.findall(r"\\bibitem\b", bbl.read_text(errors="replace"))) if bbl.exists() else 0
+    if bbl.exists():
+        P.bib_entries = len(re.findall(r"\\bibitem\b", bbl.read_text(errors="replace")))
+    else:
+        P.bib_entries = None
+        P.notes.append(f"no {P.stem}.bbl among the build files: the bibliography's entry count is unknown (BibTeX writes it; build the paper first)")
+
+
+def bib_text(P):
+    """The bibliography count as text: a number of entries, or unknown without the .bbl."""
+    return f"{P.bib_entries} entries" if P.bib_entries is not None else "unknown (no .bbl among the build files)"
 
 
 def link_at(P, pno, w):
@@ -1583,13 +1594,13 @@ def rubric(P, ch, wl, rq):
     unref = [k for k, i in rq["no_mention"] if k.split(" ")[0] in FLOAT_WORDS.values()]
     if unref:
         ev["B/1"].append(("missing", "floats the text never mentions: " + ", ".join(unref), "refs"))
-    ev["B/1"].append(("detected" if P.cites else "missing", f"{len(P.cites)} sources cited ({sum(P.cites.values())} citation links); bibliography {P.bib_entries} entries", ""))
+    ev["B/1"].append(("detected" if P.cites else "missing", f"{len(P.cites)} sources cited ({sum(P.cites.values())} citation links); bibliography {bib_text(P)}", ""))
     ev["B/2"].append(chap_row("related", "related work", "no chapter has the related role"))
     if role.get("background"):
         ev["B/2"].append(chap_row("background", "background", ""))
     gapf = find_table(P, "tab:related", GAP_RE)
     ev["B/2"].append(float_row(gapf, "gap matrix", "tab:related", "no gap matrix table"))
-    ev["B/2"].append(("detected" if P.bib_entries else "missing", f"bibliography: {P.bib_entries} entries", ""))
+    ev["B/2"].append(("detected" if P.bib_entries else ("unsure" if P.bib_entries is None else "missing"), f"bibliography: {bib_text(P)}", ""))
     abstract_words = len(P.abstract.split())
     am = marks(P.abstract)
     ev["C"].append((worst((["detected"] if abstract_words else []) + (["placeholder"] if am else [])),
@@ -1813,7 +1824,7 @@ def summary(P):
         "tagged items": sum(1 for b in P.items if b.kind == "item"), "tagged items unsure": len(P.unsure),
         "theorem-likes": kinds.get("theorem", 0),
         "paragraphs": sum(b.kind == "para" for b in P.blocks if b.data["part"] == "main"),
-        "footnotes": sum(P.footnotes.values()), "citation links": sum(P.cites.values()), "bibliography entries": P.bib_entries,
+        "footnotes": sum(P.footnotes.values()), "citation links": sum(P.cites.values()), "bibliography entries": P.bib_entries if P.bib_entries is not None else "unknown (no .bbl)",
     }
 
 
@@ -1955,7 +1966,7 @@ def write_md(P, out):
         for o in back:
             nx = next((x for x in P.lvl1 if (x["page"], x["y"]) > (o["page"], o["y"])), None)
             pages = (nx["page"] if nx else len(P.doc)) - o["page"]
-            extra = f", {P.bib_entries} entries" if re.search(r"bibliograph|reference|irodalom", o["title"], re.I) else ""
+            extra = f", {bib_text(P)}" if re.search(r"bibliograph|reference|irodalom", o["title"], re.I) else ""
             w(f"- {o['title']}: {pages} page(s){extra}, p. {P.doc[o['page']].get_label()}")
     w("\n## Walls of text\n")
     w("Per chapter, the longest stretch of plain paragraphs (and math, lists, listings) with no anchor: no heading, "
@@ -2286,7 +2297,7 @@ def write_html(P, out):
     back = [o for o in P.lvl1 if o["part"] == "back"]
     if back:
         w("<h3>Back matter</h3><ul>" + "".join(f"<li>{esc(o['title'])}, p. {esc(P.doc[o['page']].get_label())}"
-                                               + (f", {P.bib_entries} entries" if re.search(r'bibliograph|reference', o['title'], re.I) else "")
+                                               + (f", {esc(bib_text(P))}" if re.search(r'bibliograph|reference', o['title'], re.I) else "")
                                                + "</li>" for o in back) + "</ul>")
     # walls
     w("<h2 id='walls'>Walls of text</h2><p class='meta'>Longest stretch per chapter with no heading, run-in head, figure, table, box, tagged item or theorem-like. Over 1 page in red.</p>")

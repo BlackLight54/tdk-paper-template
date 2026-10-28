@@ -5,8 +5,10 @@
 # report. The paper repository is created by Overleaf per project, so this file travels with the
 # Overleaf project; see "Paper CI" in the guide. The steps below mirror `texlua scripts/lint.lua list`.
 # Every run also uploads the review bundle of the commit it built, kept 14 days: both PDFs, their
-# logs, lint.json, the skim view and manifest.json (scripts/review/README.md). The TeX image is
-# danteev/texlive:latest, resolved to one digest per run so that the manifest can name it.
+# logs, lint.json, the skim view and manifest.json (scripts/review/README.md). A failed build is
+# still evidence: its log goes into the bundle, and a build that never ran is recorded as not
+# started. The TeX image is danteev/texlive:latest, resolved to one digest per run so that the
+# manifest can name it; a run whose digest cannot be resolved fails before building.
 name: paper
 on:
   push:
@@ -25,7 +27,13 @@ jobs:
     steps:
       - name: Resolve danteev/texlive:latest to the digest this run builds with
         id: resolve
-        run: echo "digest=$(docker buildx imagetools inspect danteev/texlive:latest --format '{{.Manifest.Digest}}')" >> "$GITHUB_OUTPUT"
+        # the docker command's own failure fails this step: an empty digest would hand the paper
+        # job an invalid image reference and hide why
+        run: |
+          set -euo pipefail
+          digest=$(docker buildx imagetools inspect danteev/texlive:latest --format '{{.Manifest.Digest}}')
+          [[ "$digest" == sha256:* ]] || { echo "::error::no digest resolved for danteev/texlive:latest (got '$digest')"; exit 1; }
+          echo "digest=$digest" >> "$GITHUB_OUTPUT"
   paper:
     needs: image
     runs-on: ubuntu-latest
@@ -50,8 +58,11 @@ jobs:
       - name: template / each chapter role's criteria are the ones its guide section names (the template's repository only)
         if: github.repository == 'BlackLight54/TDK-template'
         run: texlua scripts/lint.lua criteria
+      # both builds run whatever the template checks above said, so a failed check still leaves
+      # the build evidence; the job is red from the failed step either way
       - name: Build the draft
         id: draft
+        if: always()
         run: rc=0; make all || rc=$?; echo "rc=$rc" >> "$GITHUB_OUTPUT"; exit $rc
       - name: Build the reviewer PDF
         id: reviewer
@@ -228,9 +239,12 @@ jobs:
         id: skim
         if: always() && hashFiles('reviewer.pdf') != ''
         run: rc=0; python3 scripts/skim/skim.py build . -o skim --lint lint.json || rc=$?; echo "rc=$rc" >> "$GITHUB_OUTPUT"
+      # the bundle is assembled even when a build failed or never ran: the logs and the recorded
+      # exits are the evidence of that commit (review.py bundle refuses only a claimed success
+      # without a PDF, and a run with no log at all)
       - name: Review bundle
         id: bundle
-        if: always() && hashFiles('reviewer.pdf') != ''
+        if: always()
         run: |
           sha=${{ github.event.pull_request.head.sha || github.sha }}
           python3 scripts/review/review.py bundle --built . --lint lint.json --skim skim --out review-bundle --by ci \
