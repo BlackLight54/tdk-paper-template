@@ -386,9 +386,22 @@ rule("labels", "source", "check", "always", "label prefixes match their environm
   end
 end)
 
+-- a typed "Figure~\ref{key}" and the \cref that prints the same (cleveref is loaded with capitalise
+-- and noabbrev), \Cref at the start of a sentence
+local TYPED = { figure = true, table = true, section = true, chapter = true, listing = true }
+local function typed_ref(l)
+  for s, word, tie, key in l:gmatch("()(%a+)(~?)\\ref{([^}]*)}") do
+    if TYPED[word:lower()] then
+      local before = l:sub(1, s - 1)
+      local start = before:match("^%s*$") or before:match("[%.%?!]%s+$")
+      return C.fix("safe", start and "write \\Cref" or "write \\cref", C.replace(word .. tie .. "\\ref{" .. key .. "}", (start and "\\Cref{" or "\\cref{") .. key .. "}"))
+    end
+  end
+end
+
 rule("crefs", "source", "check", "always", "references go through \\cref: no 'Figure~\\ref', no \\autoref, \\Cref at the start of a sentence, and no bare \\ref outside table cells", function()
   C.each_line(MAIN, function(f, n, l)
-    if l:match("[Ff]igure~?\\ref") or l:match("[Tt]able~?\\ref") or l:match("[Ss]ection~?\\ref") or l:match("[Cc]hapter~?\\ref") or l:match("[Ll]isting~?\\ref") then fail(f, n, "a typed reference with \\ref: write \\cref{...}") end
+    if l:match("[Ff]igure~?\\ref") or l:match("[Tt]able~?\\ref") or l:match("[Ss]ection~?\\ref") or l:match("[Cc]hapter~?\\ref") or l:match("[Ll]isting~?\\ref") then fail(f, n, "a typed reference with \\ref: write \\cref{...}", typed_ref(l)) end
     if l:match("\\autoref") then fail(f, n, "\\autoref: the template uses cleveref, write \\cref") end
     if l:match("\\figref") or l:match("\\tabref") or l:match("\\sectref") or l:match("\\listref") then fail(f, n, "the faculty template's \\figref family: write \\cref") end
     if l:match("^%s*\\cref") or l:match("[%.%?!]%s+\\cref") then warn(f, n, "\\cref at the start of a sentence: use \\Cref") end
