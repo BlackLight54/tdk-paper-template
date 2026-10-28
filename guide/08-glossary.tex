@@ -42,26 +42,51 @@ This chapter defines process terms (\cref{tab:glossary-process}) and technical t
 }
 
 \section{Technical terms}
+The common glossary, \texttt{include/glossary-common.tex}, declares the abbreviations, notation and terms our topics share (\cref{tab:glossary-common}). Use them with \texttt{\textbackslash gls\{key\}} without declaring them: only the ones your text uses appear in your lists. To change an entry for your paper, declare the same key in \texttt{content/glossary.tex}, and yours replaces it. The template's running example and the tools of our topics are not in the common glossary; \cref{tab:glossary-technical} explains them.
+
+% The rows of tab:glossary-common come from the keys \commonentry listed (include/preamble.tex);
+% \glsentry... commands print a field without marking the entry as used in the paper's lists.
+\makeatletter
+\newcommand*{\tdk@abbrrows}{}\newcommand*{\tdk@symrows}{}\newcommand*{\tdk@termrows}{}
+\newcommand{\tdk@abbrrow}[1]{\Glsentrylong{#1} (\glsentryshort{#1}) & \texttt{#1} & \glsentryuseri{#1}. \\}
+\newcommand{\tdk@symrow}[1]{\glsentryname{#1} & \texttt{#1} & \glsentrydesc{#1}. \\}
+\newcommand{\tdk@termrow}[1]{\Glsentryname{#1} & \texttt{#1} & \glsentrydesc{#1}. \\}
+\newcommand{\tdk@sortcommon}[1]{%
+  \edef\tdk@type{\glsentrytype{#1}}%
+  \ifdefstring{\tdk@type}{abbreviations}{\gappto\tdk@abbrrows{\tdk@abbrrow{#1}}}{%
+    \ifdefstring{\tdk@type}{symbols}{\gappto\tdk@symrows{\tdk@symrow{#1}}}{\gappto\tdk@termrows{\tdk@termrow{#1}}}}}
+\forlistloop{\tdk@sortcommon}{\tdkcommonkeys}
+{\small
+\begin{xltabular}{\linewidth}{>{\raggedright\arraybackslash}p{0.27\linewidth} l X}
+  \caption{The common glossary, \texttt{include/glossary-common.tex}.}\label{tab:glossary-common}\\
+  \toprule \textbf{Entry} & \textbf{Key} & \textbf{Meaning} \\ \midrule \endfirsthead
+  \toprule \textbf{Entry} & \textbf{Key} & \textbf{Meaning} \\ \midrule \endhead
+  \bottomrule \endlastfoot
+  \multicolumn{3}{@{}l}{\textit{Abbreviations}} \\
+  \tdk@abbrrows \midrule
+  \multicolumn{3}{@{}l}{\textit{Notation}} \\
+  \tdk@symrows \midrule
+  \multicolumn{3}{@{}l}{\textit{Terms}} \\
+  \tdk@termrows
+\end{xltabular}
+}
+\makeatother
+
 {\small
 \begin{xltabular}{\linewidth}{>{\raggedright\arraybackslash}p{0.24\linewidth} X}
-  \caption{Technical terms from our topics.}\label{tab:glossary-technical}\\
+  \caption{Technical terms outside the common glossary.}\label{tab:glossary-technical}\\
   \toprule \textbf{Term} & \textbf{Meaning} \\ \midrule \endfirsthead
   \toprule \textbf{Term} & \textbf{Meaning} \\ \midrule \endhead
   \bottomrule \endlastfoot
-  Self-sovereign identity (SSI) & An identity model in which holders keep their own credentials and present them without asking the issuer each time. \\
   Verifiable credential (VC) & A digitally signed statement about a subject, issued by an issuer, held by a holder, and checked by a verifier (W3C standard). \\
-  Verifiable data registry (VDR) & The shared registry that issuers, holders and verifiers trust for public data such as schemas, keys and revocation status. \\
   Zero-knowledge proof (ZKP) & A proof that a statement is true which reveals nothing beyond the statement itself. \\
   Hyperledger Fabric & A permissioned blockchain platform for consortia of known organisations. \\
-  BPMN & Business Process Model and Notation, the standard notation for business process models. \\
   Tamarin & A prover for security protocols that searches for attacks under a symbolic adversary model. \\
   Lean & A proof assistant and programming language for machine-checked proofs. \\
   Refinery & A tool for partial modelling and graph generation over metamodels. \\
-  Liveness, safety & A safety property says nothing bad ever happens; a liveness property says something good eventually happens. \\
-  TOCTOU & Time-of-check to time-of-use: a race between checking a condition and acting on it. \\
 \end{xltabular}
 }
-Add terms for your topic and check their definitions against the literature.
+VC and ZKP are the running example's abbreviations, declared in \texttt{content/glossary.tex}. Add the terms only your topic needs there too, and check their definitions against the topic's literature.
 
 \section{English--Hungarian pairs}
 Use the same Hungarian term for each concept throughout the abstract and talk. These pairs come from earlier TDK abstracts, including variants where they were used.
