@@ -310,6 +310,9 @@ function M.report(rule, r, counts)
     if h then
       local P = require("pagemap")
       local found = r.severity == "count" and (counts or "") or ((errors + warnings == 0) and "" or string.format("%d error(s), %d warning(s)", errors, warnings))
+      local fixes = 0
+      for _, f in ipairs(M.findings) do if f.fix and f.fix.safety == "safe" then fixes = fixes + 1 end end
+      if fixes > 0 then found = found .. string.format(", %d with a safe fix (`make fix`)", fixes) end
       h:write(string.format("| %s | %s %s | %s | `%s` | %s |\n", P.group_title(P.group(rule)), ICON[status] or ":hourglass:", status, (P.title(rule):gsub("%-%-", "–")), rule, (found:gsub("|", "\\|"))))
       h:close()
     end
