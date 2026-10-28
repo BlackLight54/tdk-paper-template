@@ -38,7 +38,7 @@ repository:
 
 | input | default | option |
 |---|---|---|
-| the review sheet's criteria | `guide/02-tdk-essentials.tex`, section "The review sheet" | `--guide` |
+| the review sheet's criteria | `guide/06-tdk-rules-and-dates.tex`, section "The review sheet" | `--guide` |
 | every band of the sheet | `docs/TDK2025_biralati_pontozolap_hallgatoi.pdf` | `--sheet` |
 | chapter roles and tag lists | `lint.json`, else `texlua scripts/lint.lua chapters --json` | `--lint` |
 

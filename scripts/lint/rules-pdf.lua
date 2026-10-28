@@ -109,7 +109,23 @@ rule("pdf-spacing", "pdf", "check", "polish", "line spacing of the body text is 
       end
     end
   end
-  local pitch = C.median(deltas); if not pitch then warn(nil, nil, "not enough body text lines to measure"); return end
+  -- the pitch is the most common delta: the lines inside a paragraph share it, and a paragraph
+  -- break or a heading adds to it (the median read a sparse draft of one-line paragraphs as its
+  -- paragraph pitch). pdftohtml rounds positions to whole points, so a 14.5 pt pitch reads 14 and
+  -- 15 by turns: the deltas are counted in windows of a point, and the pitch is the mean of the
+  -- fullest window, the smaller on a tie
+  local count = {}
+  for _, dt in ipairs(deltas) do count[dt] = (count[dt] or 0) + 1 end
+  local pitch, best
+  for d, n in pairs(count) do
+    local sum, total = d * n, n
+    for e, m in pairs(count) do if e > d and e <= d + 1 then sum, total = sum + e * m, total + m end end
+    if not best or total > best or (total == best and sum / total < pitch) then pitch, best = sum / total, total end
+  end
+  if #deltas < 20 then
+    warn(nil, nil, string.format("only %d line pitches to measure%s: too little body text to judge the spacing", #deltas, pitch and string.format(" (most common %.1f pt)", pitch) or ""))
+    return
+  end
   local ratio = pitch / bf.size
   if ratio < p.pitch[1] or ratio > p.pitch[2] then
     fail("thesis.tex", nil, string.format("line pitch is %.1f pt at %d pt, %.2f times the font size; the %s asks for %s", pitch, bf.size, ratio, p.name, C.opts.profile == "tdk" and "single spacing (about 1.2)" or "one-and-a-half spacing (about 1.8)"))
@@ -174,18 +190,42 @@ rule("pdf-smalltext", "pdf", "advice", "polish", "text below 8 pt, too small to 
   return string.format("runs<8pt=%d pages=%d", total, #pages)
 end)
 
+-- the position of the first numbered chapter among the .toc's chapter lines; nil without a .toc.
+-- hyperref writes a bookmark for every \contentsline of the toc, so the outline's depth-1 items
+-- are these lines in order, and the position maps the chapter to its PDF page whatever its title
+local function first_numbered_chapter()
+  local i = 0
+  for _, l in ipairs(C.lines(C.bpath(C.opts.doc .. ".toc"))) do
+    local title = l:match("^\\contentsline%s*{chapter}(%b{})")
+    if title then
+      i = i + 1
+      if title:find("\\numberline", 1, true) then return i end
+    end
+  end
+end
+
 rule("pdf-pages", "pdf", "check", "submit", "main text pages counted from the PDF outline, first chapter to the page before the back matter: 30-35 for the TDK", function()
   local d, why = doc(); if not d then C.skip(why); return end
   local p = profile()
+  local chapters = {}
+  for _, it in ipairs(d.outline) do if it.depth == 1 then chapters[#chapters + 1] = it end end
+  -- the main text starts at the .toc's first numbered chapter; without a .toc, at the chapter
+  -- numbered 1 or called Introduction
   local start, stop
-  for _, it in ipairs(d.outline) do
-    if it.depth == 1 then
+  local first = first_numbered_chapter()
+  local from = first and chapters[first] and first
+  if not from then
+    for i, it in ipairs(chapters) do
       local t = it.title
-      if not start and (t:match("^1%s") or t:match("^Chapter 1") or t:match("^Introduction") or t:match("^Bevezet")) then start = it.page
-      elseif start and not stop and (t:match("Acknowledg") or t:match("Köszönet") or t:match("List of Figures") or t:match("Ábrák") or t:match("Bibliograph") or t:match("References") or t:match("Irodalom") or t:match("Appendi") or t:match("Függelék") or t:match("Hallgatói nyilatkozat") or t:match("Acronyms")) then stop = it.page - 1 end
+      if t:match("^1%s") or t:match("^Chapter 1") or t:match("^Introduction") or t:match("^Bevezet") then from = i; break end
     end
   end
-  if not start then fail(nil, nil, "no Introduction in the PDF outline: cannot count the main text (hyperref bookmarks missing?)"); return end
+  if not from then fail(nil, nil, "no first chapter in the PDF outline: cannot count the main text (hyperref bookmarks missing, or no numbered chapter in " .. C.opts.doc .. ".toc?)"); return end
+  start = chapters[from].page
+  for i = from + 1, #chapters do
+    local t = chapters[i].title
+    if t:match("Acknowledg") or t:match("Köszönet") or t:match("List of Figures") or t:match("Ábrák") or t:match("Bibliograph") or t:match("References") or t:match("Irodalom") or t:match("Appendi") or t:match("Függelék") or t:match("Hallgatói nyilatkozat") or t:match("Acronyms") then stop = chapters[i].page - 1; break end
+  end
   stop = stop or #d.pages
   local n = stop - start + 1
   local msg = string.format("main text is %d PDF pages (%d-%d by the outline); the %s asks for %d-%d", n, start, stop, p.name, p.pages[1], p.pages[2])
@@ -195,6 +235,7 @@ end)
 
 rule("pdf-parts", "pdf", "check", "submit", "the parts we require are in the PDF: abstracts in both languages, the AI declaration, the table of contents; and the parts that must not be there are not", function()
   if not C.have("pdftotext") then C.skip("pdftotext not installed"); return end
+  if not C.exists(pdf()) then C.skip("no " .. pdf() .. " (pdf-file fails on it)"); return end
   local p = profile()
   local text = C.run(string.format("pdftotext -layout %q -", pdf())) or ""
   for _, alt in ipairs(p.needs) do
@@ -205,8 +246,12 @@ rule("pdf-parts", "pdf", "check", "submit", "the parts we require are in the PDF
   for _, f in ipairs(p.forbids) do if text:find(f, 1, true) then warn(nil, nil, f .. " is in the PDF; the TDK call says to leave the student declaration out") end end
   if not (text:find("Contents", 1, true) or text:find("Tartalomjegyzék", 1, true)) then fail(nil, nil, "no table of contents") end
   if not (text:find("Budapest University of Technology", 1, true) or text:find("Budapesti Műszaki", 1, true)) then fail(nil, nil, "the title page does not name the university") end
-  for _, m in ipairs({ "[link?]", "[?]", "TBD", "XXX", "FIXME" }) do
+  for _, m in ipairs({ "[link?]", "[?]" }) do
     if text:find(m, 1, true) then fail(nil, nil, m .. " is printed in the PDF: a placeholder left in the text, or an undefined citation") end
+  end
+  -- whole words: XXXVI. OTDK in a reference is a year, not a placeholder
+  for _, m in ipairs({ "TBD", "XXX", "FIXME" }) do
+    if text:find("%f[%w]" .. m .. "%f[%W]") then fail(nil, nil, m .. " is printed in the PDF: a placeholder left in the text") end
   end
   if text:find("TODO", 1, true) then
     local n = C.count(text, "TODO"); fail(nil, nil, n .. " TODO still printed in the PDF")

@@ -55,4 +55,14 @@ essentials:
 guide-bib:
 	texlua scripts/guide-bib.lua
 
-.PHONY: all reviewer clean check check-reviewer check-submit fix fix-dry fix-review guide-bib skeleton essentials
+# The template's own tests, the same two CI runs: the lint against each mutation of the skeleton
+# (scripts/lint/tests/mutations.py, after make reviewer) and review.py's unit tests.
+test: test-lint test-review
+
+test-lint:
+	python3 scripts/lint/tests/mutations.py
+
+test-review:
+	python3 -m unittest scripts/review/test_review.py
+
+.PHONY: all reviewer clean check check-reviewer check-submit fix fix-dry fix-review guide-bib skeleton essentials test test-lint test-review

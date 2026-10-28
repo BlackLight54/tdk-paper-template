@@ -235,6 +235,12 @@ def source_identity(a):
     built = {"by": "local", "host": socket.gethostname()}
     if dirty:
         built["dirty"] = True
+    if not head:
+        # no HEAD to hold --sha against and no tree to call clean: the bundle says which commit it
+        # claims to be, and that nothing checked the claim; `record` refuses it like a dirty one
+        print(f"review.py: warning: {a.built} is not a git checkout, so --sha {sha[:7]} cannot be checked; "
+              "the bundle is recorded as unverified", file=sys.stderr)
+        built["unverified"] = True
     return check_repo(repo), sha, ref, built
 
 
@@ -245,12 +251,20 @@ def cmd_bundle(a):
         raise Fail(f"--image-digest must look like sha256:<hex>, not {a.image_digest!r}")
     if not built.is_dir():
         raise Fail(f"--built {built} is not a directory")
-    try:
-        lint_doc = json.loads(lint.read_text(encoding="utf-8"))
-    except (OSError, ValueError) as e:
-        raise Fail(f"--lint {lint} is not readable JSON ({e}): pass the output of texlua scripts/lint.lua all --doc reviewer --json")
-    if not isinstance(lint_doc, dict):
-        raise Fail(f"--lint {lint} is not a JSON object")
+    lint_doc, lint_ok = {}, lint.is_file() and lint.stat().st_size > 0
+    if lint_ok:
+        try:
+            lint_doc = json.loads(lint.read_text(encoding="utf-8"))
+        except (OSError, ValueError) as e:
+            raise Fail(f"--lint {lint} is not readable JSON ({e}): pass the output of texlua scripts/lint.lua all --doc reviewer --json")
+        if not isinstance(lint_doc, dict):
+            raise Fail(f"--lint {lint} is not a JSON object")
+    else:
+        # the lint wrote nothing (an invalid \lintphase stops it before any rule runs): the build
+        # evidence still ships, with the lint recorded as failed and no findings
+        print(f"review.py: warning: {lint} is missing or empty; the lint is recorded as exit 2 with no findings, "
+              "and the bundle has no lint.json", file=sys.stderr)
+        exits["lint"] = 2
     repo, sha, ref, built_info = source_identity(a)
     if not HEX40.fullmatch(sha):
         raise Fail(f"the commit SHA must be 40 lowercase hex digits, not {sha!r}")
@@ -284,7 +298,8 @@ def cmd_bundle(a):
             shutil.copy2(built / f"{doc}.pdf", out / f"{doc}.pdf")
         if (built / f"{doc}.log").is_file():
             shutil.copy2(built / f"{doc}.log", out / "logs" / f"{doc}.log")
-    shutil.copy2(lint, out / "lint.json")
+    if lint_ok:
+        shutil.copy2(lint, out / "lint.json")
     if skim_ok:
         shutil.copytree(skim, out / "skim")
     else:
@@ -578,9 +593,12 @@ def cmd_record(a):
     if errs:
         raise Fail(f"{a.findings} does not match the contract:\n" + "\n".join(f"  - {e}" for e in errs))
     manifest = verified(a.bundle, f["sha"])
-    if (manifest.get("built") or {}).get("dirty"):
-        raise Fail("the bundle was built from a dirty tree (built.dirty is true): an ad hoc run, not evidence of "
-                   f"{f['sha'][:7]}; record a CI bundle, or a local bundle of a clean tree")
+    built = manifest.get("built") or {}
+    if built.get("dirty") or built.get("unverified"):
+        why = ("from a dirty tree (built.dirty is true)" if built.get("dirty")
+               else "outside a git checkout (built.unverified is true: its --sha was never checked against a HEAD)")
+        raise Fail(f"the bundle was built {why}: an ad hoc run, not evidence of "
+                   f"{f['sha'][:7]}; record a CI bundle, or a local bundle of a clean checkout")
     for p in f["panel"]:
         for name, h in inputs[p].items():
             src = bundle_name(name)

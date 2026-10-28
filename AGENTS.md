@@ -34,7 +34,8 @@ and their steps are in `guide/02-lifecycle.tex` (`tab:lifecycle`).
 - `bib/zotero.bib` comes from the Zotero group library through Overleaf, and *Refresh*
   overwrites it. Correct entries in Zotero, not in this file.
 - The template's, replaced by template updates: `guide/`, the rest of `include/`, `scripts/`,
-  `.github/`, `reviewer.tex`, `Makefile` and `tdkieee.bst`.
+  `.github/`, `.claude/skills/`, `docs/`, `reviewer.tex`, `Makefile`, `tdkieee.bst`, `README.md`
+  and this file.
 - Generated, never edited by hand: `guide/essentials.tex`, `guide/guide.bbl`, `lint-checks.tex`
   and `scripts/lint/skeleton/`.
 - Maintainer targets, never run in a paper repository: `make skeleton`, `make essentials` and
@@ -52,7 +53,7 @@ and their steps are in `guide/02-lifecycle.tex` (`tab:lifecycle`).
 - Keep the notes. `\todo` (orange) is for the student, `\advisortodo` (blue) for the advisors, and
   `\atodo` (green) is an advisor's review comment that the student resolves and then deletes.
 - Mark a gap with `\tbd{...}` or `\citeneeded[...]`, never with a typed TBD, [CITE] or XXX.
-- Check every source you suggest before it is cited. An AI answer never goes in the
+- Check every source you suggest before it is cited. By the advisors' rule, an AI answer never goes in the
   bibliography; it goes in the AI declaration (`guide/04-writing.tex`, `app:writing:ai`).
 
 ## Markup the lint reads

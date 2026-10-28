@@ -24,7 +24,6 @@ function M.run_quiet(cmd) local h = io.popen(cmd .. " 2>/dev/null"); if not h th
 function M.have(tool) local s = M.run("command -v " .. tool); return s ~= nil and s:match("%S") ~= nil end
 function M.escape(s) return (s:gsub("%p", "%%%0")) end
 function M.trim(s) return (s:gsub("^%s+", ""):gsub("%s+$", "")) end
-function M.median(t) if #t == 0 then return nil end; table.sort(t); return t[math.ceil(#t / 2)] end
 function M.count(s, pat) return select(2, s:gsub(pat, "")) end
 
 -- the content files are the ones thesis.tex reaches through \include, \input and
@@ -96,7 +95,7 @@ do
     end
     if body:match("\\chapter%*{Abstract}") then M.FILES.abstract = f end
     if body:find("\\label{aidecl}", 1, true) then M.FILES.aidecl = f end
-    if body:match("\\DeclareAcronym") or body:match("\\newabbreviation") or body:match("\\newglossaryentry") then M.FILES.glossary = f end
+    if body:match("\\DeclareAcronym") or body:match("\\newabbreviation") or body:match("\\newacronym") or body:match("\\newglossaryentry") then M.FILES.glossary = f end
   end
 end
 -- whether a file thesis.tex reaches, the frame included, loads package p, or defines the macro
@@ -281,6 +280,9 @@ function M.phase_reached(due) if due == "always" then return true end; return M.
 -- findings and reporting -------------------------------------------------------------
 local gh = os.getenv("GITHUB_ACTIONS") ~= nil
 local summary = os.getenv("GITHUB_STEP_SUMMARY")
+-- a run that prints the Checks page (--tex, which write18 runs on every XeLaTeX pass), the JSON or
+-- the fixes: the findings, the counts and the job summary stay out, since the plain run writes them
+function M.quiet() return M.opts.tex or M.opts.json or M.opts.quiet or false end
 M.findings = {}
 M.ignored = 0
 M.current_rule = nil
@@ -368,10 +370,11 @@ end
 -- the number of matches of pattern in s
 function M.nmatch(s, pattern) local n = 0; for _ in s:gmatch(pattern) do n = n + 1 end; return n end
 -- the spans of a line's code that are literal text, never prose: inline verbatim (\verb|..|,
--- \lstinline{..} or \lstinline|..|, \mintinline{lang}{..}), paths and links (\path, \url and the
--- address of \href) and inline maths ($..$). "abc" in \verb|"abc"| is the program's own text and
--- 10-20 in $10-20$ is a formula, so M.matches skips a match that touches one of them and
--- M.unliteral blanks them for a rule's pattern
+-- \lstinline{..} or \lstinline|..|, \mintinline{lang}{..}), typewriter text (\texttt{..}), paths
+-- and links (\path, \url and the address of \href) and maths ($..$ and $$..$$). "abc" in
+-- \verb|"abc"| is the program's own text and 10-20 in $10-20$ is a formula, so M.matches skips a
+-- match that touches one of them, M.unliteral blanks them for a rule's pattern, and M.prose
+-- starts by blanking them
 function M.literal_spans(code)
   local spans, init = {}, 1
   while true do
@@ -381,7 +384,7 @@ function M.literal_spans(code)
     spans[#spans + 1] = { s, close or #code }
     init = (close or #code) + 1
   end
-  for _, name in ipairs({ "lstinline", "mintinline", "path", "url", "href" }) do
+  for _, name in ipairs({ "lstinline", "mintinline", "texttt", "path", "url", "href" }) do
     init = 1
     while true do
       local s, e = code:find("\\" .. name .. "%f[%A]", init)
@@ -397,16 +400,25 @@ function M.literal_spans(code)
     end
   end
   local masked = code:gsub("\\%$", "##")
-  for s, e in masked:gmatch("()%$[^$]*%$()") do spans[#spans + 1] = { s, e - 1 } end
+  init = 1
+  while true do
+    local s = masked:find("$", init, true)
+    if not s then break end
+    local d = masked:sub(s, s + 1) == "$$" and "$$" or "$"
+    local _, e = masked:find(d, s + #d, true)
+    spans[#spans + 1] = { s, e or #masked }
+    init = (e or #masked) + 1
+  end
   return spans
 end
 function M.in_literal(spans, s, e)
   for _, sp in ipairs(spans) do if s <= sp[2] and e >= sp[1] then return true end end
   return false
 end
--- the code of a line with its literal spans blanked, the same length, for a rule's own patterns
+-- the code of a line with its literal spans blanked to "#", column for column, for a rule's own
+-- patterns: not to spaces, which would make "is \url{...}." a space before punctuation
 function M.unliteral(code)
-  for _, sp in ipairs(M.literal_spans(code)) do code = code:sub(1, sp[1] - 1) .. (" "):rep(sp[2] - sp[1] + 1) .. code:sub(sp[2] + 1) end
+  for _, sp in ipairs(M.literal_spans(code)) do code = code:sub(1, sp[1] - 1) .. ("#"):rep(sp[2] - sp[1] + 1) .. code:sub(sp[2] + 1) end
   return code
 end
 -- the fix bound to the finding's place and checked against the file; nil when it does not apply
@@ -529,7 +541,9 @@ function M.report(rule, r, counts)
     if (a.line or 0) ~= (b.line or 0) then return (a.line or 0) < (b.line or 0) end
     return a.msg < b.msg
   end)
-  local quiet = M.opts.tex or M.opts.json or M.opts.quiet
+  -- quiet: nothing on stdout but the page or the JSON, and nothing in the job summary, which the
+  -- plain run of the same rules writes
+  local quiet = M.quiet()
   if not quiet then for _, f in ipairs(M.findings) do print_finding(f) end end
   local errors, warnings = 0, 0
   for _, f in ipairs(M.findings) do
@@ -542,7 +556,7 @@ function M.report(rule, r, counts)
   if not quiet then
     io.write(string.format("%s %-13s %-7s %-18s %d error(s), %d warning(s)%s%s\n", gate and (ok and "ok  " or "FAIL") or "    ", rule, r.severity, status, errors, warnings, counts and (" " .. counts) or "", M.ignored > 0 and (" ignored=" .. M.ignored) or ""))
   end
-  if summary and r.summary ~= false and not M.opts.quiet then
+  if summary and r.summary ~= false and not quiet then
     local h = io.open(summary, "a")
     if h then
       local P = require("pagemap")
@@ -559,7 +573,7 @@ function M.report(rule, r, counts)
 end
 M.SUMMARY_HEADER = "| Group | Status | Check | Rule | Findings |\n|---|---|---|---|---|\n"
 function M.summary_header(title)
-  if not summary or M.opts.quiet then return end
+  if not summary or M.quiet() then return end
   local h = io.open(summary, "a"); if h then h:write("\n## " .. title .. "\n\n" .. M.SUMMARY_HEADER); h:close() end
 end
 
@@ -592,12 +606,17 @@ function M.refs_in(file, pattern)
 end
 
 -- the prose lines of a file: comments, todo/beat/advisor notes (brace-balanced, across lines),
--- tikzpicture and axis blocks, and listings removed; line numbers preserved as empty lines
--- environments that hold no prose: commented-out text, pictures, code and display maths
-M.NONPROSE = { "comment", "tikzpicture", "lstlisting", "minted", "forest", "equation", "equation*", "align", "align*", "gather", "gather*", "multline", "multline*", "displaymath" }
+-- \iffalse ... \fi regions, tikzpicture and axis blocks, and listings removed; line numbers
+-- preserved as empty lines
+-- environments whose text is a program's or a listing's: verbatim and its fancyvrb and alltt kin,
+-- lstlisting and minted
+M.CODE = { "verbatim", "verbatim*", "Verbatim", "BVerbatim", "LVerbatim", "alltt", "lstlisting", "minted" }
+-- environments that hold no prose: commented-out text, code, pictures and display maths
+M.NONPROSE = { "comment", "tikzpicture", "forest", "equation", "equation*", "align", "align*", "gather", "gather*", "multline", "multline*", "displaymath" }
 -- environments whose text never prints as text: commented-out text and code. M.printed_lines
 -- keeps pictures and maths, where a \cite or \url prints like anywhere else
-M.UNPRINTED = { "comment", "lstlisting", "minted" }
+M.UNPRINTED = { "comment" }
+for _, e in ipairs(M.CODE) do M.NONPROSE[#M.NONPROSE + 1] = e; M.UNPRINTED[#M.UNPRINTED + 1] = e end
 function M.printed_lines(file) return M.prose_lines(file, M.UNPRINTED) end
 function M.prose_lines(file, skip)
   local out, depth, intodo, inblock = {}, 0, false, nil
@@ -610,20 +629,24 @@ function M.prose_lines(file, skip)
         local s, e, name = l:find("\\(%a*todo)%s*%[?", i)
         local bs = l:find("\\beat{", i, true)
         local blk, bstart
+        -- blk is the pattern that closes the block
         for _, b in ipairs(skip or M.NONPROSE) do
           local p = l:find("\\begin{" .. b .. "}", i, true)
-          if p and (not bstart or p < bstart) then blk, bstart = "\\end{" .. b .. "}", p end
+          if p and (not bstart or p < bstart) then blk, bstart = M.escape("\\end{" .. b .. "}"), p end
         end
         local dm = l:find("\\[", i, true) -- display maths \[ ... \], but not the line break \\[2pt]
-        if dm and not skip and l:sub(dm - 1, dm - 1) ~= "\\" and (not bstart or dm < bstart) then blk, bstart = "\\]", dm end
+        if dm and not skip and l:sub(dm - 1, dm - 1) ~= "\\" and (not bstart or dm < bstart) then blk, bstart = "\\%]", dm end
+        -- \iffalse ... \fi, TeX's own way to comment a region out; the first \fi closes it
+        local ff = l:find("\\iffalse%f[%A]", i)
+        if ff and (not bstart or ff < bstart) then blk, bstart = "\\fi%f[%A]", ff end
         local first = math.min(s or math.huge, bs or math.huge, bstart or math.huge)
         if first == math.huge then keep[#keep + 1] = l:sub(i); break end
         keep[#keep + 1] = l:sub(i, first - 1)
         if first == bstart then inblock = blk; i = first + 1
         else intodo = true; depth = 0; i = first + 1 end
       elseif inblock then
-        local e = l:find(inblock, i, true)
-        if e then i = e + #inblock; inblock = nil else break end
+        local _, e = l:find(inblock, i)
+        if e then i = e + 1; inblock = nil else break end
       else -- inside a todo or beat: skip until its braces close (the optional [..] and 1-4 {..} groups)
         local c = l:sub(i, i)
         if c == "{" or c == "[" then depth = depth + 1 elseif c == "}" or c == "]" then depth = depth - 1 end
@@ -642,8 +665,10 @@ function M.each_prose_line(files, fn) for _, f in ipairs(files) do for n, l in i
 -- the printed lines (M.printed_lines: no comments, commented-out environments or code listings)
 function M.each_printed_line(files, fn) for _, f in ipairs(files) do for n, l in ipairs(M.printed_lines(f)) do if l:match("%S") then fn(f, n, l) end end end end
 
--- prose of a line: macros, math, labels, citations and urls removed, for word-level rules
+-- prose of a line: literal text (M.literal_spans), macros, math, labels, citations and urls
+-- removed, for word-level rules
 function M.prose(l)
+  l = M.unliteral(l)
   l = l:gsub("%$[^$]*%$", " ")
   l = l:gsub("\\url%b{}", " "):gsub("\\href%b{}", " "):gsub("\\path%b{}", " ")
   l = l:gsub("\\[cC]?ref%b{}", " "):gsub("\\[aA]utoref%b{}", " "):gsub("\\pageref%b{}", " "):gsub("\\nameref%b{}", " "):gsub("\\label%b{}", " ")

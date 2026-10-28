@@ -33,7 +33,7 @@ from pathlib import Path
 import pymupdf
 
 SHEET_NAME = "TDK2025_biralati_pontozolap_hallgatoi.pdf"
-GUIDE = "guide/02-tdk-essentials.tex"
+GUIDE = "guide/06-tdk-rules-and-dates.tex"
 # The template's tag lists in reading order; a paper's own lists follow them, then "other" (a
 # prefix no list declares, counted when at least two items share it).
 LIST_ORDER = ["contributions", "rqlist", "requirements", "derivedrequirements", "assumptions", "threats",

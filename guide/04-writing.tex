@@ -280,7 +280,7 @@ Figures and captions alone should let a reader follow the paper. Start each capt
 \end{figure}
 
 \section{The abstract}\label{app:writing:abstract}
-The abstract must explain why the work is worth reading. We read it at registration, then the committee uses it to assign reviewers, who read it first too. Show that the topic is \textbf{relevant}, solving it is \textbf{non-trivial}, the contribution is \textbf{novel} and the result is \textbf{correct}: we ask for these four claims throughout the paper (\cref{app:chapters}). Follow \weblink{https://www.nature.com/documents/nature-summary-paragraph.pdf}{Nature's summary paragraph guide}. The template abstract has placeholders for its seven steps.
+We require the abstract to explain why the work is worth reading. We read it at registration, then the committee uses it to assign reviewers, who read it first too. Show that the topic is \textbf{relevant}, solving it is \textbf{non-trivial}, the contribution is \textbf{novel} and the result is \textbf{correct}: we ask for these four claims throughout the paper (\cref{app:chapters}). Follow \weblink{https://www.nature.com/documents/nature-summary-paragraph.pdf}{Nature's summary paragraph guide}. The template abstract has placeholders for its seven steps.
 
 The faculty asks for Hungarian and English abstracts at registration (\cref{app:tdk:dates}), but does not require them in the PDF. Both the Kivonat and the Abstract in the PDF are our requirement: we write them with you in the Overleaf project.
 
@@ -306,13 +306,13 @@ The reference list demonstrates your knowledge of the field and affects two revi
   \item \textbf{One entry per work.} Treat a preprint and its published version as one work. Use one name per venue and retain titles in their original language, as the faculty requires.
   \item \textbf{Check a long list.} Above 50 entries, check that each one supports a claim or a fair comparison. There is no target to cut to.
 \end{enumerate}
-The \texttt{bib} lint rule checks titles, years and authors, access dates for web sources, and bare DOIs (\cref{app:code:paperci}). The \texttt{sources} rule only advises: it names each arXiv preprint you cite, and warns when the list exceeds 50 entries or contains only web pages. You must judge whether each source is suitable and supports the claim.
+The \texttt{bib} lint rule checks titles, years and authors, access dates for web sources, and bare DOIs (\cref{app:code:paperci}). The \texttt{sources} rule only advises: it names each arXiv preprint you cite, and warns when the list exceeds 50 entries or contains only web pages. Judging whether each source is suitable and supports the claim is your job; no rule does it.
 
 \paragraph{Quoting.} Put every verbatim quotation in \texttt{\textbackslash enquote} and follow it with a citation. Cite paraphrases too. Cite each borrowed result, concept, tool or product at first use, however familiar it is. Unmarked quotations count as plagiarism, and criterion B/2 also rewards proper citation.
 
 \paragraph{Web pages.} The faculty guideline in \texttt{include/guideline.tex} requires: \enquote{Internetes hivatkozások megadásakor fontos, hogy az elérési út előtt megadjuk az oldal tulajdonosát és tartalmát (mivel a link egy idő után akár elérhetetlenné is válhat), valamint az elérés időpontját.} Use a \texttt{misc} entry. Set the author to the page owner in double braces, such as \texttt{author = \{\{W3C\}\}}, to keep its name intact. Give the page a descriptive title, a \texttt{url} and a \texttt{urldate} recording when you read it.
 
-\paragraph{Where the entries come from: Zotero.} Add sources to the group library with the browser's \href{https://www.zotero.org/download/connectors}{Zotero Connector}. Click it on the paper or DOI page, then correct the fetched metadata in Zotero. Do not write literature entries by hand.
+\paragraph{Where the entries come from: Zotero.} Add sources to the group library with the browser's \href{https://www.zotero.org/download/connectors}{Zotero Connector}. Click it on the paper or DOI page, then correct the fetched metadata in Zotero. Do not write literature entries by hand; the hand-written entries in \texttt{bib/references.bib} are the Zenodo artifact and web pages that are not in Zotero (\cref{app:latex:cite}).
 
 \section{Style}
 \begin{itemize}
@@ -325,7 +325,7 @@ The \texttt{bib} lint rule checks titles, years and authors, access dates for we
 This template follows the faculty's \href{https://vik.bme.hu/page/1346/}{guidelines on the use of AI}:
 \begin{itemize}
   \item \textbf{Declare every use} in the faculty declaration (\tplref{aidecl}, after the bibliography). Its note lists what to state for each use. The declaration is mandatory for every thesis, and we require it for TDK papers too.
-  \item \textbf{Cite AI answers only in the declaration table}, never in the bibliography; the declaration's note gives the faculty's MLA form. Cite a fact or conclusion you take from an AI answer to the primary source that verifies it.
+  \item \textbf{Cite AI answers only in the declaration table}, never in the bibliography. This is our rule, and it departs from the faculty's wording, which asks for the MLA entry (a prompt summary, the model and version, the company, the date and a link) both next to the fact and in the bibliography: the declaration table already records the prompt, tool, version and date of every use, and a bibliography is for sources a reader can check. The declaration's note gives the faculty's MLA form. Cite a fact or conclusion you take from an AI answer to the primary source that verifies it.
 \end{itemize}
 \begin{itemize}
   \item \textbf{Keep the essential work your own.} The supervisor decides whether enough of the results are yours. A submission will not be approved if AI use is disproportionately large or touches the essential parts of the work. The faculty states: \enquote{If the task was to develop software and most of it was produced with generative AI, this is not acceptable}. AI-supported software serving your own algorithm, procedure or analysis is acceptable.

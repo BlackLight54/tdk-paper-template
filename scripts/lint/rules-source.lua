@@ -227,7 +227,8 @@ rule("markers", "source", "check", "draft", "gaps are marked with \\tbd{...} or 
   local final = C.phase_reached("submit")
   local gaps = 0
   for _, f in ipairs(CONTENT) do
-    for n, l in ipairs(C.prose_lines(f)) do
+    for n, raw in ipairs(C.prose_lines(f)) do
+      local l = C.unliteral(raw) -- a TBD in \verb|..| is the program's text
       for _, t in ipairs(TYPED) do
         if l:find(t[1]) then fail(f, n, "a typed " .. t[2] .. " prints in the reviewer PDF", "write \\tbd{what is missing} or \\citeneeded[which source] instead", marker_fix(f, n, l, t)) end
       end
@@ -350,16 +351,39 @@ rule("build", "source", "check", "always", "the build log: undefined references 
   end
 end)
 
-rule("overfull", "source", "check", "always", "overfull boxes in the build log: text or tables running into the margin", function()
+-- an overfull box under a point is invisible in print; the one that runs into the margin is wider
+local OVERFULL_PT = 1
+-- the source file open in the log at line i: TeX writes "(./content/03-approach.tex" when it
+-- opens a file and ")" when it closes it, so a balanced scan of the parentheses, with the ones
+-- that open no file (a font's "(0)", a warning's aside) on the same stack, gives the file on top
+local function log_files(ls)
+  local stack, at = {}, {}
+  for i, l in ipairs(ls) do
+    for c, path in l:gmatch("([%(%)])([%w%./_%-]*)") do
+      if c == "(" then stack[#stack + 1] = path:match("%.%a+$") and (path:gsub("^%./", "")) or false
+      elseif #stack > 0 then stack[#stack] = nil end
+    end
+    for j = #stack, 1, -1 do if stack[j] then at[i] = stack[j]; break end end
+  end
+  return at
+end
+rule("overfull", "source", "check", "always", "overfull boxes of a point or more in the build log: text or tables running into the margin, each placed at the source lines the log names so a lint-ignore there can silence it", function()
   local log = C.bpath(C.opts.doc .. ".log")
   if not C.exists(log) then fail(nil, nil, "no " .. log .. ": build first"); return end
   local ls = C.lines(log)
+  local files = log_files(ls)
   for i, l in ipairs(ls) do
-    local pt, from = l:match("^Overfull \\hbox %(([%d%.]+)pt too wide%) in paragraph at lines (%d+)")
-    if pt then
+    local pt = l:match("^Overfull \\hbox %(([%d%.]+)pt too wide%)")
+    if pt and tonumber(pt) >= OVERFULL_PT then
+      -- "in paragraph at lines 45--47", "in alignment at lines 10--20", "detected at line 12"; a box
+      -- that overflows "while \output is active" names no line
+      local from, to = l:match("at lines? (%d+)%-?%-?(%d*)")
       local sample = (ls[i + 1] or ""):gsub("\\[%w/%(%)%.]+%s*", ""):gsub("%s+", " ")
-      fail(nil, nil, string.format("overfull by %spt near log line %d: %s", pt, i, sample:sub(1, 60)))
-    elseif l:match("^Overfull \\hbox") then fail(nil, nil, l) end
+      local file, line = files[i], tonumber(from)
+      if file and not C.exists(file) then file, line = nil, nil end
+      local where = from and (to ~= "" and ("at lines " .. from .. "-" .. to) or ("at line " .. from)) or ("near log line " .. i)
+      fail(file, line, string.format("overfull by %spt %s: %s", pt, where, sample:sub(1, 60)), "shorten the line, let the table or listing break, or lint-ignore it with a reason")
+    elseif l:match("^Overfull \\hbox") and not pt then fail(nil, nil, l) end
   end
 end)
 
@@ -624,13 +648,16 @@ rule("acronyms", "source", "check", "polish", "glossary entries: every \\gls key
   local G = C.FILES.glossary or "content/glossary.tex"
   local CG = C.FILES.common_glossary
   local declared, short, used, kind, lastabbr = {}, {}, {}, {}, nil
-  -- the entries of one glossary file, in file order: key, short form (abbreviations), kind, line
+  -- the entries of one glossary file, in file order: key, short form (abbreviations, declared
+  -- with \newabbreviation or glossaries' \newacronym), kind, line
   local function entries(file)
     local t = {}
     C.each_line({ file }, function(f, n, l)
-      local k, sh = l:match("\\newabbreviation%b[]{([^}]*)}{([^}]*)}")
-      if not k then k, sh = l:match("\\newabbreviation{([^}]*)}{([^}]*)}") end
-      if k then t[#t + 1] = { key = k, short = sh, kind = "abbreviation", file = f, line = n } end
+      for _, cmd in ipairs({ "newabbreviation", "newacronym" }) do
+        local k, sh = l:match("\\" .. cmd .. "%b[]{([^}]*)}{([^}]*)}")
+        if not k then k, sh = l:match("\\" .. cmd .. "{([^}]*)}{([^}]*)}") end
+        if k then t[#t + 1] = { key = k, short = sh, kind = "abbreviation", file = f, line = n } end
+      end
       local s1 = l:match("\\glsxtrnewsymbol%b[]{([^}]*)}") or l:match("\\glsxtrnewsymbol{([^}]*)}")
       if s1 then t[#t + 1] = { key = s1, kind = "symbol", file = f, line = n } end
       local t1 = l:match("\\newglossaryentry{([^}]*)}")
@@ -1084,13 +1111,9 @@ local function typo_fix(f, n, seen, kind, help, count, pattern, fn, tier)
   local edits = C.matches(C.raw_lines(f)[n], pattern, fn)
   return C.fix(tier or (#edits == count and "safe" or "review"), help, table.unpack(edits))
 end
--- a line with its inline maths and escaped dollars blanked to "#", column for column: TeX ignores
--- the spaces in $k : x$, so they are not a slip
-local function mask_math(l)
-  l = l:gsub("\\%$", "##")
-  l = l:gsub("%$%$.-%$%$", function(m) return ("#"):rep(#m) end)
-  return (l:gsub("%$[^$]*%$", function(m) return ("#"):rep(#m) end))
-end
+-- a space before punctuation, a ratio excepted (3 : 1 keeps its spaces): at the end of the line
+-- too, where the frontier sees TeX's end of string, \0
+local PUNCT = "([%w%)])%s+([,%.;:])%f[%s\0]"
 -- whether a line sits inside a table or an array, where \\ ends a row and not a line of prose
 local GRID = { tabular = true, ["tabular*"] = true, tabularx = true, tabulary = true, longtable = true, xltabular = true, supertabular = true, array = true,
   tabbing = true, matrix = true, pmatrix = true, bmatrix = true, vmatrix = true, cases = true, aligned = true, split = true, gathered = true, eqnarray = true }
@@ -1114,7 +1137,10 @@ local function is_range(code, s, e) return not code:sub(s - 1, s - 1):match("[%w
 local DOUBLED_OK = { that = true, had = true }
 
 rule("typography", "source", "advice", "polish", "the small things the reviewer sees: number ranges with --, a thin space before units, no straight quotes, no doubled words, \\eg and \\ie macros, no manual line breaks in prose", function()
-  C.each_prose_line(MAIN, function(f, n, l)
+  C.each_prose_line(MAIN, function(f, n, raw)
+    -- the literal spans blanked (lintcore.lua, M.literal_spans): x : Nat in \texttt{} or $k : x$
+    -- is code or a formula, not a slip, and no fix touches it
+    local l = C.unliteral(raw)
     local p = C.prose(l)
     local seen = {}
     -- a range stands alone: BLS12-381 and i7-9750H are names, not ranges
@@ -1155,11 +1181,9 @@ rule("typography", "source", "advice", "polish", "the small things the reviewer 
         end, "review"))
       end
     end
-    local flat = mask_math(l)
-    if flat:match("[%w%)]%s+[,%.;:]%f[%s]") then
-      -- a ratio, 3 : 1, keeps its spaces
-      warn(f, n, "space before punctuation", typo_fix(f, n, seen, "punct", "delete the space", C.nmatch(flat, "[%w%)]%s+[,%.;:]%f[%s]"), "([%w%)])%s+([,%.;:])%f[%s]", function(m, s, code, c, q)
-        if mask_math(code):sub(s, s + #m - 1) == m and not (q == ":" and c:match("%d")) then return c .. q end
+    if l:match(PUNCT) then
+      warn(f, n, "space before punctuation", typo_fix(f, n, seen, "punct", "delete the space", C.nmatch(l, PUNCT), PUNCT, function(_, _, _, c, q)
+        if not (q == ":" and c:match("%d")) then return c .. q end
       end))
     end
     if l:match("\\\\%s*$") and not l:match("&") and not l:match("\\\\%[") and not l:match("^%s*\\\\") then
@@ -1305,6 +1329,6 @@ rule("burndown", "source", "count", "always", "one line of JSON with the counts 
   local j = string.format('{"date":"%s","pages":%d,"todo":%d,"beats":%d,"notes":%d,"placeholders":%d,"citations":%d,"figures":%d}',
     os.date("!%Y-%m-%d"), main_pages() or 0, count(CONTENT, "TODO"), count(MAIN, "\\beat{"), count(MAIN, "\\a?d?v?i?s?o?r?todo%["),
     count(CONTENT, "[Pp]laceholder"), count(MAIN, "\\cite[tp]?{"), count(MAIN, "\\label{fig:"))
-  if not C.opts.tex and not C.opts.json then io.write(j, "\n") end -- --json carries it as the counts
+  if not C.quiet() then io.write(j, "\n") end -- --json carries it as the counts
   return j
 end)

@@ -24,7 +24,7 @@ Criterion A is scored on the whole paper.
 \textbf{Non-triviality:} show why the obvious solutions fail.
 \textbf{Novelty:} state the contributions as checkable claims.
 
-\textbf{In the sheet's words.} The bottom of E (\cref{app:tdk:sheet}) names what this chapter must contain: \enquote{0: teljesen hiányzik -- ha a dolgozat bevezetése hiányos (tématerület áttekintése, problémafelvetés, fő kontribúció kimondása)}.
+\textbf{In the sheet's words.} The bottom of E (\cref{app:tdk:sheet}) names what this chapter must contain, together with the evaluation: \enquote{0: teljesen hiányzik -- ha a dolgozat bevezetése hiányos (tématerület áttekintése, problémafelvetés, fő kontribúció kimondása) ÉS az eredmények gyakorlati validálása, értékelése is hiányzik ill. hibás}.
 
 \subsection{Context}\label{app:chapters:context}
 \guidebeat{why the field matters now}{a trend, a regulation or an incident, cited}{not yet introduced}{the problem}
@@ -202,7 +202,7 @@ If you name concrete attacks, give each a row in \cref{tab:guide:attacks}: the a
 \end{assumptions}
 
 \subsection{Out of scope}\label{app:chapters:out-of-scope}
-For the registry, the excluded attacks are denial of service, side channels and compromised holder devices.
+For the registry, the excluded attacks are denial of service and compromised holder devices.
 
 \subsection[Guarantees]{Guarantees\skimmark}\label{app:chapters:guarantees}
 Prove each guarantee here or check it in the evaluation.
@@ -264,7 +264,7 @@ fun accept(cred, witness, acc, now):
 \textbf{Novelty:} compare against the closest existing approach named in the introduction; the related-work chapter then places the results in the wider literature.
 \textbf{Beyond small examples:} E awards 7--8 points only for scalability and robustness measurements beyond small examples that support use in an industrial setting. \Cref{tab:guide:eval-tracks} applies this to formal and analysis topics.
 
-\textbf{In the sheet's words.} D/2 gives \enquote{3--4: jó (színvonalas kidolgozás, de esetleg egyes eredmények helyessége nincs kellőképpen alátámasztva)} when a result is reported without the setup that supports it, and E gives \enquote{3--4: pontatlan -- ha a dolgozat bevezetése megfelelő és a dolgozatban szerepel az eredmények kis mintapéldákon túlmenő értékelése is, de az utóbbi hiányos, pontatlan} or \enquote{5--6: pontos, de hiányos} when the evaluation stops at small examples.
+\textbf{In the sheet's words.} D/2 gives \enquote{3--4: jó (színvonalas kidolgozás, de esetleg egyes eredmények helyessége nincs kellőképpen alátámasztva)} when a result is reported without the setup that supports it, and E gives \enquote{1--2: nagyon hiányos -- ha a dolgozat bevezetése hiányos (tématerület áttekintése, bemutatása, problémafelvetés, fő kontribúció kimondása) VAGY az eredmények értékelése hiányzik ill. aránytalanul kis méretű vagy hibás} when the evaluation stops at small examples. An evaluation that goes beyond them but is incomplete or imprecise earns \enquote{3--4: pontatlan -- ha a dolgozat bevezetése megfelelő és a dolgozatban szerepel az eredmények kis mintapéldákon túlmenő értékelése is, de az utóbbi hiányos, pontatlan} or \enquote{5--6: pontos, de hiányos}.
 
 \textbf{Three kinds of work, one chapter.} The examples below primarily describe a measured system (track S). Formal work (track F: Tamarin or ProVerif models, Lean or Coq proofs, model checking) and benchmarked analysis tools (track T: detectors, static analysers, generators) answer the same three questions with different evidence. Use \cref{tab:guide:eval-tracks}, the alternative figures and tables, and the track F and T research questions in the source to adapt the chapter.
 
@@ -308,7 +308,7 @@ Use three research questions, one for each evaluation section below.
 For the registry: one 8-core virtual machine, four ledger nodes, synthetic issuer sets of 10 to 10\,000 issuers with 100 credentials each, 10 runs per point with fresh sets, and the command that reruns them.
 
 \subsection{Artifact availability}\label{app:chapters:artifact-availability}
-Archive code, models and measurement scripts on Zenodo. All numbers in the chapter must come from one tagged version, such as \texttt{v1.0.0}. \texttt{just reproduce} must regenerate its figures and tables (\cref{app:zenodo}).
+Archive code, models and measurement scripts on Zenodo. We require that all numbers in the chapter come from one tagged version, such as \texttt{v1.0.0}, and that \texttt{just reproduce} regenerates its figures and tables (\cref{app:zenodo}).
 
 \subsection[Correctness (RQ1)]{Correctness (RQ1)\skimmark}\label{app:chapters:correctness}
 \guidebeat{that the approach is correct on the example and on every requirement case}{test, proof or model-checking results}{the scenario's outcome, before and after}{scalability}

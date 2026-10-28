@@ -53,13 +53,18 @@ review-<sha7>/
 - `built.by` is `ci` or `local`. A local bundle has no `run_url` and names the host instead. It
   is evidence only when its source tree was clean, so `review.py bundle` refuses a dirty tree
   unless given `--allow-dirty`, and then writes `"dirty": true` into `built`. Such a bundle is
-  for an ad hoc run: `review.py record` refuses it.
+  for an ad hoc run: `review.py record` refuses it. When the built directory is not a git
+  checkout at all, `--sha` cannot be checked against a HEAD and no tree can be called clean:
+  `review.py bundle` writes `"unverified": true` into `built`, and `record` refuses that too.
 - `builds[].started` is false when a build never ran (a step before it failed, or it was
   skipped): its log is absent, its exit is the one CI recorded, and `errors`, `undefined` and
   `pages` are `null`. A bundle with neither build started is refused. A build that ran but
   left no PDF keeps its log in the bundle, so a failed build is still evidence of the commit.
 - An exit that was not passed to `review.py bundle` (`--exit lint=N`, `--exit skim=N`) is `null`,
   never a made-up 0; so are `image.ref` and `image.digest` when not given. CI passes them all.
+- `lint.json` is absent when the lint wrote nothing (an invalid `\lintphase` stops it before any
+  rule runs): `lint.exit` is then 2 whatever was passed, `phase` and `phase_source` are `null`,
+  and the bundle ships the builds all the same. A lint file that is present but not JSON is refused.
 - `image.digest` is the digest that actually ran. CI uses `latest` on purpose; the digest is how a
   later reader knows which TeX Live built the PDFs.
 - `builds[].errors` counts `! ` lines in the log, and `undefined` counts undefined references

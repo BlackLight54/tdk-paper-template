@@ -59,7 +59,7 @@ Red rows mark anchors. Yellow rows marked \official{} are faculty steps with fix
   Panel pass & you & Every relevant persona has read the draft; blockers are fixed or acknowledged in the limitations before we receive it & \lcref{app:lifecycle:reviewers}{Reviewer passes} \\
   \rowcolor{anchorrow}
   Full draft \anchor & both & Every chapter is written and in our hands ten days before the deadline; we approve it at a revision recorded in the consultation summary & --- \\
-  \lcphase{5. Polish}{21--28 October}
+  \lcphase{5. Polish}{22--28 October}
   Advisor review & both & Our comments are resolved and the todo list is empty & \lcref{app:latex:todo}{Todo notes} \\
   Review sheet hill climb & you & You have scored A--E, fixed the weakest criterion and repeated until no cheap fixes remain & \lcref{app:tdk:sheet}{The review sheet} \\
   Skim pass (a hill climb) & you & At most three passes, or fewer once we accept the remaining objections; the maximum on every criterion from the skim view alone is the target, not the done condition & \lcref{app:lifecycle:reviewers}{Reviewer passes} \\
@@ -67,7 +67,7 @@ Red rows mark anchors. Yellow rows marked \official{} are faculty steps with fix
   \rowcolor{department}
   Writing session \department & both & You attended with pizza, closed the last todos and had an advisor check the reviewer PDF & \lcref{tab:polish}{Requirements} \\
   \lcphase{6. Submit}{29 October -- 1 November, or earlier once the paper is complete}
-  Requirements & you & \texttt{\textbackslash lintphase} is \texttt{submit}, every row due by \texttt{submit} is met and \texttt{make check-reviewer} is clean & \lcref{tab:polish}{Requirements} \\
+  Requirements & you & \texttt{\textbackslash lintphase} is \texttt{submit}, every row due by \texttt{submit} is met and \texttt{make check-submit} is clean & \lcref{tab:polish}{Requirements} \\
   \rowcolor{official}
   Paper upload \official & you & AI declaration filled in, main text 30--35 pages, the reviewer PDF uploaded under \emph{Dolgozataim} by 1 November & \lcref{app:tdk:form}{Form requirements} \\
   \lcphase{7. After the deadline}{2--16 November, while the reviewers read}
@@ -90,7 +90,7 @@ Run the reviewer passes (\cref{app:lifecycle:reviewers}) at four steps of \cref{
 \section{Requirements}\label{app:lifecycle:polish}
 The words \emph{must}, \emph{we recommend} and \emph{you can} mean what \cref{app:here:words} says.
 
-\Cref{tab:polish} lists the requirements, in the order they come due. A rule name marks a row the lint checks; \emph{reading} marks a row you check yourself. The lint's rows are checked by \texttt{make check-reviewer}, which runs every rule against the reviewer PDF (\cref{app:code:paperci}); keep them passing before the last week, as the paper CI runs them on every push. Use the polish phase for checks. Any row that takes more than an hour should have been completed in the draft phase. Before upload, set \texttt{\textbackslash lintphase} to \texttt{submit} and go through every row due by \texttt{submit}.
+\Cref{tab:polish} lists the requirements, in the order they come due. A rule name marks a row the lint checks; \emph{reading} marks a row you check yourself. The lint's rows are checked by \texttt{make check-reviewer}, which runs every rule against the reviewer PDF (\cref{app:code:paperci}); keep them passing before the last week, as the paper CI runs them on every push. Use the polish phase for checks. Any row that takes more than an hour should have been completed in the draft phase. Before upload, set \texttt{\textbackslash lintphase} to \texttt{submit}, run \texttt{make check-submit}, which runs the lint at that phase whatever \texttt{\textbackslash lintphase} says, and go through every row due by \texttt{submit}.
 {\small
 \begin{xltabular}{\linewidth}{X >{\raggedright\arraybackslash}p{0.12\linewidth} >{\raggedright\arraybackslash}p{0.15\linewidth} >{\raggedright\arraybackslash}p{0.1\linewidth}}
   \caption{Requirements, their source, what checks them and the phase they are due by. Rule names identify lint rules (\cref{app:code:paperci}); \emph{reading} means you check the row yourself.}\label{tab:polish}\\
@@ -145,10 +145,10 @@ The words \emph{must}, \emph{we recommend} and \emph{you can} mean what \cref{ap
   \textbf{Code archive.} The code is on Zenodo, cited by its concept DOI, and the results tag is named in the paper (\cref{app:zenodo:cite}). & Advisors & \texttt{essentials}, \texttt{placeholders} & \texttt{polish} \\
   \textbf{Review sheet hill climb.} You have scored A--E, fixed the weakest criterion and repeated until no cheap fixes remain (\cref{app:tdk:sheet}). & Advisors & reading & \texttt{polish} \\
   \textbf{Reviewer passes.} The skim pass is done after at most three passes, or earlier once we accept the remaining objections; the maximum on every criterion is the target. A run of the panel raises no blocker (\cref{app:lifecycle:reviewers}). & Advisors & reading & \texttt{polish} \\
-  \textbf{Page count.} The main text, from the first page of \tplref{ch:intro} to the last page of the conclusion (\path{content/07-conclusion.tex}), is 30--35 pages; the title page, the abstracts, the acknowledgements, the glossary lists, the bibliography, the AI declaration and the appendices do not count (\cref{app:tdk:form}). & Faculty: call & \texttt{pages}, \texttt{pdf-pages} & \texttt{submit} \\
+  \textbf{Page count.} The main text, from the first page of \tplref{ch:intro} to the last page of the conclusion (\path{content/07-conclusion.tex}), is 30--35 pages; the title page, the abstracts, the acknowledgements, the glossary lists, the bibliography, the AI declaration and the appendices do not count (\cref{app:tdk:form}). & Faculty: call; the counting rule: us & \texttt{pages}, \texttt{pdf-pages} & \texttt{submit} \\
   \textbf{Both abstracts.} The Kivonat and the Abstract are in the PDF (\cref{app:writing:abstract}). & Advisors & \texttt{essentials}, \texttt{pdf-parts} & \texttt{submit} \\
   \textbf{AI declaration.} It is filled in: one box marked and, if you used AI, each use with its tool, parts, share and prompt, and the overall share justified (\cref{app:writing:ai}). & Advisors & \texttt{aidecl}, \texttt{pdf-parts} & \texttt{submit} \\
-  \textbf{AI citations.} Each AI answer is cited in the declaration table in the faculty's MLA form, never in the bibliography; a fact taken from it is cited to the primary source that verifies it (\cref{app:writing:ai}). & Faculty: AI guideline & reading & \texttt{submit} \\
+  \textbf{AI citations.} Each AI answer is cited in the declaration table in the faculty's MLA form, never in the bibliography; a fact taken from it is cited to the primary source that verifies it (\cref{app:writing:ai}). & Advisors & reading & \texttt{submit} \\
   \textbf{Front and back matter.} Title page variables, both abstracts, the AI declaration, acknowledgements and appendices are complete. No faculty-template placeholder text, \enquote{TODO} or placeholder figure remains. & Advisors & \texttt{placeholders}, \texttt{stock}, \texttt{titlepage} & \texttt{submit} \\
   \textbf{Notes gone.} Every beat has become prose and every todo and advisor note is resolved; the burn-down counts are zero. & Advisors & \texttt{beats}, \texttt{markers} & \texttt{submit} \\
   \textbf{Upload.} The reviewer PDF is uploaded under \emph{Dolgozataim} by 1 November; missing it ends this semester's TDK (\cref{app:tdk:dates}). & Faculty: call & reading & \texttt{submit} \\

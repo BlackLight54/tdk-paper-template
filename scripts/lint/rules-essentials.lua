@@ -575,8 +575,7 @@ C.rule("essentials", "source", "check", "always", "the essentials every paper of
     if r.via == "heading" then note(file, line, string.format("%s found by its heading", r.row.title), string.format("add \\label{%s} so it is found when the heading changes", r.label), label_fix(r)) end
   end
   for _, w in ipairs(M.gapwarn) do warn(C.ROLE.related, nil, w) end
-  if not C.opts.tex and not C.opts.json and not C.opts.quiet then io.write(M.fingerprint(rows), "\n") end
-  if not C.opts.quiet then write_summary(rows) end
+  if not C.quiet() then io.write(M.fingerprint(rows), "\n"); write_summary(rows) end
   return string.format("at-target=%d/%d %s=%d %s=%d %s=%d %s=%d %s=%d", M.at_target(rows), #rows, M.GLYPH[4], counts[4], M.GLYPH[3], counts[3], M.GLYPH[2], counts[2], M.GLYPH[1], counts[1], M.GLYPH[0], counts[0])
 end, { summary = false })
 

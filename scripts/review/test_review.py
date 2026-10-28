@@ -127,6 +127,49 @@ class TestBundle(Workdir):
         self.assertEqual(code, 1)
         self.assertIn("sha256:<hex>", err)
 
+    def test_a_missing_or_empty_lint_file_is_recorded_as_lint_exit_2(self):
+        built = self.tmp / "nolint-built"
+        for doc in ("thesis", "reviewer"):
+            write(built / f"{doc}.pdf", b"%PDF-1.4 /Type /Page")
+            write(built / f"{doc}.log", LOG)
+        write(self.tmp / "nolint-skim" / "skim.md", "x")
+        for lint in (self.tmp / "absent.json", write(self.tmp / "empty.json", "")):
+            out = self.tmp / f"out-{lint.stem}"
+            with mock.patch.dict(os.environ, CI_ENV):
+                code, _, err = call("bundle", "--built", built, "--lint", lint, "--skim", self.tmp / "nolint-skim", "--out", out,
+                                    "--exit", "thesis=0", "--exit", "reviewer=0", "--exit", "lint=0", "--exit", "skim=0")
+            self.assertEqual(code, 0, err)
+            self.assertIn("recorded as exit 2", err)
+            m = review.load_manifest(out)
+            self.assertEqual(m["lint"], {"exit": 2})
+            self.assertEqual([m["phase"], m["phase_source"]], [None, None])
+            self.assertNotIn("lint.json", m["files"])
+            self.assertFalse((out / "lint.json").exists())
+        # a file with content that is not JSON is garbage, not a lint that did not run
+        write(self.tmp / "garbage.json", "not json")
+        with mock.patch.dict(os.environ, CI_ENV):
+            code, _, err = call("bundle", "--built", built, "--lint", self.tmp / "garbage.json", "--skim", self.tmp / "nolint-skim",
+                                "--out", self.tmp / "out-garbage", "--exit", "thesis=0", "--exit", "reviewer=0")
+        self.assertEqual(code, 1)
+        self.assertIn("not readable JSON", err)
+
+    def test_a_build_outside_git_is_recorded_as_unverified(self):
+        built = self.tmp / "nogit"
+        for doc in ("thesis", "reviewer"):
+            write(built / f"{doc}.pdf", b"%PDF-1.4 /Type /Page")
+            write(built / f"{doc}.log", LOG)
+        write(self.tmp / "nogit-lint.json", "{}")
+        write(self.tmp / "nogit-skim" / "skim.md", "x")
+        self.assertIsNone(review.git(built, "rev-parse", "HEAD"))  # the test's premise: no checkout here
+        code, _, err = call("bundle", "--built", built, "--lint", self.tmp / "nogit-lint.json", "--skim", self.tmp / "nogit-skim",
+                            "--out", self.tmp / "nogit-out", "--exit", "thesis=0", "--exit", "reviewer=0", "--by", "local",
+                            "--repo", "a/b", "--ref", "main", "--sha", SHA)
+        self.assertEqual(code, 0, err)
+        self.assertIn("unverified", err)
+        b = review.load_manifest(self.tmp / "nogit-out")["built"]
+        self.assertEqual([b["by"], b["unverified"]], ["local", True])
+        self.assertNotIn("dirty", b)
+
     def test_a_dirty_local_tree_is_refused_unless_allowed(self):
         repo = self.tmp / "paper"
         git = lambda *a: subprocess.run(["git", "-C", str(repo), "-c", "user.name=t", "-c", "user.email=t@t", *a], check=True, capture_output=True)
@@ -328,6 +371,16 @@ class TestRecord(Workdir):
         code, _, err = self.record("--dry-run")
         self.assertEqual(code, 1)
         self.assertIn("dirty tree", err)
+        self.assertIn("ad hoc run", err)
+
+    def test_an_unverified_bundle_is_never_recorded(self):
+        mp = self.bundle / "manifest.json"
+        m = json.loads(mp.read_text())
+        m["built"] = {"by": "local", "host": "laptop", "unverified": True}
+        mp.write_text(json.dumps(m))
+        code, _, err = self.record("--dry-run")
+        self.assertEqual(code, 1)
+        self.assertIn("unverified", err)
         self.assertIn("ad hoc run", err)
 
     def test_a_finding_outside_the_contract_is_refused(self):

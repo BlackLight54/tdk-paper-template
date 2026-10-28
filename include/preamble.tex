@@ -204,8 +204,8 @@
   colback=teal!5, borderline west={2pt}{0pt}{teal!60!black}, left=6pt, right=4pt, top=3pt, bottom=3pt,
   before upper={{\raggedright\textbf{Running example, \exname\if\relax\detokenize{#1}\relax\else: #1\fi}\par}\smallskip}}
 
-% The guide is deleted before submission, so the paper names its sections instead of
-% referencing them, and the guide names the paper's files.
+% The reviewer build (reviewer.tex) leaves the guide out, so the paper names its sections instead
+% of referencing them, and the guide names the paper's files.
 \newcommand{\guideref}[1]{\enquote{#1} in the guide}
 \makeatletter
 % File paths break after / and - (\path from the url package), so they fit narrow table columns.
@@ -268,7 +268,7 @@
 % Both print as coloured text in brackets in the draft, breaking across lines like the text around
 % them, are listed with the todos, and disappear in the
 % reviewer build. Never type TBD, [CITE], [?] or XXX into the text: the markers lint fails on them,
-% and on any \tbd or \citeneeded left at the final phase.
+% and on any \tbd or \citeneeded left at the submit phase.
 \makeatletter
 \newcommand{\tdk@gap}[2]{\if@todonotes@disabled\else{\color{#1}\sffamily\small[#2]}\addcontentsline{tdo}{todo}{#2}\fi}
 \makeatother

@@ -72,9 +72,12 @@ L.~Lamport, ``Time, clocks, and the ordering of events in a distributed
   1978.
 
 \bibitem[Jeney(2014)]{guide:Jeney}
+\BIBentryALTinterwordspacing
 G.~Jeney, ``Hogyan néz ki egy igényes dokumentum? {N}éhány szóban az
   alapvető tipográfiai szabályokról,'' Budapesti Műszaki és
-  Gazdaságtudományi Egyetem, Híradástechnikai Tanszék, Tech. Rep., 2014,
-  \url{http://www.mcl.hu/~jeneyg/kinezet.pdf}.
+  Gazdaságtudományi Egyetem, Híradástechnikai Tanszék, Tech. Rep., 2014.
+  [Online]. Available: \url{http://webspn.hit.bme.hu/~telek/latex/kinezet.pdf}.
+  Accessed: 2026-10-28
+\BIBentrySTDinterwordspacing
 
 \end{thebibliography}
