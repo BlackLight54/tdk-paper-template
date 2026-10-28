@@ -277,7 +277,12 @@
 \renewcommand*{\glsnamefont}[1]{\textbf{#1}} % the first column in bold, as a table head would be
 \setlength{\glsdescwidth}{0.62\linewidth} % with the name column the tables come to about three quarters of the text width, centred
 \makenoidxglossaries
+% \commonentry{key}{declaration} declares a common entry unless the paper has declared the key,
+% and lists the key, so the guide can print the common glossary
+\newcommand*{\tdkcommonkeys}{}
+\newcommand{\commonentry}[2]{\ifglsentryexists{#1}{}{#2\listgadd{\tdkcommonkeys}{#1}}}
 \loadglsentries{content/glossary}
+\loadglsentries{include/glossary-common} % the entries our topics share; a paper's own declaration wins
 \ifdefined\reviewermode\else\loadglsentries{guide/glossary}\fi % the guide's own examples, only when the guide is built
 % The three lists on one page, as booktabs tables with their own column heads, each with a sentence
 % that says what the table is for. \printlists goes after the acknowledgements in thesis.tex.

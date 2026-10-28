@@ -1,0 +1,43 @@
+% The common glossary: the abbreviations, notation and terms our topics share. A paper uses them
+% with \gls{key} without declaring them, and only the ones it uses appear in its lists. The
+% preamble loads this file after content/glossary.tex, and \commonentry skips an entry whose key
+% the paper has already declared, so a paper changes an entry by declaring the same key there.
+% Part of the template: a template update replaces this file, so do not edit it in a paper.
+% user1 is the guide's explanation of an abbreviation (guide/08-glossary.tex prints the table);
+% papers print only the long form.
+
+% Abbreviations ------------------------------------------------------------------------
+% A name keeps its owner's spelling and capitals; a concept is lower case.
+\commonentry{bbs}{\newabbreviation[user1={A pairing-based signature scheme over a list of messages; the holder can reveal some of them and prove in zero knowledge that the rest were signed, which makes it the basis of selective disclosure for credentials}]{bbs}{BBS}{Boneh--Boyen--Shacham}}
+\commonentry{bft}{\newabbreviation[user1={The ability of a distributed protocol to stay correct while a bounded number of its participants behave arbitrarily, even maliciously}]{bft}{BFT}{Byzantine fault tolerance}}
+\commonentry{bpmn}{\newabbreviation[user1={The standard graphical notation for business processes; a collaboration diagram shows several organisations exchanging messages}]{bpmn}{BPMN}{Business Process Model and Notation}}
+\commonentry{did}{\newabbreviation[user1={An identifier that its controller creates and resolves without a central registration authority, usually through a verifiable data registry (W3C standard)}]{did}{DID}{decentralized identifier}}
+\commonentry{dlt}{\newabbreviation[user1={A database replicated among parties that agree on its contents through a consensus protocol, with no single party in control; a blockchain is one kind}]{dlt}{DLT}{distributed ledger technology}}
+\commonentry{evm}{\newabbreviation[user1={The virtual machine that executes smart contracts on Ethereum and on the chains compatible with it}]{evm}{EVM}{Ethereum Virtual Machine}}
+\commonentry{ltl}{\newabbreviation[user1={A logic of properties over sequences of states, with operators such as always and eventually; model checkers verify systems against it}]{ltl}{LTL}{linear temporal logic}}
+\commonentry{ssi}{\newabbreviation[user1={An identity model in which holders keep their own credentials and present them without asking the issuer each time}]{ssi}{SSI}{self-sovereign identity}}
+\commonentry{tls}{\newabbreviation[user1={The protocol that authenticates a server, and optionally the client, and encrypts the connection between them}]{tls}{TLS}{Transport Layer Security}}
+\commonentry{toctou}{\newabbreviation[user1={A race between checking a condition and acting on it, in which the condition changes in between}]{toctou}{TOCTOU}{time-of-check to time-of-use}}
+\commonentry{vdr}{\newabbreviation[user1={The shared registry that issuers, holders and verifiers trust for public data such as schemas, keys and revocation status}]{vdr}{VDR}{verifiable data registry}}
+\commonentry{w3c}{\newabbreviation[user1={The standards body of the web; it publishes the Verifiable Credentials Data Model and the DID specifications}]{w3c}{W3C}{World Wide Web Consortium}}
+\commonentry{zksnark}{\newabbreviation[user1={A zero-knowledge proof that is short and fast to verify, needs no interaction between prover and verifier, and shows that the prover knows a witness}]{zksnark}{zk-SNARK}{zero-knowledge succinct non-interactive argument of knowledge}}
+
+% Notation -------------------------------------------------------------------------------
+% Algorithms in \mathsf, variables in \mathit. Use \gls{key} in math: $x \gls{sample} S$.
+% \Box and \Diamond exist only from \begin{document} (unicode-math), so they are \protect-ed here.
+\commonentry{secpar}{\glsxtrnewsymbol[description={Security parameter: key and proof sizes grow with it, and an adversary's advantage is negligible in it}, sort=lambda]{secpar}{\ensuremath{\lambda}}}
+\commonentry{adv}{\glsxtrnewsymbol[description={Adversary: a probabilistic polynomial-time algorithm that attacks the scheme}, sort=A]{adv}{\ensuremath{\mathcal{A}}}}
+\commonentry{negl}{\glsxtrnewsymbol[description={A negligible function: smaller than the inverse of every polynomial in $\lambda$, for large enough $\lambda$}, sort=negl]{negl}{\ensuremath{\mathsf{negl}(\lambda)}}}
+\commonentry{hash}{\glsxtrnewsymbol[description={Cryptographic hash function}, sort=H]{hash}{\ensuremath{\mathsf{H}}}}
+\commonentry{sk}{\glsxtrnewsymbol[description={Secret key, used to sign}, sort=sk]{sk}{\ensuremath{\mathit{sk}}}}
+\commonentry{pk}{\glsxtrnewsymbol[description={Public key, used to verify}, sort=pk]{pk}{\ensuremath{\mathit{pk}}}}
+\commonentry{sign}{\glsxtrnewsymbol[description={Signing: $\mathsf{Sign}(\mathit{sk}, m)$ returns a signature $\sigma$ on the message $m$}, sort=Sign]{sign}{\ensuremath{\mathsf{Sign}}}}
+\commonentry{verify}{\glsxtrnewsymbol[description={Verification: $\mathsf{Verify}(\mathit{pk}, m, \sigma)$ returns 1 if $\sigma$ is a valid signature on $m$ under $\mathit{pk}$, and 0 otherwise}, sort=Verify]{verify}{\ensuremath{\mathsf{Verify}}}}
+\commonentry{sample}{\glsxtrnewsymbol[description={Uniform sampling: $x \xleftarrow{\$} S$ draws $x$ uniformly at random from the set $S$}, sort=sample]{sample}{\ensuremath{\xleftarrow{\$}}}}
+\commonentry{concat}{\glsxtrnewsymbol[description={Concatenation of bit strings}, sort=concat]{concat}{\ensuremath{\mathbin{\|}}}}
+\commonentry{always}{\glsxtrnewsymbol[description={Always: $\protect\Box\varphi$ holds if $\varphi$ holds in every state from now on (LTL)}, sort=always]{always}{\ensuremath{\protect\Box}}}
+\commonentry{eventually}{\glsxtrnewsymbol[description={Eventually: $\protect\Diamond\varphi$ holds if $\varphi$ holds in some state from now on (LTL)}, sort=eventually]{eventually}{\ensuremath{\protect\Diamond}}}
+
+% Terms ----------------------------------------------------------------------------------
+\commonentry{liveness}{\newglossaryentry{liveness}{name={liveness}, description={The kind of property that says something good eventually happens, such as every request being answered}}}
+\commonentry{safety}{\newglossaryentry{safety}{name={safety}, description={The kind of property that says nothing bad ever happens, such as two parties never deciding differently}}}

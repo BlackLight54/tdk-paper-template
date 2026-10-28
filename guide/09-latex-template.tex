@@ -46,7 +46,7 @@ Build the submission from \texttt{reviewer.tex}. This four-line root sets the \t
 
 %----------------------------------------------------------------------------
 \section{Abbreviations, notation and terms (glossaries-extra)}\label{app:latex:acro}
-Declare abbreviations, notation and terms in \texttt{content/glossary.tex}. The three tables after the acknowledgements contain only entries used in the text. Each use links to its table row.
+Declare abbreviations, notation and terms in \texttt{content/glossary.tex}. The three tables after the acknowledgements contain only entries used in the text. Each use links to its table row. The entries our topics share are already declared in \texttt{include/glossary-common.tex} (\cref{tab:glossary-common}): write \texttt{\textbackslash gls\{did\}} without declaring anything.
 \begin{itemize}[noitemsep]
   \item \textbf{Abbreviations.} First use expands the term: \glsreset{vc}\gls{vc}. Later uses are short: \gls{vc}. Use \glspl{vc} for the plural, or request a specific form with \glsxtrshort{zkp} and \glsxtrlong{zkp}. Declare it with \texttt{\textbackslash newabbreviation\{vc\}\{VC\}\{verifiable credential\}}.
   \item \textbf{Notation.} Declare each symbol once, with a description linking to its definition. For example, \gls{Rt} is the registry; $\gls{valid}$ also works in math. You may type \texttt{\$R\_t\$} directly elsewhere, but declare every symbol used in \cref{app:latex:theorems} and use \texttt{\textbackslash gls} at least when introducing it, so it enters the table.
