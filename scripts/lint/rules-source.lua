@@ -398,7 +398,7 @@ local function opens_sentence(code, s)
   return before:match("^%s*$") ~= nil or before:match("[%.%?!]%s+$") ~= nil
 end
 local function cref(code, s, key) return (opens_sentence(code, s) and "\\Cref{" or "\\cref{") .. key .. "}" end
-local TYPED = { figure = true, table = true, section = true, chapter = true, listing = true }
+local TYPED_REF = { figure = true, table = true, section = true, chapter = true, listing = true }
 local FACULTY_REF = { fig = true, tab = true, sect = true, list = true }
 local function cref_fix(l, pattern, ok)
   return C.fix("safe", "write \\cref, or \\Cref where a sentence starts", table.unpack(C.matches(l, pattern, function(_, s, code, a, b)
@@ -408,7 +408,7 @@ end
 
 rule("crefs", "source", "check", "always", "references go through \\cref: no 'Figure~\\ref', no \\autoref, \\Cref at the start of a sentence, and no bare \\ref outside table cells", function()
   C.each_line(MAIN, function(f, n, l)
-    if l:match("[Ff]igure~?\\ref") or l:match("[Tt]able~?\\ref") or l:match("[Ss]ection~?\\ref") or l:match("[Cc]hapter~?\\ref") or l:match("[Ll]isting~?\\ref") then fail(f, n, "a typed reference with \\ref: write \\cref{...}", cref_fix(l, "(%a+)~?\\ref{([^}]*)}", function(w) return TYPED[w:lower()] end)) end
+    if l:match("[Ff]igure~?\\ref") or l:match("[Tt]able~?\\ref") or l:match("[Ss]ection~?\\ref") or l:match("[Cc]hapter~?\\ref") or l:match("[Ll]isting~?\\ref") then fail(f, n, "a typed reference with \\ref: write \\cref{...}", cref_fix(l, "(%a+)~?\\ref{([^}]*)}", function(w) return TYPED_REF[w:lower()] end)) end
     if l:match("\\autoref") then fail(f, n, "\\autoref: the template uses cleveref, write \\cref", cref_fix(l, "\\(auto)ref{([^}]*)}", function() return true end)) end
     if l:match("\\figref") or l:match("\\tabref") or l:match("\\sectref") or l:match("\\listref") then fail(f, n, "the faculty template's \\figref family: write \\cref", cref_fix(l, "\\(%a+)ref{([^}]*)}", function(w) return FACULTY_REF[w] end)) end
     if l:match("^%s*\\cref") or l:match("[%.%?!]%s+\\cref") then
