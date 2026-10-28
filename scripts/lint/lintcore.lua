@@ -2,7 +2,7 @@
 local lfs = require("lfs")
 local M = {}
 
-M.opts = { dir = ".", doc = "thesis", profile = os.getenv("LINT_PROFILE") or "tdk", tex = false }
+M.opts = { dir = ".", doc = "thesis", profile = os.getenv("LINT_PROFILE") or "tdk", tex = false, json = false }
 M.PHASES = { plan = 1, draft = 2, polish = 3, final = 4 } -- the order of the manual phase in thesis.tex
 
 function M.readfile(p) local h = io.open(p, "r"); if not h then return nil end; local s = h:read("a"); h:close(); return s end
@@ -93,6 +93,30 @@ function M.role_text(r)
   for _, f in ipairs(M.role_files(r)) do t[#t + 1] = M.readfile(f) or "" end
   return table.concat(t, "\n")
 end
+-- the main text's chapter files: the numbered chapters up to the appendix
+function M.main_chapters()
+  local out = {}
+  for _, f in ipairs(M.MAIN) do
+    if M.file_has(f, "\\appendix") then break end
+    out[#out + 1] = f
+  end
+  return out
+end
+-- the environment of the running example's boxes: \lintexamplebox in thesis.tex, or the template's
+function M.example_box() return (M.readfile("thesis.tex") or ""):match("\\newcommand{\\lintexamplebox}{(%a+)}") or "runningexample" end
+-- the bibliography's entries by key: { type, body }, read once
+local bib_cache
+function M.bib_entries()
+  if bib_cache then return bib_cache end
+  bib_cache = {}
+  for _, b in ipairs(M.BIB) do
+    for typ, body in (M.readfile(b) or ""):gmatch("@(%a+)%s*(%b{})") do
+      local key = body:match("^{%s*([^,%s]+)%s*,")
+      if key then bib_cache[key] = { type = typ:lower(), body = body, file = b } end
+    end
+  end
+  return bib_cache
+end
 -- a rule that needs chapters by role calls this first; it fails with the right message and returns false
 function M.roles_ok(list)
   local ok = true
@@ -155,6 +179,16 @@ function M.note(file, line, msg) finding("notice", file, line, msg) end
 
 M.results = {}
 -- severity: check (fails on errors once its phase is reached), advice (warns, never fails), count (numbers)
+-- status, in the words the Checks page and the job summary use: pass, fix (a check that fails now),
+-- due at <phase> (a check that fails, but not yet), suggestion (advice with findings), count
+function M.status(r, errors, warnings)
+  if r.severity == "check" then
+    if errors == 0 then return "pass" end
+    return M.phase_reached(r.phase) and "fix" or ("due at " .. r.phase)
+  elseif r.severity == "advice" then return (errors + warnings == 0) and "pass" or "suggestion" end
+  return "count"
+end
+local ICON = { pass = ":white_check_mark:", fix = ":x:", suggestion = ":information_source:", count = ":1234:" }
 function M.report(rule, r, counts)
   -- a stable order: pairs() differs between runs, and the Checks page that lists these findings
   -- is input by the build, so an unstable order kept latexmk recompiling
@@ -163,41 +197,41 @@ function M.report(rule, r, counts)
     if (a.line or 0) ~= (b.line or 0) then return (a.line or 0) < (b.line or 0) end
     return a.msg < b.msg
   end)
-  if not M.opts.tex then for _, f in ipairs(M.findings) do print_finding(f) end end
+  local quiet = M.opts.tex or M.opts.json
+  if not quiet then for _, f in ipairs(M.findings) do print_finding(f) end end
   local errors, warnings = 0, 0
   for _, f in ipairs(M.findings) do
     if f.level == "error" then errors = errors + 1 elseif f.level == "warning" then warnings = warnings + 1 end
   end
-  local due = M.phase_reached(r.phase)
-  local gate = r.severity == "check" and due
+  local gate = r.severity == "check" and M.phase_reached(r.phase)
   local ok = errors == 0
-  local status
-  if r.severity == "check" then status = (not due) and ("report until " .. r.phase) or (ok and "ok" or "FAIL")
-  elseif r.severity == "advice" then status = (errors + warnings == 0) and "clean" or "advice"
-  else status = "count" end
+  local status = M.status(r, errors, warnings)
   M.results[#M.results + 1] = { rule = rule, severity = r.severity, phase = r.phase, status = status, errors = errors, warnings = warnings, counts = counts, findings = M.findings, ignored = M.ignored }
-  if not M.opts.tex then
+  if not quiet then
     io.write(string.format("%s %-13s %-7s %-18s %d error(s), %d warning(s)%s%s\n", gate and (ok and "ok  " or "FAIL") or "    ", rule, r.severity, status, errors, warnings, counts and (" " .. counts) or "", M.ignored > 0 and (" ignored=" .. M.ignored) or ""))
   end
-  if summary then
+  if summary and r.summary ~= false then
     local h = io.open(summary, "a")
     if h then
-      local icon = gate and (ok and ":white_check_mark:" or ":x:") or (r.severity == "check" and ":hourglass:" or ((errors + warnings == 0) and ":white_check_mark:" or ":information_source:"))
-      h:write(string.format("| %s | %s | %s | %s | %d | %d | %s |\n", rule, r.severity, r.phase == "always" and "" or r.phase, icon, errors, warnings, (counts or ""):gsub("|", "\\|")))
+      local P = require("pagemap")
+      local found = r.severity == "count" and (counts or "") or ((errors + warnings == 0) and "" or string.format("%d error(s), %d warning(s)", errors, warnings))
+      h:write(string.format("| %s | %s %s | %s | `%s` | %s |\n", P.group_title(P.group(rule)), ICON[status] or ":hourglass:", status, (P.title(rule):gsub("%-%-", "–")), rule, (found:gsub("|", "\\|"))))
       h:close()
     end
   end
   return not gate or ok
 end
+M.SUMMARY_HEADER = "| Group | Status | Check | Rule | Findings |\n|---|---|---|---|---|\n"
 function M.summary_header(title)
   if not summary then return end
-  local h = io.open(summary, "a"); if h then h:write("\n## " .. title .. "\n\n| Rule | Severity | Due | Status | Errors | Warnings | Counts |\n|---|---|---|---|---|---|---|\n"); h:close() end
+  local h = io.open(summary, "a"); if h then h:write("\n## " .. title .. "\n\n" .. M.SUMMARY_HEADER); h:close() end
 end
 
 -- rule registry ------------------------------------------------------------------------
 M.RULES, M.ORDER = {}, {}
-function M.rule(name, family, severity, phase, desc, fn)
-  M.RULES[name] = { family = family, severity = severity, phase = phase, desc = desc, fn = fn }; M.ORDER[#M.ORDER + 1] = name
+-- opts.summary = false: the rule writes its own section of the job summary instead of a table row
+function M.rule(name, family, severity, phase, desc, fn, opts)
+  M.RULES[name] = { family = family, severity = severity, phase = phase, desc = desc, fn = fn, summary = (opts or {}).summary }; M.ORDER[#M.ORDER + 1] = name
 end
 
 -- label and reference index over the main chapters -------------------------------------
@@ -277,6 +311,37 @@ function M.prose(l)
   l = l:gsub("\\begin%b{}%b[]", " "):gsub("\\begin%b{}", " "):gsub("\\end%b{}", " ")
   l = l:gsub("\\[%a@]+%*?", " ")
   return l
+end
+
+-- the template's skeleton chapters, copied into scripts/lint/skeleton by `make skeleton`: a line of
+-- theirs is the template's, not the paper's, however long the skeleton chapter is
+M.SKELETON = "scripts/lint/skeleton"
+function M.skeleton_files()
+  local out = {}
+  if not M.exists(M.SKELETON) then return out end
+  for e in lfs.dir(M.SKELETON) do if e:match("%.tex$") then out[#out + 1] = M.SKELETON .. "/" .. e end end
+  table.sort(out)
+  return out
+end
+function M.prose_key(l) return M.trim((M.prose(l):gsub("%s+", " "))) end
+local skel_cache
+function M.skeleton_lines()
+  if skel_cache then return skel_cache end
+  skel_cache = {}
+  for _, f in ipairs(M.skeleton_files()) do
+    for _, l in ipairs(M.prose_lines(f)) do
+      local k = M.prose_key(l)
+      if k ~= "" then skel_cache[k] = true end
+    end
+  end
+  return skel_cache
+end
+-- own words of a prose line: not a TODO line, not a line of the template's skeleton
+function M.own_words(l)
+  if l:match("TODO") or M.skeleton_lines()[M.prose_key(l)] then return 0 end
+  local n = 0
+  for _ in M.prose(l):gmatch("%a%a+") do n = n + 1 end
+  return n
 end
 
 return M

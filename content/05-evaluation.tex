@@ -43,7 +43,7 @@
     % Track T: How do the results change under parameter changes, mutated inputs, and a benchmark from another source?
 \end{rqlist}
 
-\section{Setup}
+\section{Setup}\label{sec:setup}
 \beat{how the measurements were made, so that each can be checked}{hardware, software versions, workloads, repetitions, the rerun command}{the example as the base workload, scaled up for \cref{rq:scale}}{the results}
 TODO
 
@@ -125,7 +125,7 @@ TODO What happens in the scenario with this work, compared with what went wrong 
   \label{fig:example-trace}
 \end{figure}
 
-\section{Scalability (RQ2)}
+\section{Scalability (RQ2)}\label{sec:scalability}
 \beat{how the cost grows with the input}{\cref{fig:scalability}}{the example multiplied to $n$ participants or items}{robustness}
 TODO Describe \cref{fig:scalability}: what grows, how fast, and where the limit is. Put the better result on top: plot a metric where higher is better (\cref{fig:scalability-throughput}), or reverse the axis of one where lower is better (\cref{fig:scalability-time}).
 
@@ -179,7 +179,7 @@ TODO Describe \cref{fig:scalability}: what grows, how fast, and where the limit 
   \label{fig:scalability-formal}
 \end{figure}
 
-\section{Robustness analysis (RQ3)}
+\section{Robustness analysis (RQ3)}\label{sec:robustness}
 \todo[inline, caption={Robustness is scored separately from scalability}]{\textbf{Robustness is scored separately from scalability.} The review sheet gives 7--8 points on criterion E only if \enquote{a szerző skálázhatósági, robosztussági vizsgálatokat is elvégzett, mellyel igazolta, hogy rendszere ipari környezetben is megállja a helyét}: scalability \emph{and} robustness studies showing the system holds up in an industrial setting. Scalability alone does not earn it.\\
 \textbf{Track S:} perturb the system on purpose and report what happens: \cref{tab:robustness} lists the perturbations and their outcomes, \cref{fig:robustness} shows how the system degrades and recovers during a fault, and how sensitive it is to its main parameter.\\
 \textbf{Track F:} \cref{tab:robustness-formal}: re-verify every property under a stronger adversary and with each assumption dropped, and report which still hold, which break, and the attack that breaks them.\\
@@ -248,6 +248,6 @@ TODO
   \label{fig:robustness}
 \end{figure}
 
-\section{Threats to validity}
+\section{Threats to validity}\label{sec:validity}
 \beat{what could make the results wrong or not generalise, and what was done about each}{the mitigations}{whether the example is representative of real use}{related work}
 TODO

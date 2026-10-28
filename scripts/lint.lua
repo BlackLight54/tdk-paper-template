@@ -3,19 +3,22 @@
 --
 --   texlua scripts/lint.lua <rule>... [--dir <builddir>] [--doc <jobname>] [--profile tdk|thesis] [--phase <p>]
 --   texlua scripts/lint.lua all | source | pdf | tools | overleaf     a family, in order
---   texlua scripts/lint.lua list                                      the rules, their severity and phase
+--   texlua scripts/lint.lua list [--tsv]                              the rules, their severity, phase and group
 --   texlua scripts/lint.lua overleaf --tex > lint-checks.tex          the Checks page and the package warnings
+--   texlua scripts/lint.lua essentials --guide > guide/essentials.tex the guide's reference of the essentials
+--   texlua scripts/lint.lua essentials --json                         the essentials, for work/essentials-labels.py
 --
 -- Severity: check (fails once its phase is reached), advice (warns, never fails), count (numbers).
 -- Phase: the manual phase from \newcommand{\lintphase}{plan|draft|polish|final} in thesis.tex;
--- a check whose phase is not reached yet only reports. Chapters are found by their role labels
--- (ch:<role> or ch:<role>:<name>; a role may span chapters), not by file name. "% lint-ignore: <rule> <reason>" silences one finding.
+-- a check whose phase is not reached yet only reports. The essentials (scripts/lint/essentials.lua)
+-- are one check whose level rises with the phase. Chapters are found by their labels (ch:intro,
+-- ...), not by file name. "% lint-ignore: <rule> <reason>" silences one finding.
 -- Needs texlua (TeX Live); the pdf family needs poppler-utils, the tools family what it names.
 
 package.path = "scripts/lint/?.lua;" .. package.path
 local C = require("lintcore")
 
-local args = {}
+local args, guide = {}, false
 do
   local i = 1
   while i <= #arg do
@@ -24,10 +27,16 @@ do
     elseif arg[i] == "--profile" then C.opts.profile = arg[i + 1]; i = i + 2
     elseif arg[i] == "--phase" then C.opts.phase = arg[i + 1]; i = i + 2
     elseif arg[i] == "--tex" then C.opts.tex = true; i = i + 1
+    elseif arg[i] == "--json" then C.opts.json = true; i = i + 1
+    elseif arg[i] == "--guide" then guide = true; i = i + 1
+    elseif arg[i] == "--tsv" then C.opts.tsv = true; i = i + 1
     else args[#args + 1] = arg[i]; i = i + 1 end
   end
 end
-require("rules-source"); require("rules-pdf"); require("rules-tools")
+-- the essentials first: they open the Checks page, the job summary and every list
+require("rules-essentials"); require("rules-source"); require("rules-pdf"); require("rules-tools")
+local P = require("pagemap")
+local R = require("render")
 
 -- the rules the Overleaf hook runs on every compile: the sources, and the page count from this
 -- compile's aux files; not the log (Overleaf shows it), not the PDF (it does not exist yet)
@@ -35,6 +44,13 @@ local OVERLEAF_SKIP = { build = true, overfull = true, checkcites = true, ["bibt
 
 local cmd = args[1]
 if not cmd or cmd == "list" then
+  if C.opts.tsv then
+    for _, n in ipairs(C.ORDER) do
+      local r = C.RULES[n]
+      io.write(table.concat({ r.family, n, r.severity, r.phase, P.group(n), P.title(n) }, "\t"), "\n")
+    end
+    os.exit(0)
+  end
   io.write(string.format("phase: %s (from \\lintphase in thesis.tex)\n", C.phase()))
   io.write("rules: severity check fails once its phase is reached; advice warns; count reports numbers\n")
   local fam
@@ -45,66 +61,25 @@ if not cmd or cmd == "list" then
   end
   os.exit(0)
 end
+if guide then io.write(R.guide()); os.exit(0) end
 local todo = {}
 if cmd == "all" then for _, n in ipairs(C.ORDER) do todo[#todo + 1] = n end
 elseif cmd == "overleaf" then for _, n in ipairs(C.ORDER) do if C.RULES[n].family ~= "pdf" and not OVERLEAF_SKIP[n] then todo[#todo + 1] = n end end
 elseif cmd == "source" or cmd == "pdf" or cmd == "tools" then for _, n in ipairs(C.ORDER) do if C.RULES[n].family == cmd then todo[#todo + 1] = n end end
 else for _, n in ipairs(args) do todo[#todo + 1] = n end end
-if #todo > 1 then C.summary_header("Lint: " .. cmd .. " (phase " .. C.phase() .. ", profile " .. C.opts.profile .. ")") end
 local allok = true
+local header = #todo <= 1
 for _, name in ipairs(todo) do
   local r = C.RULES[name]
   if not r then io.stderr:write("unknown rule " .. name .. "; try: texlua scripts/lint.lua list\n"); os.exit(2) end
+  -- the essentials write their own section of the job summary; the rules' table follows them
+  if not header and r.summary ~= false then C.summary_header("Lint: " .. cmd .. " (phase " .. C.phase() .. ", profile " .. C.opts.profile .. ")"); header = true end
   C.findings = {}; C.ignored = 0; C.current_rule = name
   local ok_call, counts = pcall(r.fn)
   if not ok_call then C.fail(nil, nil, "the rule itself failed: " .. tostring(counts)); counts = nil end
   if not C.report(name, r, counts) then allok = false end
 end
 
--- the Checks page for the draft PDF, and package warnings for the log panel
-if C.opts.tex then
-  local function esc(s)
-    s = tostring(s or "")
-    s = s:gsub("\\", "\1"):gsub("([#$%%&_{}])", "\\%1"):gsub("~", "\\textasciitilde{}"):gsub("%^", "\\textasciicircum{}"):gsub("\1", "\\textbackslash{}")
-    return s
-  end
-  local out = {}
-  local function w(s) out[#out + 1] = s end
-  w("% generated by scripts/lint.lua --tex; do not edit")
-  w("\\chapter*{Checks}\\addcontentsline{toc}{chapter}{Checks}")
-  w(string.format("\\noindent Phase \\textbf{%s}, set by \\texttt{\\textbackslash lintphase} in \\texttt{thesis.tex}; generated %s by \\texttt{texlua scripts/lint.lua overleaf}. A check whose phase is not reached yet only reports. The build log's own warnings and the PDF rules are not here: Overleaf shows the first, CI runs the second. \\texttt{\\%% lint-ignore: <rule> <reason>} on a line silences one finding.\\par\\medskip", esc(C.phase()), os.date("%Y-%m-%d")))
-  w("{\\small\\begin{xltabular}{\\linewidth}{>{\\raggedright\\arraybackslash}p{0.16\\linewidth} >{\\raggedright\\arraybackslash}p{0.17\\linewidth} X}")
-  w("\\toprule \\textbf{Rule} & \\textbf{Status} & \\textbf{Findings} \\\\ \\midrule \\endfirsthead")
-  w("\\toprule \\textbf{Rule} & \\textbf{Status} & \\textbf{Findings} \\\\ \\midrule \\endhead \\bottomrule \\endlastfoot")
-  for _, res in ipairs(C.results) do
-    local colour = ({ FAIL = "red!70!black", ok = "green!45!black", advice = "orange!80!black" })[res.status] or "black"
-    local shown, extra = {}, 0
-    for _, f in ipairs(res.findings) do
-      if f.level ~= "notice" then
-        if #shown < 3 then
-          local loc = f.file and (esc(f.file) .. (f.line and (":" .. f.line) or "") .. ": ") or ""
-          shown[#shown + 1] = string.format("\\textcolor{%s}{%s}\\path{%s}%s", f.level == "error" and "red!70!black" or "orange!80!black", f.level == "error" and "\\textbullet~" or "\\textopenbullet~", loc:gsub("\\path{}", ""), esc(f.msg:sub(1, 160)))
-        else extra = extra + 1 end
-      end
-    end
-    local findings = table.concat(shown, "\\newline ")
-    if extra > 0 then findings = findings .. string.format("\\newline \\ldots{} and %d more", extra) end
-    if res.counts and res.severity == "count" then findings = esc(res.counts) end
-    if res.ignored > 0 then findings = findings .. string.format("\\newline (%d ignored)", res.ignored) end
-    w(string.format("%s & \\textcolor{%s}{%s}%s & %s \\\\", esc(res.rule), colour, esc(res.status), (res.severity == "check" and res.phase ~= "always") and (" \\footnotesize(" .. esc(res.phase) .. ")") or "", findings))
-  end
-  w("\\end{xltabular}}")
-  -- package warnings for check findings only
-  for _, res in ipairs(C.results) do
-    if res.severity == "check" and C.phase_reached(res.phase) then
-      for _, f in ipairs(res.findings) do
-        if f.level == "error" then
-          local loc = f.file and (f.file .. (f.line and (":" .. f.line) or "") .. ": ") or ""
-          w(string.format("\\PackageWarningNoLine{tdk-lint}{%s: %s%s}", res.rule, loc, (f.msg:gsub("[%%#{}\\]", " "):gsub("\n", " "))))
-        end
-      end
-    end
-  end
-  io.write(table.concat(out, "\n"), "\n")
-end
+if C.opts.json then io.write(R.json())
+elseif C.opts.tex then io.write(R.checks_page(C.results)) end
 os.exit(allok and 0 or 1)
