@@ -1,25 +1,29 @@
 # FTSRG TDK paper template
 
-The LaTeX template of the FTSRG advisors for a TDK paper at BME VIK, with the advisors' guide
-built into the draft. The source of truth is the Overleaf project; this repository mirrors it
-for browsing and for its CI. Students get an Overleaf project copied from it, and Overleaf's
-GitHub sync creates their paper repository, which carries this CI.
+This is the FTSRG advisors' LaTeX template for a TDK paper at BME VIK. The advisors'
+guide is included in the draft PDF. **The Overleaf project is the canonical source.**
+This GitHub copy is not a maintained mirror and may be out of date. Students receive
+a copy of the Overleaf project; its GitHub integration creates each student's paper
+repository, including the build and lint workflow.
 
-- `thesis.tex` is the draft: the paper with its notes, the Checks page and the guide.
-  The chapter files hold only headings, one note each that links to the guide's
-  "The paper, chapter by chapter" (`guide/chapter-by-chapter.tex`), and stubs; the
-  instructions and every item in action live there.
-  `reviewer.tex` builds the paper as the reviewer sees it; that is the PDF to upload.
-- `content/` holds the chapters, the abstract, the glossary and the AI declaration; `guide/` the
-  advisors' guide; `include/` the preamble; `bib/` the bibliographies; `docs/` the review sheet.
-- `scripts/lint.lua` is the lint: `texlua scripts/lint.lua list` names its rules, `make check`
-  runs them, and `.github/workflows/paper.yml` runs each as its own step on every push to main
-  and on every pull request that is not a draft.
-- `\lintphase` in `thesis.tex` is where you are in the lifecycle; checks come due by phase.
+- `thesis.tex` builds the draft with notes, the Checks page and the guide.
+  The chapter files contain headings, stubs and notes linking to
+  "The paper, chapter by chapter" in `guide/chapter-by-chapter.tex`, where the
+  instructions and worked examples live. `reviewer.tex` builds the submission-format PDF;
+  the final checks and advisor review determine whether it is ready to upload.
+- `content/` holds the chapters, abstract, glossary and AI declaration; `guide/` holds
+  the advisors' guide; `include/` the preamble; `bib/` the bibliographies; and `docs/`
+  the review sheet.
+- `scripts/lint.lua` checks the paper. `texlua scripts/lint.lua list` lists the rules,
+  and `make check` runs them. `.github/workflows/paper.yml` runs each rule as a
+  separate step on every push to main and every pull request that is not a draft.
+- Set `\lintphase` in `thesis.tex` to your current lifecycle phase. Checks become
+  required as you reach each phase.
 
-Sibling templates: [tdk-notes-template](https://github.com/BlackLight54/tdk-notes-template) for
-the notes repository and [tdk-code-template](https://github.com/BlackLight54/tdk-code-template)
-for the code repository. The guide, in the draft PDF after the appendices, explains all three.
+The companion templates are [tdk-notes-template](https://github.com/BlackLight54/tdk-notes-template)
+for the notes repository and [tdk-code-template](https://github.com/BlackLight54/tdk-code-template)
+for the code repository. The guide explains all three after the draft's appendices.
 
-Build locally with `make all` (draft) and `make reviewer`, in a TeX Live with XeLaTeX, Inkscape
-and shell escape; `make check-reviewer` runs the lint on the reviewer build.
+Build locally with `make all` for the draft and `make reviewer` for the reviewer PDF.
+Use TeX Live with XeLaTeX, Inkscape and shell escape enabled.
+`make check-reviewer` runs the lint on the reviewer build.
