@@ -67,6 +67,9 @@
 
 \selectthesislanguage
 
+% The todo list and Checks open the draft. The reviewer PDF starts with its title page.
+\ifdefined\reviewermode\else\listoftodos\lintchecks\fi
+
 %TODO Titlepage -- choose one from below
 %~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 %\include{include/titlepage}		   % Szakdolgozat/Diplomaterv címlap
@@ -77,7 +80,6 @@
 % Table of Contents
 %~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 \tableofcontents\vfill
-\ifdefined\reviewermode\else\listoftodos\lintchecks\fi % the list of todos and the Checks page; reviewer.tex leaves both out
 
 
 % Declaration and Abstract
