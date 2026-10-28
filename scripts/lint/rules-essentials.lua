@@ -146,19 +146,16 @@ end
 -- the canonical label for a row found by its heading: par: on a paragraph, sec: otherwise
 function M.label_for(row, cmd) return (cmd == "paragraph" and "par:" or "sec:") .. row.key end
 
-local function cited_doi(files)
-  local bib = C.bib_entries()
-  for _, f in ipairs(files) do
-    for _, l in ipairs(plines(f)) do
-      for _, arg in l:gmatch("\\cite%a*%*?([^{]-)(%b{})") do
-        for key in arg:sub(2, -2):gmatch("[^,%s]+") do
-          local e = bib[key]
-          local doi = e and (e.body:match("[Dd][Oo][Ii]%s*=%s*(%b{})") or e.body:match('[Dd][Oo][Ii]%s*=%s*(%b"")'))
-          if doi and not doi:match("TODO") and doi:match("10%.%d+/") then return key end
-        end
-      end
-    end
-  end
+-- the first cited entry of the files that is a Zenodo record (10.5281/zenodo.<number>), the
+-- archive the template's code repository releases to; any other DOI is a paper, not the artifact.
+-- Whether it is the version the results came from, the lint cannot tell
+local function cited_artifact(files)
+  local bib, found = C.bib_entries(), nil
+  C.each_cite(files, function(_, _, key)
+    local e = bib[key]
+    if not found and e and e.body:match("10%.5281/zenodo%.%d+") then found = key end
+  end)
+  return found
 end
 
 local TEXT_USED = {
@@ -167,8 +164,8 @@ local TEXT_USED = {
     return false, "point to the full comparison: \\cref{ch:related}, \\cref{tab:related} or \\cref{fig:positioning}"
   end,
   setup = function()
-    if cited_doi(C.role_files("evaluation")) then return true end
-    return false, "cite the archived artifact with its DOI (Zenodo) in the evaluation"
+    if cited_artifact(C.role_files("evaluation")) then return true end
+    return false, "cite the archived artifact in the evaluation: a bibliography entry with its Zenodo DOI, 10.5281/zenodo.<number>"
   end,
   scalability = function(f, a, b)
     for _, key in ipairs(labels_in_span(f, a, b)) do if (key:match("^fig:") or key:match("^tab:")) and main_refs(key) > 0 then return true end end
@@ -354,8 +351,10 @@ local function eval_float(row, r)
   return 3, why
 end
 
--- the gap matrix's argument: rows are requirements, this work meets all with pointers, every other
--- approach misses something. Returns the failures; warnings go out as the rule's own findings.
+-- the gap matrix's argument: one row per requirement, each exactly once; this work meets all, each
+-- with a pointer to a result; every other approach misses something. Returns the failures;
+-- warnings go out as the rule's own findings. Whether a pointed-at result shows what the cell
+-- claims is for the reader to judge.
 M.gapwarn = {}
 function M.gapmatrix()
   local fails = {}
@@ -365,25 +364,29 @@ function M.gapmatrix()
   local tab = fl.block:match("\\label{tab:related}(.-)\\end{tabularx}") or fl.block:match("\\label{tab:related}(.-)\\end{tabular}")
     or fl.block:match("\\begin{tabularx}(.-)\\label{tab:related}") or fl.block:match("\\begin{tabular}(.-)\\label{tab:related}")
   if not tab then return { "the gap matrix has no tabular" } end
-  local rows, ncols = {}, nil
+  local rows, ncols, seen = {}, nil, {}
   for line in tab:gmatch("[^\n]+") do
-    if line:match("\\ref{req:") and line:match("\\\\") then
+    local req = line:match("\\ref{(req:[^}]*)}")
+    if req and line:match("\\\\") then
       local cells = {}
       for cell in (line:gsub("\\\\.*$", "") .. "&"):gmatch("(.-)&") do cells[#cells + 1] = C.trim(cell) end
       rows[#rows + 1] = cells; ncols = ncols or #cells
       if #cells ~= ncols then fails[#fails + 1] = "gap matrix rows have different numbers of cells" end
+      if seen[req] then fails[#fails + 1] = req .. " has two rows in the gap matrix" end
+      seen[req] = true
     end
   end
   if #rows == 0 then return { "the gap matrix has no rows starting with \\ref{req:...}" } end
-  local nreq = #tag_items("req")
-  if #rows < nreq then fails[#fails + 1] = string.format("the gap matrix has %d rows but there are %d requirements", #rows, nreq) end
+  for _, it in ipairs(tag_items("req")) do
+    if not seen[it.key] then fails[#fails + 1] = it.key .. " has no row in the gap matrix" end
+  end
   local approaches = ncols - 3 -- tag, name, approaches..., this work
   if approaches < 2 then M.gapwarn[#M.gapwarn + 1] = "fewer than two other approaches in the gap matrix: the gap is argued against the closest existing work, plural" end
   local allmet = {}
   for _, r in ipairs(rows) do
     local last = r[#r]
     if not last:match("\\gapyes") then fails[#fails + 1] = string.format("row %s: this work does not meet its own requirement; if a requirement is not met, say so in the text and the limitations", r[1])
-    elseif not last:match("\\[cC]ref{") and not last:match("\\ref{") then M.gapwarn[#M.gapwarn + 1] = string.format("row %s: this work's cell points at no evaluation result", r[1]) end
+    elseif not last:match("\\[cC]ref{") and not last:match("\\ref{") then fails[#fails + 1] = string.format("row %s: this work's cell points at no evaluation result: add \\cref to the result that shows it", r[1]) end
     if (r[2] or ""):match("TODO") then M.gapwarn[#M.gapwarn + 1] = string.format("row %s: the requirement's short name is a TODO", r[1]) end
     for c = 3, #r - 1 do allmet[c] = (allmet[c] == nil or allmet[c]) and r[c]:match("\\gapyes") ~= nil end
   end
