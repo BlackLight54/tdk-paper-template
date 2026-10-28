@@ -1,0 +1,38 @@
+%----------------------------------------------------------------------------
+\chapter{Related Work and Gap Analysis}\label{ch:related}
+%----------------------------------------------------------------------------
+\guidetodo{Related Work and Gap Analysis}{app:chapters:related}
+
+\section{Comparison criteria}
+\guidetodo{Comparison criteria}{app:chapters:comparison-criteria}
+
+\section{Existing approaches}
+\guidetodo{Existing approaches}{app:chapters:existing-approaches}
+TODO The related work by family; \cref{fig:positioning} places it, and \cref{tab:related} compares the closest approaches.
+
+\begin{runningexample}[elsewhere]
+TODO How the closest approach would handle the scenario, and which requirement it fails on.
+\end{runningexample}
+
+\begin{figure}[!ht]
+  \centering
+  \missingfigure[figheight=2cm]{Positioning figure: \cref{fig:guide:positioning}}
+  \caption{TODO positioning figure.}
+  \label{fig:positioning}
+\end{figure}
+
+\begin{table}[!ht]
+  \centering
+  \caption{TODO Gap matrix: each requirement against the closest approaches. \gaplegend.}
+  \label{tab:related}
+  \begin{tabularx}{\linewidth}{l X c c c c}
+    \toprule
+    & \textbf{Requirement} & \makecell{\textbf{Approach A}\\\cite{lamport1978time}} & \makecell{\textbf{Approach B}\\\cite{w3c2025vcdm}} & \textbf{Approach C} & \textbf{This work} \\
+    \midrule
+    \ref{req:first} & TODO short name & \gapyes & \gappartial & \gapno & \gapyes\,(\cref{rq:correct}) \\
+    \bottomrule
+  \end{tabularx}
+\end{table}
+
+\section{Gap}\label{sec:gap}
+\guidetodo{Gap}{app:chapters:gap}

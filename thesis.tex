@@ -1,0 +1,152 @@
+% !TeX spellcheck = en_GB
+% !TeX encoding = UTF-8
+% !TeX program = xelatex
+\documentclass[12pt,a4paper,oneside]{report}             % Single-side
+%\documentclass[11pt,a4paper,twoside,openright]{report}  % Duplex
+
+
+
+
+\input{include/packages}
+
+%TODO Set the main variables
+\newcommand{\vikszerzoVezeteknev}{Gipsz}
+\newcommand{\vikszerzoKeresztnev}{Jakab}
+
+\newcommand{\vikkonzulensAMegszolitas}{}
+\newcommand{\vikkonzulensAVezeteknev}{Farkas}
+\newcommand{\vikkonzulensAKeresztnev}{Martin}
+
+\newcommand{\vikkonzulensBMegszolitas}{Dr.~}
+\newcommand{\vikkonzulensBVezeteknev}{Kocsis}
+\newcommand{\vikkonzulensBKeresztnev}{Imre}
+
+\newcommand{\vikkonzulensCMegszolitas}{}
+\newcommand{\vikkonzulensCVezeteknev}{}
+\newcommand{\vikkonzulensCKeresztnev}{}
+
+\newcommand{\exname}{TODO name of the running example} % used in every chapter, e.g. "the flat reservation"
+\newcommand{\lintexamplebox}{runningexample} % the environment of the running example's boxes; name your own if include/macros.tex defines one
+\newcommand{\lintphase}{plan} % plan | draft | polish | final: where you are in the lifecycle; the lint's checks come due by phase
+\newcommand{\vikcim}{TODO Title of the paper} % Cím
+\newcommand{\viktanszek}{\bmemit} % Tanszék
+\newcommand{\vikdoktipus}{\tdk} % Dokumentum típusa 
+% \bsc
+% \msc
+% \tdk
+% \bsconlab
+% \msconlabi
+% \msconlabii
+\newcommand{\vikmunkatipusat}{szakdolgozatot} % a "hallgató nyilatkozat" részhez: szakdolgozatot vagy diplomatervet
+
+\input{include/tdk-variables} %TODO Second author and year of the TDK title page
+\newcommand{\szerzoMeta}{\vikszerzoVezeteknev{} \vikszerzoKeresztnev} % egy szerző esetén
+%\newcommand{\szerzoMeta}{\vikszerzoVezeteknev{} \vikszerzoKeresztnev, \tdkszerzoB} % két szerző esetén
+
+% The paper is written in English; the Hungarian abstract and the AI declaration switch to
+% Hungarian themselves. A Hungarian paper starts from the faculty's template instead.
+\input{include/thesis-en}
+
+\input{include/preamble}
+\input{include/macros} % your own packages and macros; a template update leaves this file alone
+
+\singlespacing
+\marginsize{15mm}{15mm}{15mm}{15mm}
+%--------------------------------------------------------------------------------------
+% Table of contents and the main text
+%--------------------------------------------------------------------------------------
+\begin{document}
+
+\pagenumbering{gobble}
+\hypersetup{pageanchor=false} % unnumbered pages get no PDF page anchors; they come back on with the abstract
+
+%TODO These includes define guidelines -- remove these
+%~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+%\include{include/guideline}
+%\include{include/project}
+
+\selectthesislanguage
+
+%TODO Titlepage -- choose one from below
+%~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+%\include{include/titlepage}		   % Szakdolgozat/Diplomaterv címlap
+\include{include/titlepage-tdk}	% TDK címlap
+%\include{include/titlepage-otdk}   % OTDK címlap
+
+
+% Table of Contents
+%~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+\tableofcontents\vfill
+\ifdefined\reviewermode\else\listoftodos\lintchecks\fi % the list of todos and the Checks page; reviewer.tex leaves both out
+
+
+% Declaration and Abstract
+%~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+%\include{include/declaration} %TODO Hallgatói nyilatkozat -- TDK és OTDK esetén törlendő!
+\clearpage\pagenumbering{roman}\hypersetup{pageanchor=true} % from the abstract on, pages are numbered and anchored
+\include{content/00-abstract}    %TODO Összefoglaló -- TDK és OTDK esetén nem kötelező
+
+
+% The main part of the thesis
+%~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+\pagenumbering{arabic}
+
+%TODO import your own content
+\include{content/01-introduction} % the main text starts here; the lint counts its pages from the .toc
+\include{content/02-background}
+\include{content/03-approach}
+\include{content/04-implementation}
+\include{content/05-evaluation}
+\include{content/06-related-work}
+\include{content/07-conclusion}
+
+
+% Acknowledgements
+%~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+\include{content/08-acknowledgement}
+
+
+% Abbreviations, notation and terms, from content/glossary.tex; only used entries print.
+% (The TDK call asks for no list of figures or tables, so the template prints none.)
+%~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+\printlists
+
+
+% Bibliography
+%~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+\addcontentsline{toc}{chapter}{\bibname}
+\bibliography{bib/references,bib/zotero} % zotero.bib: linked to the Zotero group by Overleaf; the guide has its own list
+
+
+% Declaration on generative AI use (required by the faculty)
+%~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+\include{content/09-ai-declaration}
+
+
+% Appendix
+%~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+\include{content/10-appendices}
+
+
+% The guide: how we work, the TDK lifecycle, and how to use this template
+%~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+% Nothing to delete before submission: reviewer.tex builds the paper without the guide and
+% the notes. The part heading is in guide/01-getting-started.tex, so that its contents line
+% lands in that file's .aux before the chapter's.
+\ifdefined\reviewermode\else
+\renewcommand{\exname}{the credential revocation registry} % the guide's own running example
+\include{guide/01-getting-started}
+\include{guide/02-tdk-essentials}
+\include{guide/03-weekly-consultations}
+\include{guide/04-lifecycle}
+\include{guide/05-writing}
+\include{guide/chapter-by-chapter}
+\include{guide/06-code-tools-ai}
+\include{guide/07-zenodo}
+\include{guide/08-glossary}
+\include{guide/09-latex-template}
+\include{guide/10-references}
+\fi
+
+%\label{page:last}
+\end{document}

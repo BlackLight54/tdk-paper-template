@@ -1,0 +1,65 @@
+%----------------------------------------------------------------------------
+\chapter{Approach}\label{ch:approach}
+%----------------------------------------------------------------------------
+\guidetodo{Approach}{app:chapters:approach}
+
+\section{Overview}
+\guidetodo{Overview}{app:chapters:overview}
+TODO The approach end to end, along \cref{fig:architecture}.
+\begin{runningexample}[through the approach]
+TODO The scenario step by step: which component handles which part of it, and what each produces.
+\end{runningexample}
+
+\begin{figure}[!ht]
+  \centering
+  \missingfigure[figheight=2cm]{Architecture: \cref{fig:guide:architecture}}
+  \caption{TODO architecture.}
+  \label{fig:architecture}
+\end{figure}
+
+\section{TODO Model or design}
+\guidetodo{Model or design}{app:chapters:model}
+
+\section{Threat model and guarantees}
+\guidetodo{Threat model and guarantees}{app:chapters:threat-model}
+
+\paragraph{Adversary.}
+\guidetodo{Adversary}{app:chapters:adversary}
+\begin{threats}
+  \item\label{thr:example} \textbf{TODO Malicious participant.} A participant who ...
+\end{threats}
+
+\begin{runningexample}[under attack]
+TODO How \cref{thr:example} plays out in the scenario, and which guarantee stops it.
+\end{runningexample}
+
+\paragraph{Attacks.}
+\guidetodo{Attacks}{app:chapters:attacks}
+
+\paragraph{Trust and cryptographic assumptions.}
+\guidetodo{Trust and cryptographic assumptions}{app:chapters:assumptions}
+\begin{assumptions}
+  \item\label{asm:example} \textbf{TODO Unforgeable signatures.} The underlying signature scheme is existentially unforgeable under chosen-message attack.
+\end{assumptions}
+
+\paragraph{Out of scope.}
+\guidetodo{Out of scope}{app:chapters:out-of-scope}
+
+\paragraph{Guarantees.}
+\guidetodo{Guarantees}{app:chapters:guarantees}
+
+\begin{guarantees}
+  \item\label{g:example} \textbf{TODO Short name.} Under \cref{asm:example}, against \cref{thr:example}, no participant can ...
+\end{guarantees}
+
+\begin{lemma}[TODO]\label{lem:helper}
+TODO A helper statement.
+\end{lemma}
+
+\begin{theorem}[TODO]\label{thm:main}
+TODO The main result: \cref{g:example} holds against \cref{thr:example}.
+\end{theorem}
+
+\begin{proof}
+TODO By \cref{lem:helper} and \cref{asm:example}.
+\end{proof}

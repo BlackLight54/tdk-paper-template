@@ -1,0 +1,153 @@
+%----------------------------------------------------------------------------
+\chapter{TDK essentials}\label{app:tdk}
+%----------------------------------------------------------------------------
+If you are working on a hard topic, show your hard work in a TDK paper: the \href{https://tdk.bme.hu/}{Students' Scientific Conference} (Tudományos Diákköri Konferencia, \href{https://tdk.bme.hu/conference/VIK/2026}{this year's call at our faculty}) is where a semester of research turns into a reviewed, presented result, and the best papers go on to the national round, the \href{https://otdk.hu/}{OTDK}.
+
+\section{Where to look}
+\begin{itemize}
+  \item The \href{https://tdk.bme.hu/}{BME TDK portal} and the \href{https://tdk.bme.hu/conference/VIK/2026}{faculty's page for the current year}: check the call, the templates, the FAQ, and the review sheet. Calls change from year to year.
+  \item The research group's own guide: \href{https://github.com/ftsrg/cheat-sheets/wiki/TDK-Howto}{TDK Howto} in the FTSRG cheat-sheets wiki, with the portal steps, the group's slide template and the presentation advice. Its page ranges per chapter predate the call's 30--35 page limit; the call wins.
+  \advisortodo{Link the group's slide template (Beamer and PowerPoint) here and in the Talk row of \cref{tab:lifecycle}.}
+  \item Past first-place papers of the research group and of neighbouring groups at the faculty (\cref{app:tdk:papers}), for structure and tone.
+\end{itemize}
+
+\section{Official dates}\label{app:tdk:dates}
+The portal publishes the dates each year; these are the 2026 ones, \cref{fig:timeline} draws them on the semester, and \cref{tab:lifecycle} plans the semester backwards from them.
+\begin{itemize}
+  \item \textbf{1--30 September:} registration on the portal, with the abstract in Hungarian and English: the Kivonat and the Abstract of the paper, written first as a promise (\cref{app:writing:abstract}). Without it there is no paper.
+  \item \textbf{1 October -- 1 November:} paper upload on the portal. The deadline is the last day; the portal closes.
+  \item \textbf{2--16 November:} the reviewers read and score the paper. The code can still be polished in this window (\cref{app:zenodo:versions}).
+  \item \textbf{18 November:} the conference. A plenary at 8:00, section talks from 8:30, fifteen minutes of talk and five of questions each; the awards ceremony is the same evening.
+  \item \textbf{Placements.} Each section awards several first, second and third places, and special prizes on top; the section jury ranks the papers on the day, from the reviews and the talk together, so the talk is worth as much care as the paper. First and second places are nominated to the OTDK, the national round held every two years (until recently only the first place was). The placement goes on your CV and counts in applications for scholarships and the doctoral school.
+  \advisortodo{Placements: confirm the current nomination rule (first and second place) against this year's call, and add what else a placement brings that students ask about: the prize money or company awards of the section, and how the faculty's own awards relate to the TDK placements.}
+\end{itemize}
+
+
+\begin{figure}[!ht]
+  \centering
+  % One unit = one day from 1 September; the semester dates are the 2026 autumn ones as far as we know them.
+  \newcommand{\tlband}[6]{\fill[#5, rounded corners=1.2pt] (#1,#3) rectangle (#2,#4); \node[font=\footnotesize, #6] at ({(#1+#2)/2},{(#3+#4)/2}) {\strut};}
+  \begin{tikzpicture}[x=0.142cm, y=1cm, every node/.style={inner sep=1.5pt}]
+    % months and weeks
+    \foreach \d/\m in {0/September, 30/October, 61/November, 91/December} {
+      \draw[gray!60] (\d,0.25) -- (\d,-3.55);
+      \node[anchor=south west, font=\footnotesize\bfseries, text=gray!70!black] at (\d,0.3) {\m};
+    }
+    \draw[gray!60] (111,0.25) -- (111,-3.55);
+    \foreach \d in {7,14,21,28,37,44,51,58,68,75,82,89,98,105} \draw[gray!50] (\d,0.1) -- (\d,0.25);
+    \draw[thick, gray!70!black] (0,0.25) -- (111,0.25);
+    % lane 1: the faculty's dates
+    \node[anchor=east, font=\footnotesize\bfseries, text=orange!80!black] at (-1,-0.3) {Faculty};
+    \fill[official, rounded corners=1.5pt] (0,-0.62) rectangle (29,-0.02);
+    \node[font=\footnotesize] at (14.5,-0.32) {registration + abstract};
+    \fill[official, rounded corners=1.5pt] (30,-0.62) rectangle (61,-0.02);
+    \node[font=\footnotesize] at (45.5,-0.32) {paper upload};
+    \fill[official, rounded corners=1.5pt] (62,-0.62) rectangle (76,-0.02);
+    \node[font=\footnotesize] at (69,-0.32) {review};
+    \foreach \d/\t in {29/30 Sep, 61/1 Nov} {
+      \draw[orange!80!black, very thick] (\d,-0.68) -- (\d,0.1);
+      \node[font=\footnotesize\bfseries, text=orange!80!black, anchor=north] at (\d,-0.68) {\t};
+    }
+    \node[diamond, fill=orange!80!black, inner sep=2.2pt] at (78,-0.32) {};
+    \node[font=\footnotesize\bfseries, text=orange!80!black, anchor=west] at (79,-0.32) {18 Nov conference};
+    % lane 2: our phases and the anchors
+    \node[anchor=east, font=\footnotesize\bfseries, text=teal!60!black] at (-1,-1.45) {Us};
+    \foreach \a/\b/\t in {0/14/research, 15/29/plan, 30/51/draft, 52/61/polish, 62/76/{talk, code}} {
+      \fill[teal!12, rounded corners=1.5pt] (\a,-1.75) rectangle (\b,-1.15);
+      \node[font=\footnotesize] at ({(\a+\b)/2},-1.45) {\t};
+    }
+    \fill[teal!12, rounded corners=1.5pt] (79,-1.75) rectangle (111,-1.15);
+    \node[font=\footnotesize] at (95,-1.45) {paper or thesis};
+    \foreach \d/\t/\p in {-0.5/manifest/west, 29/spine/east, 52/full draft/east} {
+      \draw[red!70!black, very thick] (\d,-1.85) -- (\d,-1.05);
+      \node[font=\footnotesize\bfseries, text=red!70!black, anchor=north \p] at (\d,-1.85) {\t};
+    }
+    % lane 3: the semester and the department
+    \node[anchor=east, font=\footnotesize\bfseries, text=gray!70!black] at (-1,-2.95) {Semester};
+    \fill[gray!14, rounded corners=1.5pt] (6,-3.25) rectangle (100,-2.65);
+    \node[font=\footnotesize] at (29,-2.95) {fourteen teaching weeks, a consultation in each};
+    \fill[gray!30, rounded corners=1.5pt] (103,-3.25) rectangle (108,-2.65);
+    \node[font=\footnotesize, anchor=north, align=center] at (105.5,-3.3) {pótlási\\hét};
+    \draw[-Stealth, gray!70!black] (108.5,-2.95) -- (111,-2.95);
+    \node[font=\footnotesize, anchor=north, align=center] at (6,-3.3) {semester\\starts};
+    \foreach \d/\t in {58/{writing session}, 76/{talk rehearsal}} {
+      \fill[department, draw=green!45!black, rounded corners=1.5pt] (\d-2.2,-3.3) rectangle (\d+2.2,-2.6);
+      \draw[green!45!black, line width=1.6pt] (\d,-3.3) -- (\d,-2.6);
+      \node[font=\footnotesize\bfseries, text=green!45!black, anchor=north, align=center] at (\d,-3.35) {department\\\t};
+    }
+  \end{tikzpicture}
+  \caption{The semester on one line: the faculty's windows and deadlines in yellow, our phases in teal with the three anchors in red, and the department's two sessions in green: the writing session with pizza in the last days before the upload and the talk rehearsal two days before the conference. The deadlines are the fixed points; everything to their left is planned backwards from them.}\label{fig:timeline}
+\end{figure}
+
+\section{Form requirements}\label{app:tdk:form}
+From the faculty call; the template already meets them.
+\begin{itemize}
+  \item \textbf{Length}: 30--35 pages of main text. The title page, the optional task description, the table of contents, the bibliography, the abstract and the appendices do not count.
+  \item \textbf{Layout}, whether you use \LaTeX{} or Word: A4 paper, single column, Times New Roman or another readable serif font, 12\,pt, single line spacing, margins between 1.5 and 3.5\,cm on every side.
+  \item \textbf{Figures and tables} are part of the main text, so they count towards the page limit. Their size is free, but they must be readable in print: avoid text below 10\,pt, labels included.
+  \item The faculty's templates under \emph{Letöltések} are diploma thesis templates, so they need small changes for the TDK, such as margins and headings. This template has them.
+\end{itemize}
+
+\section{The review sheet}\label{app:tdk:sheet}
+Reviewers score the paper on the review sheet (bírálói lap), saved in \texttt{docs/} of this project, 35 points in five criteria. \Cref{app:chapters} explains the four things to argue throughout: relevance, non-triviality, novelty and correctness; each of its sections quotes the criterion its chapter carries, in the sheet's own words, so that you can score yourself against the same sentences the reviewer reads. The top score of each criterion, in the sheet's words:
+\begin{description}[noitemsep]
+  \item[A. Szerkesztés, stílus (0--5)] \enquote{4--5: kiváló (ha a dolgozat közel hibamentes, jól tagolt, követhető, gördülékeny stílusú)}. The sheet also says: \enquote{Terjedelmi korlát 30--35 oldal. Ettől eltérés esetén 3 oldalanként 1 pont levonás javasolt.}
+  \item[B/1. Ábrák, táblázatok] \enquote{4: kiváló (a dolgozat megfelelő számú és jól átgondolt ábrát, táblázatot tartalmaz, és a szakirodalmi hivatkozások pontosak)}.
+  \item[B/2. Hivatkozások, irodalom feldolgozás] \enquote{3--4: újszerű ipari megoldások és kutatási eredmények (a dolgozat -- az újszerű ipari megoldásokon túl -- bemutatja a dolgozat témakörében releváns kutatási eredményeket a szakterületen)}. B is the average of B/1 and B/2.
+  \item[C. A dolgozat témája (0--8)] \enquote{7--8: tudományos vizsgálat szükséges (ha a dolgozat témája korszerű, nem lezárt, vizsgálata magas szintű, tudományos, elmélyült tudást igényel)}.
+  \item[D/1. Tudományos újdonságtartalom és kontribúció (0--5)] \enquote{5: újszerű (legalább hazánkban újszerű, vagy eddig még nem létező megoldás)}; one step below, \enquote{3--4: inkrementális (értékes inkrementális kontribúció, létező megoldások apró továbbfejlesztése)}.
+  \item[D/2. Technikai helyesség és színvonal (0--5)] \enquote{5: kiváló (kimagasló színvonalú kidolgozás, a közölt eredmények helyessége kétségkívül megalapozott)}. D is the sum of D/1 and D/2.
+  \item[E. Bevezetés és az eredmények értékelése (0--8)] \enquote{7--8: teljeskörű -- A bevezetés megfelelő és az elért eredmények pontosak és teljesek, az értékelés megalapozott. A szerző skálázhatósági, robosztussági vizsgálatokat is elvégzett, mellyel igazolta, hogy rendszere ipari környezetben is megállja a helyét}.
+\end{description}
+
+\section{First-place papers to learn from}\label{app:tdk:papers}
+\Cref{tab:papers-ftsrg} lists the first-place TDK papers of the research group's advisors since 2018, and \cref{tab:papers-neighbours} those of neighbouring groups at the faculty. Read two or three before you write the spine: look at how the leading figure, the contributions and the evaluation are built, not at the topic. Each link opens the paper's page on the portal, where the PDF is.
+
+{\small
+\begin{xltabular}{\linewidth}{>{\raggedright\arraybackslash}p{0.07\linewidth} X >{\raggedright\arraybackslash}p{0.2\linewidth} >{\raggedright\arraybackslash}p{0.24\linewidth}}
+  \caption{First-place TDK papers advised in the research group, 2018--2025, from the BME TDK portal.}\label{tab:papers-ftsrg}\\
+  \toprule \textbf{Year} & \textbf{Title} & \textbf{Authors} & \textbf{Advisors} \\ \midrule \endfirsthead
+  \toprule \textbf{Year} & \textbf{Title} & \textbf{Authors} & \textbf{Advisors} \\ \midrule \endhead
+  \bottomrule \endlastfoot
+  2018 & \href{https://tdk.bme.hu/conference/VIK/2018/sessions/SW5/paper/Grafmintailleszto-rendszerek-tesztelese}{Functional Testing of Graph Query Engines by Automated Graph Generators} & Bekő Mária & Semeráth Oszkár \\
+  2019 & \href{https://tdk.bme.hu/conference/VIK/2019/sessions/intel/paper/Kiberfizikai-rendszerek-megbizhatosagi}{Simulation, inference and verification for state-based advanced reliability models of complex cyber-physical systems} & Nagy Simon József & Marussy Kristóf \\
+  2019 & \href{https://tdk.bme.hu/conference/VIK/2019/sessions/model/paper/Tenzorreprezentacios-modszerek-a-komplex}{Towards tensor-based reliability analysis of complex safety-critical systems} & Szekeres Dániel & Marussy Kristóf \\
+  2020 & \href{https://tdk.bme.hu/conference/VIK/2020/sessions/modell/paper/Komplex-elosztott-rendszerek}{Towards tensor-based extrafunctional analysis of complex distributed systems} & Szekeres Dániel & Marussy Kristóf \\
+  2021 & \href{https://tdk.bme.hu/conference/VIK/2021/sessions/inform/paper/ZKPalapu-audit-digitalis-jegybankpenzt-kezelo}{ZKP-based Audit for Blockchain Systems Managing Central Bank Digital Currency} & Péter Bertalan Zoltán & Kocsis Imre \\
+  2022 & \href{https://tdk.bme.hu/conference/VIK/2022/sessions/inform1/paper/Alkalmazasi-szintu-ateresztokepesseg}{Data model driven goodput optimization for execute-order-validate blockchains} & Debreczeni Máté & Klenik Attila, Kocsis Imre \\
+  2022 & \href{https://tdk.bme.hu/conference/VIK/2022/sessions/sw8/paper/Kollaborativ-munkafolyamatok-titkossagmegorzo}{Blockchain-based, confidentiality preserving orchestration of collaborative workflows} & Toldi Balázs Ádám & Kocsis Imre \\
+  2022 & \href{https://tdk.bme.hu/conference/VIK/2022/sessions/sw8/paper/Graflekerdezesekkel-tamogatott-architektura}{System Architecture Evaluation and Synthesis for Performability with Graph Queries} & Földiák Máté & Marussy Kristóf \\
+  2023 & \href{https://tdk.bme.hu/conference/VIK/2023/sessions/inform2/paper/Onkiertekelo-eljarasrendek-tamogatasa}{Self-evaluated policies using Zero-Knowledge proofs} & Farkas Martin, Toldi Balázs Ádám & Kocsis Imre, Péter Bertalan Zoltán \\
+  2023 & \href{https://tdk.bme.hu/conference/VIK/2023/sessions/sw9/paper/Valos-ideju-szoftverintenziv-rendszer-modellek}{Abstraction-based model checking for real-time software-intensive system models} & Cziborová Dóra & Marussy Kristóf, Dobos-Kovács Mihály \\
+  2024 & \href{https://tdk.bme.hu/conference/VIK/2024/sessions/intel/paper/Kvalitativ-kovetkeztes-alapu-hibadiagnosztika}{Qualitative Reasoning-Based Fault Diagnosis in Distributed Systems} & Tarnay Márton & Földvári András, Péter Bertalan Zoltán \\
+  2024 & \href{https://tdk.bme.hu/conference/VIK/2024/sessions/model/paper/Beagyazott-MI-komponensek-rendszer-szintu}{System-level impact analysis of embedded AI components} & Deé-Lukács András Gergely & Pataricza András, Földvári András \\
+  2025 & \href{https://tdk.bme.hu/conference/VIK/2025/sessions/inf/paper/Hatasanalizissel-Tamogatott-MI-Biztonsagi}{Impact Assessment Supported AI Safety Wrapper} & Deé-Lukács András Gergely & Pataricza András, Földvári András \\
+  2025 & \href{https://tdk.bme.hu/conference/VIK/2025/sessions/inteli/paper/Grafalapu-logikai-megoldok-kombinalasa}{Combining graph-based logic solvers with genetic algorithms} & Tömöri Péter András & Ficsor Attila, Semeráth Oszkár \\
+  2025 & \href{https://tdk.bme.hu/conference/VIK/2025/sessions/rendmod/paper/Modellalapu-rendszertervezest-tamogato-agensek}{Developing AI assistants for model-based systems engineering} & Bilicki Vilmos & Elekes Márton, Marussy Kristóf, Vörös András \\
+  2025 & \href{https://tdk.bme.hu/conference/VIK/2025/sessions/sw/paper/Numerikus-kovetkezteto-modszerek-vizsgalata}{Numerical constraint propagation for automated graph generation} & Balog Bors & Marussy Kristóf \\
+\end{xltabular}
+
+\begin{xltabular}{\linewidth}{>{\raggedright\arraybackslash}p{0.07\linewidth} X >{\raggedright\arraybackslash}p{0.2\linewidth} >{\raggedright\arraybackslash}p{0.24\linewidth}}
+  \caption{First-place TDK papers advised in neighbouring groups at the faculty, 2017--2025: the CrySyS Lab (Buttyán Levente) and Pejo Balázs.}\label{tab:papers-neighbours}\\
+  \toprule \textbf{Year} & \textbf{Title} & \textbf{Authors} & \textbf{Advisors} \\ \midrule \endfirsthead
+  \toprule \textbf{Year} & \textbf{Title} & \textbf{Authors} & \textbf{Advisors} \\ \midrule \endhead
+  \bottomrule \endlastfoot
+  2017 & \href{https://tdk.bme.hu/conference/VIK/2017/sessions/SW4/paper/a84}{Detection of malicious web pages with static analysis} & Tamás Kristóf & Buttyán Levente \\
+  2020 & \href{https://tdk.bme.hu/conference/VIK/2020/sessions/info2/paper/Keresesi-hatekonysag-novelese-nagyon-nagy}{Improving search efficiency in very large malware repositories} & Tamás Csongor & Buttyán Levente \\
+  2021 & \href{https://tdk.bme.hu/conference/VIK/2021/sessions/beagy/paper/Kartekony-kod-mentes-allapot-tavoli}{Protocol for remote attestation of malware-free state of embedded IoT devices} & Bak Márton László & Buttyán Levente, Futóné Papp Dorottya \\
+  2022 & \href{https://tdk.bme.hu/conference/VIK/2022/sessions/beagy1/paper/Robusztussag-vizsgalat-a-hasonlosagalapu-IoT}{Robustness Against Evasion of Similarity-based IoT Malware Detection Methods} & Sándor József & Buttyán Levente \\
+  2023 & \href{https://tdk.bme.hu/conference/VIK/2023/sessions/sw9/paper/Ket-tamadas-a-TLSH-hasonlosagi-hash-algoritmus}{Two Attacks on the TLSH Similarity Digest Scheme} & Fuchs Gábor & Buttyán Levente, Nagy Roland \\
+  2024 & \href{https://tdk.bme.hu/conference/VIK/2024/sessions/kvantum/paper/A-securitybydesign-modszer-tamogatasa-az}{Supporting security-by-design via automating attack tree generation from abstract system models} & Szilvágyi Dániel Zoltán & Buttyán Levente \\
+  2025 & \href{https://tdk.bme.hu/conference/VIK/2025/sessions/modeling/paper/Nagy-meretu-dinamikus-grafok-klaszterezeset}{Design and analysis of clustering algorithms for large dynamic graphs} & Maliga Dávid & Buttyán Levente \\
+  2025 & \href{https://tdk.bme.hu/conference/VIK/2025/sessions/neural/paper/Hozzajarulasi-ertek-szamitasa-elosztott}{Robustness Scores in Federated Learning} & Ulrich Flóra Zsuzsanna & Pejo Balázs \\
+\end{xltabular}
+}
+
+\section{A thesis from this paper}\label{app:tdk:thesis}
+A TDK paper often grows into a BSc or MSc thesis, so the template keeps what a thesis needs, commented out in \texttt{thesis.tex}: the thesis title page (\texttt{include/titlepage.tex}), the student's declaration (\texttt{include/declaration.tex}), the faculty's structure guide (\texttt{include/guideline.tex}) and the task description page (\texttt{include/project.tex}). Switch \texttt{\textbackslash vikdoktipus} to \texttt{\textbackslash bsc} or \texttt{\textbackslash msc}, and change what differs from the TDK; from the faculty's own guide, that is:
+\begin{itemize}[noitemsep]
+  \item \textbf{Length.} A BSc thesis is around 30--45 pages, an MSc thesis 60--90 pages of useful content; ask us, departments differ.
+  \item \textbf{Language.} The faculty's default is Hungarian. English is for students who aim at international research or industry, and it costs more in writing and in reading for the advisor and the reviewer. This template is English-only; a Hungarian thesis starts from the faculty's template.
+  \item \textbf{Format.} A4, 2.5\,cm margins plus 1\,cm for binding, 11--12\,pt serif, one-and-a-half line spacing. The TDK's 15\,mm margins and single spacing are set in \texttt{thesis.tex}; change them there. Typography beyond that: \citet{guide:Jeney}.
+  \item \textbf{Structure.} The faculty's list is in \texttt{include/guideline.tex}: task description, title page, table of contents, declaration, abstracts in both languages, introduction, analysis of the task, prior work, the design with its alternatives, evaluation, acknowledgements, bibliography, appendices. The declaration is mandatory; without it the thesis is not reviewed. The PDF may be at most 15\,MB. In print, the declaration signed by you and the topic description signed by the head of the department (downloaded from the \href{https://diplomaterv.vik.bme.hu/}{dipterv portal}) must be included, which is easy to forget.
+\end{itemize}

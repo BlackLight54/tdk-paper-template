@@ -1,0 +1,404 @@
+%--------------------------------------------------------------------------------------
+% Page layout setup
+%--------------------------------------------------------------------------------------
+% we need to redefine the pagestyle plain
+% another possibility is to use the body of this command without \fancypagestyle
+% and use \pagestyle{fancy} but in that case the special pages
+% (like the ToC, the References, and the Chapter pages)remain in plane style
+
+\pagestyle{plain}
+
+\setcounter{tocdepth}{3}
+%\sectionfont{\large\upshape\bfseries}
+\setcounter{secnumdepth}{3}
+
+\sloppy % Margón túllógó sorok tiltása.
+\widowpenalty=10000 \clubpenalty=10000 %A fattyú- és árvasorok elkerülése
+\def\hyph{-\penalty0\hskip0pt\relax} % Kötőjeles szavak elválasztásának engedélyezése
+
+
+%--------------------------------------------------------------------------------------
+% Setup hyperref package
+%--------------------------------------------------------------------------------------
+\hypersetup{
+    % bookmarks=true,            % show bookmarks bar?
+    unicode=true,              % non-Latin characters in Acrobat's bookmarks
+    pdftitle={\vikcim},        % title
+    pdfauthor={\szerzoMeta},    % author
+    pdfsubject={\vikdoktipus}, % subject of the document
+    pdfcreator={\szerzoMeta},   % creator of the document
+    pdfproducer={},    % producer of the document
+    pdfkeywords={},    % list of keywords (separate then by comma)
+    pdfnewwindow=true,         % links in new window
+    colorlinks=true,           % false: boxed links; true: colored links
+    linkcolor=black,           % color of internal links
+    citecolor=black,           % color of links to bibliography
+    filecolor=black,           % color of file links
+    urlcolor=black             % color of external links
+}
+
+
+\input{include/code-languages} % syntax-highlighting colors, minted setup, Refinery/Tamarin/Lean
+
+%--------------------------------------------------------------------------------------
+% Set up listings
+%--------------------------------------------------------------------------------------
+\definecolor{lightgray}{rgb}{0.95,0.95,0.95}
+\lstset{
+	basicstyle=\scriptsize\ttfamily, % print whole listing small
+	keywordstyle=\color{codeKeyword}\bfseries,
+	identifierstyle=, % nothing happens
+	commentstyle=\color{codeComment}\itshape,
+	stringstyle=\color{codeString}\scriptsize,
+	showstringspaces=false, % no special string spaces
+	aboveskip=3pt,
+	belowskip=3pt,
+	backgroundcolor=\color{lightgray},
+	columns=flexible,
+	keepspaces=true,
+	escapeinside={(*@}{@*)},
+	captionpos=b,
+	breaklines=true,
+	frame=single,
+	float=!ht,
+	tabsize=2,
+	literate=*
+		{á}{{\'a}}1	{é}{{\'e}}1	{í}{{\'i}}1	{ó}{{\'o}}1	{ö}{{\"o}}1	{ő}{{\H{o}}}1	{ú}{{\'u}}1	{ü}{{\"u}}1	{ű}{{\H{u}}}1
+		{Á}{{\'A}}1	{É}{{\'E}}1	{Í}{{\'I}}1	{Ó}{{\'O}}1	{Ö}{{\"O}}1	{Ő}{{\H{O}}}1	{Ú}{{\'U}}1	{Ü}{{\"U}}1	{Ű}{{\H{U}}}1
+}
+
+
+%--------------------------------------------------------------------------------------
+% Set up theorem-like environments
+%--------------------------------------------------------------------------------------
+% Using ntheorem package -- see http://www.math.washington.edu/tex-archive/macros/latex/contrib/ntheorem/ntheorem.pdf
+
+\theoremstyle{plain}
+\theoremseparator{.}
+\newtheorem{example}{\pelda}
+
+\theoremseparator{.}
+%\theoremprework{\bigskip\hrule\medskip}
+%\theorempostwork{\hrule\bigskip}
+\theorembodyfont{\upshape}
+\theoremsymbol{{\large \ensuremath{\cdot}}}
+\newtheorem{definition}{\definicio}
+
+\theoremseparator{.}
+%\theoremprework{\bigskip\hrule\medskip}
+%\theorempostwork{\hrule\bigskip}
+\newtheorem{theorem}{\tetel}
+
+% More theorem-like environments, numbered together with theorems (Lemma 3, Theorem 4, ...).
+% Italic body: formal statements.
+\theorembodyfont{\itshape}
+\theoremsymbol{}
+\newtheorem{lemma}[theorem]{Lemma}
+\newtheorem{proposition}[theorem]{Proposition}
+\newtheorem{corollary}[theorem]{Corollary}
+\newtheorem{invariant}[theorem]{Invariant}
+\newtheorem{property}[theorem]{Property}
+\newtheorem{claim}[theorem]{Claim}
+% Upright body: commentary.
+\theorembodyfont{\upshape}
+\newtheorem{remark}[theorem]{Remark}
+\newtheorem{notation}[theorem]{Notation}
+% Unnumbered proof that ends with a box.
+\theoremstyle{nonumberplain}
+\theoremheaderfont{\itshape}
+\theoremsymbol{\ensuremath{\square}}
+\newtheorem{proof}{Proof}
+\theoremstyle{plain}
+\theoremheaderfont{\normalfont\bfseries}
+\theoremsymbol{}
+
+
+%--------------------------------------------------------------------------------------
+% Some new commands and declarations
+%--------------------------------------------------------------------------------------
+\newcommand{\code}[1]{{\upshape\ttfamily\scriptsize\indent #1}}
+\newcommand{\doi}[1]{DOI: \href{http://dx.doi.org/\detokenize{#1}}{\raggedright{\texttt{\detokenize{#1}}}}} % A hivatkozások közt így könnyebb DOI-t megadni.
+
+% English abbreviations; include/thesis-en.tex defines the full set, these keep
+% Hungarian builds compiling when a text uses them.
+\providecommand{\eg}{e.g.\@\xspace}
+\providecommand{\ie}{i.e.\@\xspace}
+\providecommand{\etal}{et al.\@\xspace}
+
+\DeclareMathOperator*{\argmax}{arg\,max}
+%\DeclareMathOperator*[1]{\floor}{arg\,max}
+\DeclareMathOperator{\sign}{sgn}
+\DeclareMathOperator{\rot}{rot}
+
+
+%--------------------------------------------------------------------------------------
+% Setup captions
+%--------------------------------------------------------------------------------------
+\captionsetup[figure]{
+	width=.75\textwidth,
+	aboveskip=10pt}
+
+\renewcommand{\captionlabelfont}{\bf}
+\captionsetup[sub]{justification=centering} % subfigure captions are narrow
+
+% Number column in the list of figures and tables, wide enough for A.3.1.
+\makeatletter
+\renewcommand*{\l@figure}{\@dottedtocline{1}{1.5em}{3.2em}}
+\renewcommand*{\l@table}{\@dottedtocline{1}{1.5em}{3.2em}}
+% The same for subsections in the table of contents, for numbers like A.10.10.
+\renewcommand*{\l@subsection}{\@dottedtocline{2}{1.5em}{3.5em}}
+\renewcommand*{\l@subsubsection}{\@dottedtocline{3}{5em}{4.1em}}
+\makeatother
+
+% Ragged right bibliography: long URLs and DOIs otherwise stretch the line.
+\renewcommand{\bibfont}{\raggedright}
+%\renewcommand{\captionfont}{\footnotesize\it}
+
+%--------------------------------------------------------------------------------------
+% Hyphenation exceptions
+%--------------------------------------------------------------------------------------
+\hyphenation{Shakes-peare Mar-seilles ár-víz-tű-rő tü-kör-fú-ró-gép}
+
+
+\author{\vikszerzo}
+\title{\viktitle}
+
+%--------------------------------------------------------------------------------------
+% Todo notes
+%--------------------------------------------------------------------------------------
+% The page margins are narrow (see \marginsize in thesis.tex), so margin notes get
+% squeezed. Prefer \todo[inline]{...} for anything longer than a few words.
+% todonotes checks for at least 2cm at \begin{document}; the narrow width is deliberate,
+% so it is set after that check.
+\setlength{\marginparwidth}{2cm}
+% 15mm margins leave no room for a readable note, so margin notes are 18mm wide, set in
+% footnotesize, and shifted 4mm into the text: they touch the text edge but stay readable.
+% Inline notes keep the text width. Both kinds disappear with todonotes' disable option.
+\AtBeginDocument{\setlength{\marginparwidth}{18mm}\setlength{\marginparsep}{-4mm}}
+\makeatletter
+\@ifpackageloaded{todonotes}{\setlength{\@todonotes@textwidth}{18mm}}{}
+\makeatother
+\newcommand{\todoinline}[1]{\todo[inline]{#1}}
+
+% Two kinds of notes: orange \todo for the student; blue \advisortodo for the advisors
+% (a draft to confirm, or a link to fill in). Both disappear with todonotes' disable option.
+% A beat: the plan of one paragraph (see the Writing chapter of the guide). Prints as a student todo.
+%   \beat{what it establishes}{its evidence}{what the running example shows here}{what it leads to}
+\newcommand{\beat}[4]{\todo[inline, caption={Beat: #1}]{\textbf{Beat.} \textit{Establishes:} #1. \textit{Evidence:} #2. \textit{Running example:} #3. \textit{Leads to:} #4.}}
+% A heading's pointer to its instruction and example in the guide chapter "The paper, chapter by
+% chapter" (guide/chapter-by-chapter.tex). Prints as a student todo, so the reviewer build drops it.
+%   \guidetodo{Context}{app:chapters:context}
+\newcommand{\guidetodo}[2]{\todo[inline, caption={#1}]{\textbf{#1.} What goes here, with an example: \cref{#2}.}}
+% The guide prints its beats as text, so they stay out of the paper's list of todos, and marks a
+% heading whose section holds something a skimming reviewer reads.
+\newcommand{\guidebeat}[4]{\par{\small\color{gray!30!black}\textbf{Beat.} \textit{Establishes:} #1. \textit{Evidence:} #2. \textit{Running example:} #3. \textit{Leads to:} #4.\par}\smallskip}
+\newcommand{\skimmark}{\enspace{\small\faEye}}
+
+% The running example, named once in thesis.tex (\exname) and revisited in every chapter.
+%   \begin{runningexample}[what this chapter adds] ... \end{runningexample}
+\newtcolorbox{runningexample}[1][]{enhanced, breakable, sharp corners, frame hidden,
+  colback=teal!5, borderline west={2pt}{0pt}{teal!60!black}, left=6pt, right=4pt, top=3pt, bottom=3pt,
+  before upper={{\raggedright\textbf{Running example, \exname\if\relax\detokenize{#1}\relax\else: #1\fi}\par}\smallskip}}
+
+% The guide is deleted before submission, so the paper names its sections instead of
+% referencing them, and the guide names the paper's files.
+\newcommand{\guideref}[1]{\enquote{#1} in the guide}
+\makeatletter
+% File paths break after / and - (\path from the url package), so they fit narrow table columns.
+\g@addto@macro\UrlBreaks{\do\-}
+\newcommand{\deftplref}[4]{\@namedef{tpl@#1}{#2 (\path{content/#4.tex})}\@namedef{Tpl@#1}{#3 (\path{content/#4.tex})}}
+\newcommand{\tplref}[1]{\@nameuse{tpl@#1}}
+\newcommand{\Tplref}[1]{\@nameuse{Tpl@#1}}
+\makeatother
+\deftplref{ch:intro}{the introduction}{The introduction}{01-introduction}
+\deftplref{ch:approach}{the approach chapter}{The approach chapter}{03-approach}
+\deftplref{ch:implementation}{the implementation chapter}{The implementation chapter}{04-implementation}
+\deftplref{ch:evaluation}{the evaluation chapter}{The evaluation chapter}{05-evaluation}
+\deftplref{ch:related}{the related-work chapter}{The related-work chapter}{06-related-work}
+\deftplref{fig:overview}{the leading figure}{The leading figure}{01-introduction}
+\deftplref{fig:positioning}{the positioning figure}{The positioning figure}{06-related-work}
+\deftplref{aidecl}{the AI declaration}{The AI declaration}{09-ai-declaration}
+
+% A web link that looks like one: underlined, in the link color. Links set with \href or \url
+% stay black, as the faculty template prints them (see \hypersetup above).
+\definecolor{weblinkcolor}{RGB}{31,86,156}
+\newcommand{\weblink}[2]{\href{#1}{\textcolor{weblinkcolor}{\uline{#2}}}}
+
+% The Checks page of the draft: on every compile, the lint runs on the sources (shell escape, which
+% Overleaf and the Makefile enable) and writes lint-checks.tex, the essentials and the other checks,
+% input after the list of todos; its failing checks also come out as package warnings in the log.
+% Without shell escape nothing is written and nothing is input. \lintfalse turns it off.
+\newif\iflint\linttrue
+\newcommand{\lintchecks}{\iflint\immediate\write18{texlua scripts/lint.lua overleaf --tex > lint-checks.tex}\InputIfFileExists{lint-checks.tex}{}{}\fi}
+
+% Marks a step where the student stops for the advisors' approval (lifecycle chapter of the guide).
+\newcommand{\anchor}{\textcolor{red!70!black}{\textsc{anchor}}}
+\definecolor{official}{RGB}{255,243,205}
+\definecolor{anchorrow}{RGB}{252,228,228} % lifecycle rows that are anchors
+\definecolor{department}{RGB}{224,242,226} % lifecycle rows that are the department's own sessions
+% What is yours, in every figure: the FTSRG TDK Howto asks to keep your own contribution visibly apart
+% from prior work, and the leading figure is where the reviewer looks for it first. Use the `ours`
+% TikZ style on the nodes that are your contribution and say so in the caption.
+% ours: every component that is yours, one blue; problem red, result green; prior: reused or external, grey.
+\tikzset{ours/.style={draw=blue!60!black, line width=1.1pt, fill=blue!8}, prior/.style={draw=gray!70, fill=gray!10},
+  problem/.style={draw=red!60!black, fill=red!8}, result/.style={draw=green!50!black, fill=green!8}}
+\newcommand{\department}{\textcolor{green!45!black}{\textsc{department}}}
+\newcommand{\official}{\textcolor{orange!80!black}{\textsc{official}}}
+\newcommand{\advisortodo}[1]{\todo[inline, color=cyan!20, bordercolor=cyan!60!black]{\textbf{Advisor:} #1}}
+
+% Review comments from the supervisor in the student's paper:
+%   \atodo[options]{comment}
+% Pre-fills a green color and "A" (advisor) as author; like \todo, it is a margin note unless
+% given [inline]. Every \todo option
+% still works, and options given here override the defaults:
+%   \atodo{short margin comment}  \atodo[inline]{longer comment}  \atodo[author=IK]{...}
+\newcommand{\atodo}[2][]{\todo[color=green!25, bordercolor=green!50!black, author=A, #1]{#2}}
+
+% A gap the paper still has to fill, in a sentence, a table cell or a caption, where a margin note
+% cannot go (a float has no margin):
+%   \tbd{the proving time}          a value or a sentence still to write
+%   \citeneeded  \citeneeded[the 2023 survey]   a claim that still needs its source
+% Both print as coloured text in brackets in the draft, breaking across lines like the text around
+% them, are listed with the todos, and disappear in the
+% reviewer build. Never type TBD, [CITE], [?] or XXX into the text: the markers lint fails on them,
+% and on any \tbd or \citeneeded left at the final phase.
+\makeatletter
+\newcommand{\tdk@gap}[2]{\if@todonotes@disabled\else{\color{#1}\sffamily\small[#2]}\addcontentsline{tdo}{todo}{#2}\fi}
+\makeatother
+\DeclareRobustCommand{\tbd}[1]{\csname tdk@gap\endcsname{orange!75!black}{TODO: #1}}
+\DeclareRobustCommand{\citeneeded}[1][]{\if\relax\detokenize{#1}\relax\csname tdk@gap\endcsname{red!70!black}{citation needed}\else\csname tdk@gap\endcsname{red!70!black}{citation needed: #1}\fi}
+
+
+%--------------------------------------------------------------------------------------
+% Abbreviations, notation and terms (glossaries-extra)
+%--------------------------------------------------------------------------------------
+\setabbreviationstyle{long-short}          % first use "long form (SHORT)", then "SHORT"
+\glssetcategoryattribute{abbreviation}{nohyperfirst}{true}
+\renewcommand*{\glsnamefont}[1]{\textbf{#1}} % the first column in bold, as a table head would be
+\setlength{\glsdescwidth}{0.62\linewidth} % with the name column the tables come to about three quarters of the text width, centred
+\makenoidxglossaries
+\loadglsentries{content/glossary}
+\ifdefined\reviewermode\else\loadglsentries{guide/glossary}\fi % the guide's own examples, only when the guide is built
+% The three lists on one page, as booktabs tables with their own column heads, each with a sentence
+% that says what the table is for. \printlists goes after the acknowledgements in thesis.tex.
+\newcommand{\printlists}{%
+  \chapter*{Abbreviations, notation and terms}\addcontentsline{toc}{chapter}{Abbreviations, notation and terms}%
+  {\renewcommand*{\entryname}{Abbreviation}\renewcommand*{\descriptionname}{Meaning}%
+   \printnoidxglossary[type=abbreviations, style=long-booktabs, title={Abbreviations},
+     preamble={Every abbreviation is spelled out where it first appears in the text; this table repeats the expansions for a reader who starts in the middle, and each use in the text links here.}]}%
+  {\renewcommand*{\entryname}{Symbol}\renewcommand*{\descriptionname}{Meaning}%
+   \printnoidxglossary[type=symbols, style=long-booktabs, title={Notation},
+     preamble={The symbols of the formal model, in one place. Each is introduced once, in the definition the description points at, and keeps that meaning in every chapter; nothing is overloaded.}]}%
+  {\renewcommand*{\entryname}{Term}\renewcommand*{\descriptionname}{Meaning}%
+   \printnoidxglossary[type=main, style=long-booktabs, title={Terms},
+     preamble={Words this paper uses in one fixed sense, often narrower than everyday or vendor usage. The description is that sense; where the literature uses the word differently, the background chapter says so.}]}%
+}
+
+
+%--------------------------------------------------------------------------------------
+% Colored boxes (tcolorbox)
+%--------------------------------------------------------------------------------------
+% theo: top-ruled box with a detached title, from Bertalan's BPM paper.
+% Usage: \begin{tcolorbox}[theo=blue, title={Key insight}] ... \end{tcolorbox}
+\tcbset{%
+    theo/.style={%
+        enhanced,
+        breakable = true,
+        sharp corners,
+        before skip=20pt,
+        toprule=1pt, rightrule=0pt, bottomrule=0pt, leftrule=0pt,
+        colback=#1!15, colframe=#1!50, coltitle=#1!60!black,
+        detach title,
+        overlay unbroken and first ={
+            \node[minimum width=1cm, anchor=south west, font=\bfseries]
+               at (frame.north west) {\tcbtitle};
+        }
+    }
+}
+
+% Ready-made boxes for the common cases. The optional argument is the title.
+\newtcolorbox{infobox}[1][]{enhanced, breakable, colback=blue!5, colframe=blue!50!black, fonttitle=\bfseries, title={#1}}
+\newtcolorbox{warnbox}[1][]{enhanced, breakable, colback=orange!8, colframe=orange!70!black, fonttitle=\bfseries, title={#1}}
+\newtcolorbox{keybox}[1][]{theo=teal, title={#1}}
+
+
+%--------------------------------------------------------------------------------------
+% Cross-references (cleveref)
+%--------------------------------------------------------------------------------------
+% Write \cref{fig:overview} instead of Figure~\ref{fig:overview}; \Cref at sentence start.
+% Label prefixes: ch: sec: fig: tab: eq: lst: alg: app: def: thm: lem: prop: cor: inv:
+% Glossary keys (content/glossary.tex) have no prefix; they are a separate name space.
+% prty: claim: rem: not: ex: c: rq: req: dr: asm: g: thr: lim:
+\crefname{definition}{Definition}{Definitions}
+\crefname{theorem}{Theorem}{Theorems}
+\crefname{example}{Example}{Examples}
+\crefname{lemma}{Lemma}{Lemmas}
+\crefname{proposition}{Proposition}{Propositions}
+\crefname{corollary}{Corollary}{Corollaries}
+\crefname{invariant}{Invariant}{Invariants}
+\crefname{property}{Property}{Properties}
+\crefname{claim}{Claim}{Claims}
+\crefname{remark}{Remark}{Remarks}
+\crefname{notation}{Notation}{Notations}
+\crefname{lstlisting}{Listing}{Listings}
+
+% The environments above share the theorem counter, so cleveref would call all of them
+% "Theorem". Inside each one, labels on that counter get the environment's own name.
+\makeatletter
+\@for\tdk@env:=lemma,proposition,corollary,invariant,property,claim,remark,notation\do{%
+  \edef\tdk@hook{\noexpand\AddToHook{env/\tdk@env/begin}{\noexpand\crefalias{theorem}{\tdk@env}}}%
+  \tdk@hook}
+\makeatother
+
+% Tagged lists: numbered items with a short tag that \cref can point to.
+%   \NewTagList{<environment>}{<tag>}{<Name>}{<Names>}
+% defines an enumerate-like environment whose items read "AS1", "AS2", ... Each item starts
+% with a short name in bold, which the gap matrix and the text reuse:
+%   \begin{assumptions}
+%     \item\label{asm:clock} \textbf{Bounded drift.} Clocks drift by at most $\delta$.
+%   \end{assumptions}
+% A reference prints the tag alone, as a student would type it: \cref{asm:clock} -> "AS1",
+% \cref{asm:clock,asm:keys} -> "AS1 and AS2", three or more in a row -> "AS1–AS3". The
+% tag says what the item is, so the sentence does not need to. <Name> is what \namecref prints.
+% \tagrow{<environment>} gives a table row the list's next tag, for items kept in a table
+% instead of a list: \tagrow{guarantees}\label{g:monotone} & Monotone growth & ...
+% (\tdk@tagtype makes each kind's format differ, or cleveref would merge two kinds into one
+% range: "AS1–SG3".)
+\makeatletter
+\newcommand{\tdk@tagtype}[1]{}
+\newcommand{\NewTagList}[4]{%
+  \newlist{#1}{enumerate}{1}%
+  \setlist[#1]{label=\textbf{#2\arabic*}, ref=#2\arabic*, leftmargin=*, widest=99}%
+  \expandafter\def\csname the#1i\endcsname{#2\arabic{#1i}}%
+  \crefalias{#1i}{#1}%
+  \crefname{#1}{#3}{#4}\Crefname{#1}{#3}{#4}%
+  \crefformat{#1}{\tdk@tagtype{#1}##2##1##3}\Crefformat{#1}{\tdk@tagtype{#1}##2##1##3}%
+  \crefmultiformat{#1}{\tdk@tagtype{#1}##2##1##3}{\tdk@tagtype{#1} and~##2##1##3}{\tdk@tagtype{#1}, ##2##1##3}{\tdk@tagtype{#1} and~##2##1##3}%
+  \Crefmultiformat{#1}{\tdk@tagtype{#1}##2##1##3}{\tdk@tagtype{#1} and~##2##1##3}{\tdk@tagtype{#1}, ##2##1##3}{\tdk@tagtype{#1} and~##2##1##3}%
+  \crefrangeformat{#1}{\tdk@tagtype{#1}##3##1##4--##5##2##6}\Crefrangeformat{#1}{\tdk@tagtype{#1}##3##1##4--##5##2##6}%
+  \crefrangemultiformat{#1}{\tdk@tagtype{#1}##3##1##4--##5##2##6}{\tdk@tagtype{#1} and~##3##1##4--##5##2##6}{\tdk@tagtype{#1}, ##3##1##4--##5##2##6}{\tdk@tagtype{#1} and~##3##1##4--##5##2##6}%
+  \Crefrangemultiformat{#1}{\tdk@tagtype{#1}##3##1##4--##5##2##6}{\tdk@tagtype{#1} and~##3##1##4--##5##2##6}{\tdk@tagtype{#1}, ##3##1##4--##5##2##6}{\tdk@tagtype{#1} and~##3##1##4--##5##2##6}%
+}
+\makeatother
+\newcommand{\tagrow}[1]{\refstepcounter{#1i}\textbf{\csname the#1i\endcsname}}
+\NewTagList{contributions}{C}{Contribution}{Contributions}
+\NewTagList{requirements}{REQ}{Requirement}{Requirements}
+% Derived requirements: what the design itself must do for the guarantees to hold, each
+% checked by a test or a proof. Unlike requirements, they are not rows of the gap matrix.
+\NewTagList{derivedrequirements}{DR}{Derived requirement}{Derived requirements}
+\NewTagList{assumptions}{AS}{Assumption}{Assumptions}
+\NewTagList{guarantees}{SG}{Guarantee}{Guarantees}
+% Threats are the adversaries: who attacks and what they can do. The attacks themselves,
+% one per row, go into the threat model's attacks table (tab:attacks).
+\NewTagList{threats}{ADV}{Adversary}{Adversaries}
+\NewTagList{limitations}{LIM}{Limitation}{Limitations}
+\NewTagList{rqlist}{RQ}{Research question}{Research questions}
+
+% Gap matrix cells: rows are requirements (\ref{req:x} prints "REQ1"), columns are approaches.
+% Put \gaplegend in the caption so every matrix explains the same symbols.
+\newcommand{\gapyes}{\textcolor{green!45!black}{\ensuremath{\checkmark}}}
+\newcommand{\gappartial}{\textcolor{orange!85!black}{$\circ$}}
+\newcommand{\gapno}{\textcolor{red!70!black}{$\times$}}
+\newcommand{\gapna}{--}
+\newcommand{\gaplegend}{\gapyes{} meets the requirement, \gappartial{} partially, \gapno{} does not, \gapna{} not applicable}
+

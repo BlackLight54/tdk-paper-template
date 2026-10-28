@@ -1,0 +1,540 @@
+%----------------------------------------------------------------------------
+\chapter{Using this \LaTeX{} template}\label{app:latex}
+%----------------------------------------------------------------------------
+This chapter uses every package that \texttt{include/packages.tex} loads, every theorem-like environment, and every tagged list, on one running example: an issuer revokes verifiable credentials in a shared registry.
+Copy what you need from the source, \texttt{guide/09-latex-template.tex}.
+Your own packages and macros go in \texttt{include/macros.tex}, which \texttt{thesis.tex} inputs after the template's preamble; a template update replaces the other files under \texttt{include/} and leaves that one alone.
+The theorem-like environments of \cref{app:latex:theorems} are already defined: use them, because a second \texttt{\textbackslash newtheorem} of the same name stops the build.
+\Cref{tab:package-index} at the end lists each package and where it is shown.
+
+%----------------------------------------------------------------------------
+\section{Todo notes (todonotes)}\label{app:latex:todo}
+A margin note sits next to the line it refers to.\todo{A margin note.}
+The margins are 15\,mm, so margin notes are shifted into the text edge to stay readable; prefer inline notes for anything longer than a few words:
+\todo[inline]{An inline note: a block across the text width.}
+\todoinline{The same, with the \texttt{\textbackslash todoinline} shortcut.}
+\atodo[inline]{A longer review comment: \texttt{\textbackslash atodo} pre-fills the color and the author, and takes every \texttt{\textbackslash todo} option, here \texttt{inline}.}
+\atodo[inline, author=IK, color=yellow!30]{The same with another author and color, given as options.}
+\missingfigure{A placeholder for a figure that does not exist yet.}
+\beat{what a paragraph establishes}{its evidence}{what the running example shows in it}{the next paragraph}
+\advisortodo{A note for the advisors: a draft to confirm or a link to add.}
+A margin comment from the supervisor.\atodo[nolist]{Cite this.}
+
+A gap the paper still has to fill gets a marker in the sentence: proving one slice takes \tbd{the proving time} on a laptop, and a claim that still needs its source gets one too\citeneeded[the 2023 survey]. A float has no margin, so a margin note cannot sit in a table cell or a caption, while these markers can (\cref{tab:latex:gaps}). Both are listed with the todos and disappear in the reviewer build. Never type a placeholder word or a bracketed citation mark by hand instead: the lint fails on typed markers, and on any \texttt{\textbackslash tbd} or \texttt{\textbackslash citeneeded} still there at the final phase.
+\begin{table}[!ht]
+  \centering
+  \caption{A table with a value still to measure, marked in its cell.}
+  \label{tab:latex:gaps}
+  \begin{tabular}{lrr}
+    \toprule
+    Proof & Cycles & Time \\
+    \midrule
+    real & 120\,000 & \tbd{after the runs} \\
+    \bottomrule
+  \end{tabular}
+\end{table}
+\begin{runningexample}[a box]
+The running example's appearance in a chapter; \texttt{\textbackslash exname} is set in \texttt{thesis.tex}. A paper with its own environment for the example names it there in \texttt{\textbackslash lintexamplebox}, and the lint looks for that one instead.
+\end{runningexample}
+
+All notes are collected in the list of todos after the table of contents, and the \emph{Checks} page follows it: on every compile the lint of \cref{app:code:paperci} runs on the sources, so you see where the paper stands without leaving the PDF. Its first page is the picture: the phase, one mark for each essential of \cref{app:writing:essentials} in reading order, and the essentials under their chapters, those below the phase's level in red. Its second page is the work: the next step for each essential below that level, then the other checks grouped by what they examine, each with its first findings, and the counts. Its failing checks also appear as \texttt{tdk-lint} package warnings in Overleaf's log panel. The page is governed by two lines in \texttt{thesis.tex}: \texttt{\textbackslash lintphase}, which you set to \texttt{plan}, \texttt{draft}, \texttt{polish} or \texttt{final} as the lifecycle moves, because a check only counts once its phase is reached; and \texttt{\textbackslash linttrue}, which you may flip to \texttt{\textbackslash lintfalse} to switch the page off. A finding you have judged and rejected is silenced with a comment on its line, \texttt{\% lint-ignore: <rule> <reason>}; the reason is required and the page counts the ignores.
+The submitted version is built from \texttt{reviewer.tex}, a four-line root file that sets the \texttt{final} class option, disables todonotes, defines \texttt{\textbackslash reviewermode}, and inputs \texttt{thesis.tex}: every note disappears, and \texttt{thesis.tex} skips the list of todos and the guide. On Overleaf, open \texttt{reviewer.tex} and choose \emph{Recompile from this file}; locally, \texttt{make reviewer}. Look at it every week, not only in the last one: it is the paper the reviewer gets.
+
+%----------------------------------------------------------------------------
+\section{Abbreviations, notation and terms (glossaries-extra)}\label{app:latex:acro}
+One file, \texttt{content/glossary.tex}, declares the three things a paper keeps lists of, and one command in each case uses them; the three tables are printed after the acknowledgements, only with the entries the text used, and every use links to its row.
+\begin{itemize}[noitemsep]
+  \item \textbf{Abbreviations.} The first use expands: \glsreset{vc}\gls{vc}. Later uses stay short: \gls{vc}. The plural: \glspl{vc}. One form on demand: \glsxtrshort{zkp}, \glsxtrlong{zkp}. Declared with \texttt{\textbackslash newabbreviation\{vc\}\{VC\}\{verifiable credential\}}.
+  \item \textbf{Notation.} A symbol is declared once, with a description that points at the definition introducing it, and the table collects them: \gls{Rt} is the registry, and $\gls{valid}$ works inside math too. Typing \texttt{\$R\_t\$} directly is fine as well; the entry is what puts the symbol in the table, so declare every symbol of \cref{app:latex:theorems} and use \texttt{\textbackslash gls} at least where it is introduced.
+  \item \textbf{Terms.} A word the paper uses in one fixed sense: an \gls{issuer} signs, a \gls{holder} presents, a \gls{verifier} checks. Use \texttt{\textbackslash gls} at the first use in a chapter, so the reader who forgot can click.
+\end{itemize}
+The template pins one workflow, \texttt{\textbackslash makenoidxglossaries}: the sorting is done by TeX, nothing else has to run, on Overleaf or locally. Give symbols a plain \texttt{sort} key. The internet will offer \texttt{makeglossaries} and \texttt{bib2gls} as well; neither is needed, and mixing them in breaks the build. The \href{https://ctan.org/pkg/glossaries-extra}{package documentation} is large; the \texttt{glossaries-extra} user manual's first chapter covers everything used here.
+
+%----------------------------------------------------------------------------
+\section{Citations, links and icons (natbib, hyperref, bookmark, orcidlink, fontawesome5)}\label{app:latex:cite}
+The bibliography is in IEEE style, \texttt{tdkieee.bst}: numbered in order of first citation, as the faculty's guideline asks for numbered references, with abbreviated first names and IEEE's punctuation. Numeric citations are sorted and compressed~\cite{guide:w3c2025vcdm,guide:lamport1978time}.
+\texttt{\textbackslash citet} names the author: \citet{guide:lamport1978time} introduced logical clocks.
+\texttt{\textbackslash citep} brackets the reference~\citep{guide:lamport1978time}.
+
+Links: \url{https://github.com/ftsrg} prints the address, \href{https://ftsrg.mit.bme.hu}{the research group} hides it.
+The PDF bookmarks in the viewer's sidebar come from hyperref and bookmark.
+Icons: \faGithub~source code, \faFilePdf~paper, \faEnvelope~contact. Author ORCID: \orcidlink{0000-0000-0000-0000}.
+
+\paragraph{Quoting.} Verbatim text from a source goes in \texttt{\textbackslash enquote} with the citation right after it, and nowhere else; paraphrase gets the citation too. Every result, concept, tool or product you use is cited where it first appears, even the ones everybody knows. The university treats an unmarked quotation as plagiarism, and the review sheet's criterion B/2 rewards the citing anyway.
+
+\paragraph{Web pages.} The faculty's guideline, quoted in \texttt{include/guideline.tex}, says what an internet reference needs: \enquote{Internetes hivatkozások megadásakor fontos, hogy az elérési út előtt megadjuk az oldal tulajdonosát és tartalmát (mivel a link egy idő után akár elérhetetlenné is válhat), valamint az elérés időpontját.} So a web source is a \texttt{misc} entry whose author is the page's owner, in double braces so BibTeX keeps it whole (\texttt{author = \{\{W3C\}\}}), whose title says what the page is, with the \texttt{url} and the \texttt{urldate}, the day you read it. Zotero records the access date when you save a page and exports it as \texttt{urldate}; the template's bibliography style, \texttt{tdkieee.bst}, prints it after the URL as \enquote{Accessed: 2026-10-25}, which the stock styles would silently drop. The \texttt{w3c2025vcdm} entry in \texttt{bib/references.bib} is the pattern, and the \texttt{bib} lint rule flags a web source without an access date.
+
+\paragraph{Where the entries come from: Zotero.} You do not write BibTeX by hand. Every source you read goes into the group library with the \href{https://www.zotero.org/download/connectors}{Zotero Connector} in your browser, one click on the paper's page or its DOI; Zotero fetches the metadata, and you fix what it got wrong there, once, for everyone. Overleaf's Zotero integration turns the group library into \texttt{bib/zotero.bib} (\cref{app:start:access}); \emph{Refresh} on that file pulls in what was added since. The citation key is the one Zotero generates, visible in Overleaf's autocomplete after you type \texttt{\textbackslash cite\{}. Official guides: the \href{https://www.zotero.org/support/quick_start_guide}{Zotero quick start guide}, \href{https://www.zotero.org/support/groups}{group libraries}, and Overleaf's \href{https://www.overleaf.com/learn/how-to/How_to_link_your_Overleaf_account_to_Mendeley_and_Zotero}{linking your account to Zotero}. Working locally, the \href{https://retorque.re/zotero-better-bibtex/}{Better BibTeX} plugin keeps an auto-exported \texttt{.bib} in sync with the library and gives stable citation keys. Three habits keep the bibliography clean: check the entry type and the title's capitalisation when you save (protect names and acronyms with braces, \texttt{\{BPMN\}}), add the DOI where one exists, and put hand-written entries that are not literature, the Zenodo artifact and AI citations, in \texttt{bib/references.bib}, because a refresh overwrites \texttt{zotero.bib}.
+
+%----------------------------------------------------------------------------
+\section{Cross-references (cleveref)}\label{app:latex:cref}
+Use \texttt{\textbackslash cref} for every reference, so the type name comes for free, and \texttt{\textbackslash Cref} at the start of a sentence:
+\cref{fig:latex:tikz,fig:latex:svg}, \cref{tab:latex:booktabs}, \cref{alg:latex:revoke}, \cref{lst:latex:verify}, \cref{eq:latex:window}, \cref{app:latex:theorems}.
+Ranges compress: \cref{eq:latex:window,eq:latex:fresh,eq:latex:valid}.
+\Cref{app:latex:theorems,app:latex:tags} reference every theorem-like environment and tagged list.
+Label prefixes are listed in \texttt{include/preamble.tex}.
+
+A chapter's label also says its role in the argument, and the lint finds chapters by it, never by file name: \texttt{ch:intro}, \texttt{ch:background}, \texttt{ch:approach}, \texttt{ch:implementation}, \texttt{ch:evaluation}, \texttt{ch:related} or \texttt{ch:conclusion}. A role may span chapters: the first keeps the plain label, and the others add a name, as in \texttt{ch:approach:monitors}. A chapter that plays two roles carries two labels, for example \texttt{ch:implementation} and \texttt{ch:evaluation}. Every numbered chapter needs a role.
+
+%----------------------------------------------------------------------------
+\section{Mathematics and theorems (amsmath, unicode-math, ntheorem)}\label{app:latex:theorems}
+A numbered equation:
+\begin{equation}\label{eq:latex:window}
+  \mathit{valid}(c, t) \iff t \in [t_\mathrm{issue}(c), t_\mathrm{exp}(c)) \land c \notin R_t .
+\end{equation}
+Aligned equations, each with its own number:
+\begin{align}
+  R_{t+1} &= R_t \cup \{ c \} \label{eq:latex:fresh}\\
+  \mathit{valid}(c, t+1) &\implies \mathit{valid}(c, t) \label{eq:latex:valid}
+\end{align}
+Symbols beyond amsmath come from the math font: $\mathbb{N}$, $\mathcal{R}$, $\nexists$, $\varnothing$.
+
+Every theorem-like environment, in a typical order.
+Definitions and examples have their own counters; the rest share the theorem counter.
+\begin{definition}[Revocation registry]\label{def:latex:registry}
+A \emph{revocation registry} is a set $R_t$ of revoked credential identifiers at time $t \in \mathbb{N}$.
+\end{definition}
+\begin{notation}\label{not:latex:issuer}
+$I(c)$ denotes the issuer of credential $c$.
+\end{notation}
+\begin{example}\label{ex:latex:registry}
+A university revokes a diploma credential $c$ at $t=5$, so $c \in R_5$.
+\end{example}
+\begin{invariant}\label{inv:latex:monotone}
+The registry only grows: $R_t \subseteq R_{t+1}$ for every $t$.
+\end{invariant}
+\begin{property}[Revocation is final]\label{prty:latex:final}
+If $c \in R_t$, then $\mathit{valid}(c, t')$ is false for every $t' \geq t$.
+\end{property}
+\begin{lemma}\label{lem:latex:step}
+If $\mathit{valid}(c, t+1)$, then $\mathit{valid}(c, t)$, by \cref{eq:latex:valid}.
+\end{lemma}
+\begin{proof}
+By \cref{inv:latex:monotone}, $c \notin R_{t+1}$ implies $c \notin R_t$.
+\end{proof}
+\begin{theorem}[Finality]\label{thm:latex:finality}
+\Cref{prty:latex:final} holds for every registry that satisfies \cref{inv:latex:monotone}.
+\end{theorem}
+\begin{proof}
+Induction on $t' - t$ with \cref{lem:latex:step}.
+\end{proof}
+\begin{corollary}\label{cor:latex:noresurrect}
+A revoked credential is never valid again.
+\end{corollary}
+\begin{proposition}\label{prop:latex:size}
+After $n$ revocations, $|R_t| = n$.
+\end{proposition}
+\begin{claim}\label{claim:latex:append}
+An append-only log implements $R_t$.
+\end{claim}
+\begin{remark}\label{rem:latex:expiry}
+Expiry is not revocation: an expired credential is not in $R_t$.
+\end{remark}
+References: \cref{def:latex:registry}, \cref{not:latex:issuer}, \cref{ex:latex:registry}, \cref{inv:latex:monotone}, \cref{prty:latex:final}, \cref{lem:latex:step}, \cref{thm:latex:finality}, \cref{cor:latex:noresurrect}, \cref{prop:latex:size}, \cref{claim:latex:append}, \cref{rem:latex:expiry}.
+
+%----------------------------------------------------------------------------
+\section{Tagged lists and other lists (enumitem)}\label{app:latex:tags}
+Tagged lists give short, stable names to the things a paper argues about: C for contributions, REQ for requirements, DR for derived requirements, AS for assumptions, SG for guarantees, ADV for adversaries, LIM for limitations and RQ for research questions.
+Each item starts with a short name in bold, and a gap-matrix row reuses its requirement's name.
+A reference prints the tag alone, so the sentence around it reads as if the tag were typed by hand: \verb|\cref{asm:latex:clock}| prints \cref{asm:latex:clock}, and three or more in a row become a range.
+Add a new kind with one \texttt{\textbackslash NewTagList} line in \texttt{include/preamble.tex}.
+Every kind is shown with content where a paper uses it, in \cref{app:chapters}: contributions and requirements in the introduction; threats, assumptions, guarantees and derived requirements in the approach; research questions in the evaluation; limitations in the conclusion. Here, one list and its references:
+\begin{assumptions}
+  \item\label{asm:latex:clock} \textbf{Bounded drift.} Participants' clocks drift by at most $\delta$.
+  \item\label{asm:latex:sig} \textbf{Unforgeable signatures.} The issuer's signature scheme is unforgeable.
+  \item\label{asm:latex:ledger} \textbf{Ledger integrity.} Committed ledger history does not change.
+\end{assumptions}
+When the items already live in a table, \verb|\tagrow{guarantees}| gives a row the list's next tag, and the row takes a label:
+\begin{center}
+\begin{tabular}{@{}lll@{}}
+  \toprule
+  & \textbf{Claim} & \textbf{Relies on} \\
+  \midrule
+  \tagrow{guarantees}\label{g:latex:monotone} & Monotone growth & \cref{asm:latex:ledger} \\
+  \bottomrule
+\end{tabular}
+\end{center}
+References: \cref{asm:latex:clock}, \cref{asm:latex:clock,asm:latex:sig}, \cref{asm:latex:clock,asm:latex:sig,asm:latex:ledger}, \cref{g:latex:monotone}.
+
+Inline lists: the protocol has three roles, \begin{enumerate*}[label=(\roman*)] \item issuer, \item holder, and \item verifier. \end{enumerate*}
+Compact lists:
+\begin{itemize}[noitemsep]
+  \item no extra space between items,
+  \item set per list with enumitem options.
+\end{itemize}
+
+%----------------------------------------------------------------------------
+\section{Figures (graphicx, svg, tikz, pgfplots, subcaption, wrapfig, rotating, placeins)}\label{app:latex:figures}
+\Cref{fig:latex:tikz} is drawn in TikZ, so it uses the document's fonts and scales without blurring.
+\begin{figure}[!ht]
+  \centering
+  \begin{tikzpicture}[node distance=8mm and 18mm,
+      role/.style={draw, rounded corners, fill=blue!8, minimum width=24mm, minimum height=9mm, font=\small},
+      store/.style={draw, cylinder, shape border rotate=90, aspect=0.25, fill=gray!15, minimum width=18mm, minimum height=12mm, font=\small}]
+    \node[role] (issuer) {Issuer};
+    \node[role, right=of issuer] (holder) {Holder};
+    \node[role, right=of holder] (verifier) {Verifier};
+    \node[store, below=of holder] (reg) {Registry};
+    \draw[-Stealth] (issuer) -- node[above, font=\footnotesize]{issue} (holder);
+    \draw[-Stealth] (holder) -- node[above, font=\footnotesize]{present} (verifier);
+    \draw[-Stealth, dashed] (issuer) |- node[pos=0.75, below, font=\footnotesize]{revoke} (reg);
+    \draw[-Stealth, dashed] (verifier) |- node[pos=0.75, below, font=\footnotesize]{check} (reg);
+  \end{tikzpicture}
+  \caption{A TikZ diagram: roles and the revocation registry.}\label{fig:latex:tikz}
+\end{figure}
+
+\Cref{fig:latex:svg} is an SVG file included with \texttt{\textbackslash includesvg}. Overleaf converts it with Inkscape; local builds need \texttt{-shell-escape}.
+Export draw.io and Inkscape drawings as SVG and include them this way, so the text stays sharp.
+\begin{figure}[!ht]
+  \centering
+  \includesvg[width=0.35\linewidth]{guide/figures/example}
+  \caption{An SVG figure.}\label{fig:latex:svg}
+\end{figure}
+
+\Cref{fig:latex:sub} places two subfigures side by side; each has its own label, \cref{fig:latex:sub-a} and \cref{fig:latex:sub-b}.
+\begin{figure}[!ht]
+  \centering
+  \begin{subfigure}[b]{0.45\linewidth}
+    \centering
+    \begin{tikzpicture}
+      \begin{axis}[ybar, width=0.9\linewidth, height=40mm, symbolic x coords={Fabric, Besu, Ethereum}, xtick=data, ylabel={Latency [s]}, ymin=0, font=\footnotesize]
+        \addplot coordinates {(Fabric,0.8) (Besu,1.5) (Ethereum,12)};
+      \end{axis}
+    \end{tikzpicture}
+    \caption{A pgfplots bar chart.}\label{fig:latex:sub-a}
+  \end{subfigure}\hfill
+  \begin{subfigure}[b]{0.45\linewidth}
+    \centering
+    \includegraphics[width=0.6\linewidth]{figures/bme_logo}
+    \caption{A PDF image via graphicx.}\label{fig:latex:sub-b}
+  \end{subfigure}
+  \caption{Subfigures with subcaption.}\label{fig:latex:sub}
+\end{figure}
+
+\begin{wrapfigure}{r}{0.3\linewidth}
+  \centering
+  \captionsetup{format=plain, justification=centering}
+  \begin{tikzpicture}
+    \node[draw, circle, fill=red!15, minimum size=14mm, font=\footnotesize] {revoked};
+  \end{tikzpicture}
+  \caption{A wrapped figure.}\label{fig:latex:wrap}
+\end{wrapfigure}
+Text flows around \cref{fig:latex:wrap}, which wrapfig places at the right margin.
+Use it for small figures only, and never next to a list or a section heading, where wrapfig breaks.
+The paragraph needs enough lines to wrap around the figure, so this one goes on for a few more sentences.
+A revoked credential stays revoked; the registry never forgets.
+Verifiers check the registry before accepting a presentation.
+
+\FloatBarrier
+The \texttt{\textbackslash FloatBarrier} command from placeins above this line keeps every earlier figure before it.
+Put one before a section whose text must not be preceded by stray floats.
+
+%----------------------------------------------------------------------------
+\section{Colored boxes (tcolorbox)}\label{app:latex:boxes}
+\begin{infobox}[Information]
+  A general-purpose box for background facts.
+\end{infobox}
+\begin{warnbox}[Threat model caveat]
+  A box for warnings and limitations.
+\end{warnbox}
+\begin{keybox}[Key insight]
+  The \texttt{theo} style; any color works: \texttt{\textbackslash begin\{tcolorbox\}[theo=red, title=...]}.
+\end{keybox}
+
+%----------------------------------------------------------------------------
+\section{Tables (booktabs, array, tabularx, xltabular, multirow, makecell, rotating)}\label{app:latex:tables}
+\Cref{tab:latex:booktabs} uses booktabs rules, a bold first column defined with array's \texttt{>\{\textbackslash bfseries\}}, a stretching tabularx column, multirow, makecell, and a colored row from xcolor.
+\begin{table}[!ht]
+  \centering
+  \caption{A booktabs table with tabularx, multirow, makecell and a colored row.}\label{tab:latex:booktabs}
+  \begin{tabularx}{\linewidth}{>{\bfseries}l X c}
+    \toprule
+    Platform & Revocation mechanism & \makecell{Latency\\{[s]}} \\
+    \midrule
+    \multirow{2}{*}{Fabric} & Chaincode-managed registry & 0.8 \\
+     & Private data collections & 1.1 \\
+    \rowcolor{gray!15}
+    Ethereum & Smart-contract status list & 12 \\
+    \bottomrule
+  \end{tabularx}
+\end{table}
+
+\Cref{tab:latex:long} is an xltabular: a tabularx that breaks across pages and repeats its header.
+\begin{xltabular}{\linewidth}{l X}
+  \caption{A table that may break across pages.}\label{tab:latex:long}\\
+  \toprule
+  \textbf{Package} & \textbf{Purpose} \\
+  \midrule
+  \endfirsthead
+  \toprule
+  \textbf{Package} & \textbf{Purpose} \\
+  \midrule
+  \endhead
+  todonotes & Visible notes while drafting \\
+  acro & Acronyms expanded on first use \\
+  tcolorbox & Colored boxes \\
+  \bottomrule
+\end{xltabular}
+
+\Cref{tab:latex:sideways} is too wide for the page, so rotating turns it sideways onto its own page.
+\begin{sidewaystable}
+  \centering
+  \caption{A sideways table from rotating.}\label{tab:latex:sideways}
+  \begin{tabular}{l c c c c c c}
+    \toprule
+    Approach & Offline check & Privacy & Finality & Open source & Throughput & Standardised \\
+    \midrule
+    Status list & \gapyes & -- & \gapyes & \gapyes & high & \gapyes \\
+    Accumulator & \gapyes & \gapyes & \gapyes & \gappartial & medium & -- \\
+    \bottomrule
+  \end{tabular}
+\end{sidewaystable}
+
+%----------------------------------------------------------------------------
+\section{Algorithms (algorithm, algpseudocode)}\label{app:latex:alg}
+\begin{algorithm}[!ht]
+  \caption{Revocation with a freshness check}\label{alg:latex:revoke}
+  \begin{algorithmic}[1]
+    \Require credential $c$, registry $R$, time $t$
+    \If{$c \in R$}
+      \State \Return \textsc{already-revoked}
+    \EndIf
+    \State $R \gets R \cup \{c\}$ \Comment{\cref{eq:latex:fresh}}
+    \State \Return \textsc{ok}
+  \end{algorithmic}
+\end{algorithm}
+
+%----------------------------------------------------------------------------
+\section{Code with syntax highlighting (minted, listings)}\label{app:latex:code}
+Common languages go through minted, which uses the Pygments highlighter.
+For a captioned listing, put a \texttt{minted} environment inside a \texttt{listing} float; in running text, use \mintinline{python}{print("inline")}.
+Pygments knows over 500 languages; \texttt{pygmentize -L lexers} lists their names, as does the \href{https://pygments.org/docs/lexers/}{lexer list} in its documentation.
+Languages Pygments does not know (Refinery, Tamarin, Lean) go through listings with the styles in \texttt{include/code-languages.tex}: \lstinline[style=lean]{theorem le_succ (n : Nat) : n <= n + 1 := by omega}.
+Inline listings must be ASCII under XeLaTeX; Unicode notation such as $\forall$ or $\mathbb{N}$ works in block listings (\cref{lst:latex:lean}).
+Both are numbered as listings in one sequence, from \cref{lst:latex:refinery} to \cref{lst:latex:sql}.
+
+\paragraph{Refinery, Tamarin and Lean (listings).}
+\Cref{lst:latex:refinery,lst:latex:tamarin,lst:latex:lean} use the listings styles \texttt{refinery}, \texttt{tamarin} and \texttt{lean}.
+\begin{lstlisting}[style=refinery, float=tbp, morekeywords={[2]Credential,Issuer,Holder}, caption={Refinery: a credential metamodel with an error predicate.}, label={lst:latex:refinery}]
+class Issuer.
+class Holder.
+class Credential {
+    Issuer[1] issuedBy
+    Holder[1] heldBy
+    contains Credential[0..1] revokes
+}
+
+pred selfRevoked(Credential c) <->
+    revokes(c, c).
+
+error unissued(Credential c) <->
+    !issuedBy(c, _).
+\end{lstlisting}
+
+\begin{lstlisting}[style=tamarin, float=tbp, caption={Tamarin: revocation as a multiset-rewriting rule and a lemma.}, label={lst:latex:tamarin}]
+theory Revocation
+begin
+builtins: signing
+
+rule Revoke:
+    [ !Issued($I, cred), Fr(~nonce) ]
+  --[ Revoked(cred) ]->
+    [ !RevokedFact(cred), Out(sign(<cred, ~nonce>, ~sk)) ]
+
+lemma revoked_never_accepted:
+  "All cred #i #j. Revoked(cred) @ i & Accepted(cred) @ j ==> j < i"
+end
+\end{lstlisting}
+
+\begin{lstlisting}[style=lean, float=tbp, caption={Lean 4: the registry only grows (\cref{inv:latex:monotone}).}, label={lst:latex:lean}]
+-- A registry is a list of revoked credential identifiers.
+def Registry := List Nat
+
+def revoke (r : Registry) (c : Nat) : Registry := c :: r
+
+theorem revoke_monotone (r : Registry) (c x : Nat) :
+    x ∈ r → x ∈ revoke r c := by
+  intro h
+  exact List.mem_cons_of_mem c h
+\end{lstlisting}
+
+\FloatBarrier
+\paragraph{Common languages (minted).}
+\Cref{lst:latex:verify} to \cref{lst:latex:sql} use the Pygments lexers \texttt{python}, \texttt{rust}, \texttt{go}, \texttt{java}, \texttt{typescript}, \texttt{solidity}, \texttt{json}, \texttt{yaml}, \texttt{bash} and \texttt{sql}.
+\begin{listing}[!ht]
+\begin{minted}{python}
+def verify(credential, registry):
+    # Reject revoked credentials before checking the signature.
+    if credential.id in registry.revoked:
+        return False
+    return credential.signature_valid()
+\end{minted}
+\caption{Python.}\label{lst:latex:verify}
+\end{listing}
+
+\begin{listing}[!ht]
+\begin{minted}{rust}
+/// Appends a credential to the registry; revocation is final.
+pub fn revoke(registry: &mut HashSet<CredentialId>, id: CredentialId) -> bool {
+    registry.insert(id)
+}
+\end{minted}
+\caption{Rust.}\label{lst:latex:rust}
+\end{listing}
+
+\begin{listing}[!ht]
+\begin{minted}{go}
+// IsRevoked reports whether the chaincode state marks the credential as revoked.
+func (s *Registry) IsRevoked(ctx contractapi.TransactionContextInterface, id string) (bool, error) {
+	v, err := ctx.GetStub().GetState("revoked/" + id)
+	return v != nil, err
+}
+\end{minted}
+\caption{Go (a Hyperledger Fabric chaincode function).}\label{lst:latex:go}
+\end{listing}
+
+\begin{listing}[!ht]
+\begin{minted}{java}
+public record Credential(String id, String issuer, Instant expires) {
+    public boolean isValidAt(Instant t, Set<String> revoked) {
+        return t.isBefore(expires) && !revoked.contains(id);
+    }
+}
+\end{minted}
+\caption{Java.}\label{lst:latex:java}
+\end{listing}
+
+\begin{listing}[!ht]
+\begin{minted}{typescript}
+interface StatusEntry { id: string; revoked: boolean }
+
+export async function check(url: string, id: string): Promise<boolean> {
+  const list: StatusEntry[] = await (await fetch(url)).json();
+  return list.some((e) => e.id === id && e.revoked);
+}
+\end{minted}
+\caption{TypeScript.}\label{lst:latex:ts}
+\end{listing}
+
+\begin{listing}[!ht]
+\begin{minted}{solidity}
+contract RevocationRegistry {
+    mapping(bytes32 => bool) public revoked;
+    event Revoked(bytes32 indexed id);
+
+    function revoke(bytes32 id) external {
+        require(!revoked[id], "already revoked");
+        revoked[id] = true;
+        emit Revoked(id);
+    }
+}
+\end{minted}
+\caption{Solidity.}\label{lst:latex:solidity}
+\end{listing}
+
+\FloatBarrier
+\begin{listing}[!ht]
+\begin{minted}{json}
+{
+  "@context": ["https://www.w3.org/ns/credentials/v2"],
+  "type": ["VerifiableCredential"],
+  "issuer": "did:example:university",
+  "credentialStatus": { "type": "BitstringStatusListEntry", "statusListIndex": "94567" }
+}
+\end{minted}
+\caption{JSON (a verifiable credential).}\label{lst:latex:json}
+\end{listing}
+
+\begin{listing}[!ht]
+\begin{minted}{yaml}
+# docker-compose.yml: one registry node for the measurements
+services:
+  registry:
+    image: ghcr.io/example/registry:1.4
+    ports: ["8080:8080"]
+    environment:
+      LOG_LEVEL: info
+\end{minted}
+\caption{YAML.}\label{lst:latex:yaml}
+\end{listing}
+
+\begin{listing}[!ht]
+\begin{minted}{bash}
+#!/usr/bin/env bash
+# Run each benchmark size five times and collect the timings.
+for n in 10 100 1000 10000; do
+  for run in {1..5}; do
+    ./bench --credentials "$n" >> "results/$n.csv"
+  done
+done
+\end{minted}
+\caption{Bash.}\label{lst:latex:bash}
+\end{listing}
+
+\begin{listing}[!ht]
+\begin{minted}{sql}
+-- Credentials revoked in the last day, per issuer.
+SELECT issuer, COUNT(*) AS revoked
+FROM revocations
+WHERE revoked_at > NOW() - INTERVAL '1 day'
+GROUP BY issuer
+ORDER BY revoked DESC;
+\end{minted}
+\caption{SQL.}\label{lst:latex:sql}
+\end{listing}
+\FloatBarrier
+
+%----------------------------------------------------------------------------
+\section{Text (csquotes, ulem, xcolor, xspace, babel, setspace, lineno, comment)}\label{app:latex:text}
+Quotes adapt to the language: \enquote{revocation is final}, and nested: \enquote{the issuer said \enquote{revoked}}.
+ulem marks edits: \uline{underlined}, \sout{struck out}, \uwave{wavy}. xcolor colors text: \textcolor{red!70!black}{red}, \colorbox{yellow!40}{highlighted}.
+Abbreviation macros use xspace, so they need no trailing braces: \eg the issuer, \ie the registry, Lamport \etal showed.
+babel switches the hyphenation and quotes per phrase: \foreignlanguage{magyar}{\enquote{visszavont tanúsítvány}}.
+
+\begin{onehalfspace}
+setspace changes the line spacing for a block; this paragraph uses one-and-a-half spacing.
+The rest of the thesis is single-spaced, as the TDK rules require.
+\end{onehalfspace}
+
+\begin{linenumbers}
+lineno numbers lines, so reviewers can point at them.
+Wrap a draft paragraph in a \texttt{linenumbers} environment, or put \texttt{\textbackslash linenumbers} in the preamble for the whole document.
+\end{linenumbers}
+
+The comment package hides a block without deleting it. The next paragraph is inside a \texttt{comment} environment and does not appear.
+\begin{comment}
+This sentence is in the source but not in the PDF.
+\end{comment}
+
+%----------------------------------------------------------------------------
+\section{Package index}\label{app:latex:index}
+\newcommand{\ctan}[1]{\href{https://ctan.org/pkg/#1}{#1}}
+\begin{xltabular}{\linewidth}{>{\ttfamily\raggedright\arraybackslash\hsize=1.1\hsize}X >{\raggedright\arraybackslash\hsize=0.9\hsize}X}
+  \caption{Every package in \texttt{include/packages.tex} and where it is shown. Each name links to the package's documentation on CTAN; \texttt{texdoc <name>} opens the same locally. TikZ and pgfplots also have \href{https://tikz.dev/}{tikz.dev} and the \href{https://pgfplots.sourceforge.net/}{pgfplots gallery}.}\label{tab:package-index}\\
+  \toprule
+  \normalfont\textbf{Package} & \textbf{Shown in} \\
+  \midrule
+  \endfirsthead
+  \toprule
+  \normalfont\textbf{Package} & \textbf{Shown in} \\
+  \midrule
+  \endhead
+  \ctan{todonotes} & \cref{app:latex:todo} \\
+  \ctan{glossaries-extra} & \cref{app:latex:acro}, and the three lists after the acknowledgements \\
+  \ctan{natbib}, \ctan{hyperref}, \ctan{bookmark}, \ctan{orcidlink}, \ctan{fontawesome5} & \cref{app:latex:cite} \\
+  \ctan{cleveref} & \cref{app:latex:cref}, and every reference in this chapter \\
+  \ctan{amsmath}, \ctan{unicode-math} (\ctan{newtx} under pdfLaTeX), \ctan{ntheorem} & \cref{app:latex:theorems} \\
+  \ctan{enumitem} & \cref{app:latex:tags} \\
+  \ctan{graphicx}, \ctan{svg}, \ctan{tikz}, \ctan{pgfplots}, \ctan{subcaption}, \ctan{wrapfig}, \ctan{placeins} & \cref{app:latex:figures} \\
+  \ctan{tcolorbox} & \cref{app:latex:boxes} \\
+  \ctan{booktabs}, \ctan{array}, \ctan{tabularx}, \ctan{xltabular}, \ctan{multirow}, \ctan{makecell}, \ctan{rotating} & \cref{app:latex:tables} \\
+  \ctan{algorithms}, \ctan{algorithmicx} & \cref{app:latex:alg} \\
+  \ctan{listings}, \ctan{minted} & \cref{app:latex:code} \\
+  \ctan{csquotes}, \ctan{ulem}, \ctan{xcolor}, \ctan{xspace}, \ctan{babel}, \ctan{setspace}, \ctan{lineno}, \ctan{comment} & \cref{app:latex:text} \\
+  \ctan{caption} & Every caption: bold labels, hanging indent \\
+  \ctan{anysize} & Page margins, set with \texttt{\textbackslash marginsize} in \texttt{thesis.tex} \\
+  \ctan{microtype} & Character protrusion and font expansion on every page \\
+  \ctan{emptypage} & Blank pages before chapters have no page number \\
+  \ctan{ifxetex}, \ctan{ifluatex}, \ctan{fontspec}, \ctan{fontenc}, \ctan{inputenc}, \ctan{lm}, \ctan{newtx} & Text in TeX Gyre Termes (Times), code in Latin Modern Mono, under XeLaTeX, LuaLaTeX and pdfLaTeX \\
+  \bottomrule
+\end{xltabular}

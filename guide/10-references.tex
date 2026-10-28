@@ -1,0 +1,7 @@
+%----------------------------------------------------------------------------
+\chapter*{References of the guide}\addcontentsline{toc}{chapter}{References of the guide}
+%----------------------------------------------------------------------------
+% The guide's own reference list, apart from the paper's bibliography, so the paper lists only
+% what the paper cites. It is guide/guide.bbl, built from guide/guide.bib by `make guide-bib`
+% (BibTeX with tdkieee.bst) and committed, so no build runs BibTeX for it.
+{\renewcommand{\bibsection}{}\input{guide/guide.bbl}}

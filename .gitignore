@@ -1,0 +1,26 @@
+lint-checks.tex
+# Build output: Overleaf never commits it, and a local build should not either. CI publishes the
+# PDFs as artifacts of every run.
+*.aux
+*.bbl
+!guide/guide.bbl
+*.blg
+*.fdb_latexmk
+*.fls
+*.lof
+*.log
+*.lol
+*.lot
+*.out
+*.synctex.gz
+*.tdo
+*.thm
+*.toc
+*.xdv
+_minted/
+_minted-*/
+svg-inkscape/
+thesis.pdf
+reviewer.pdf
+# Personal settings of an AI coding agent
+.claude/settings.local.json

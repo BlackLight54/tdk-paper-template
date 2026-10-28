@@ -1,0 +1,54 @@
+%----------------------------------------------------------------------------
+\chapter{Archiving the code on Zenodo}\label{app:zenodo}
+%----------------------------------------------------------------------------
+A GitHub link can move, change or disappear; a reviewer checking \textbf{correctness} (criterion D/2) needs the exact code your results came from.
+\href{https://zenodo.org/}{Zenodo}, run by CERN, archives a GitHub release permanently and gives it a DOI, so cite the archived release, not the repository.
+These steps follow Zenodo's documentation as of September 2026; if the interface differs, the linked pages are authoritative.
+
+\section{Prepare the repository}
+Zenodo archives the code repository, the \texttt{code/} submodule (\cref{app:code:github}); prepare it, not the notes repository.
+\begin{enumerate}
+  \item A \texttt{README.md} with the sections of \cref{app:code:readme}: at minimum the one command that reproduces every measurement in \tplref{ch:evaluation}, and the results map.
+  \item A \texttt{LICENSE} file; ask us which license to use. Apache 2.0 for a tool (\cref{app:code:readme}), MIT otherwise.
+  \item A \texttt{.zenodo.json} file in the repository root (\cref{lst:zenodo-json}). Zenodo takes the record's title, authors, license and links from it (\href{https://help.zenodo.org/docs/github/describe-software/zenodo-json/}{format and example}). Check that it is valid JSON before releasing.
+  \item If the repository has a \texttt{CITATION.cff}, keep its fields in line with \texttt{.zenodo.json}; Zenodo uses \texttt{.zenodo.json} when both exist.
+\end{enumerate}
+
+\begin{listing}[!ht]
+\begin{minted}{json}
+{
+  "title": "TODO Artifact for: <thesis title>",
+  "description": "Code and measurement scripts for the TDK paper <thesis title>.",
+  "upload_type": "software",
+  "version": "1.0.0",
+  "publication_date": "TODO YYYY-MM-DD",
+  "license": "MIT",
+  "creators": [
+    { "name": "TODO Surname, Given name", "affiliation": "Budapest University of Technology and Economics", "orcid": "TODO your ORCID iD, or remove this field" }
+  ],
+  "keywords": ["TODO"]
+}
+\end{minted}
+\caption{A minimal \texttt{.zenodo.json}.}\label{lst:zenodo-json}
+\end{listing}
+
+\section{Publish the first release}
+\begin{enumerate}
+  \item Sign in to \href{https://zenodo.org/}{Zenodo} with the GitHub account that owns the repository. Open the profile menu, then \emph{GitHub}; click \emph{Sync now}, find the repository, and switch its toggle on (\href{https://help.zenodo.org/docs/github/enable-repository/}{enable a repository}).
+  \item Commit the prepared files. On GitHub, open \emph{Releases}, then \emph{Draft a new release}: create a new tag such as \texttt{v1.0.0} on the commit your measurements used, add release notes, and publish.
+  \item Back on Zenodo's GitHub page, open the repository and wait for processing. Open the new record and check its files and metadata; a failed release shows an \emph{Errors} section (\href{https://help.zenodo.org/docs/github/archive-software/github-upload/}{archive a release}).
+\end{enumerate}
+If the repository cannot be connected to Zenodo, upload a prepared archive instead: \emph{+}, then \emph{New upload}, fill in the metadata, \emph{Preview}, \emph{Publish} (\href{https://help.zenodo.org/docs/deposit/create-new-upload/}{upload instructions}).
+
+\section{Cite it}\label{app:zenodo:cite}
+Each release gets its own \emph{version DOI}; the \emph{concept DOI} stands for all versions together and always resolves to the newest one (\href{https://support.zenodo.org/help/en-gb/1-upload-deposit/97-what-is-doi-versioning}{DOI versioning}).
+\begin{itemize}
+  \item In the paper, cite the \textbf{concept DOI}, as the \texttt{artifact} entry in \texttt{bib/references.bib} shows, and cite it in \tplref{ch:implementation}. Next to it, name the \textbf{results tag}: the Git tag, and with it the Zenodo version, that every number in the paper came from. The reviewer who follows the DOI lands on the newest, best-packaged version; the reviewer who wants exactly what you measured has the tag.
+  \item In \texttt{README.md}, put the badge of the concept DOI, and name the results tag in its own section (\cref{app:code:readme}). The record page's DOI badge dialog gives the Markdown.
+  \item Copy both DOIs from the Zenodo record; never guess a DOI by changing its number.
+\end{itemize}
+
+\section{Release a new version}\label{app:zenodo:versions}
+Fix the code, update \texttt{version} and \texttt{publication\_date} in \texttt{.zenodo.json}, commit, and publish a new GitHub release with a new tag (for example \texttt{v1.0.1}). Zenodo adds it to the same record as a new version with a new version DOI (\href{https://help.zenodo.org/docs/deposit/manage-versions/}{manage versions}). Never move an old tag, and never re-run the measurements for a version that the paper does not describe: the results tag named in the paper stays what it was.
+
+This is why the lifecycle (\cref{tab:lifecycle}) has a code polish step \emph{after} the paper deadline. The reviewers get the paper about two weeks after you upload it, and the concept DOI resolves to whatever version exists when they look. The README, the Docker images, the results map and the honesty section are packaging, not results, so they can be finished in those two weeks and released as a new version. What cannot change after the deadline is anything the paper's numbers depend on: a changed algorithm or a re-measured table would make the paper describe code that no longer exists under the tag it names.
