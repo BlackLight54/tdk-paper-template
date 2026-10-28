@@ -35,6 +35,7 @@ M.RULES = {
   labels = { "refs", "Labels match what they label" },
   crefs = { "refs", "References go through \\cref" },
   bib = { "refs", "Bibliography entries are complete" },
+  sources = { "refs", "At most 50 references and mostly papers" },
   code = { "refs", "Listings are captioned and ASCII-safe" },
   links = { "refs", "Every link answers" },
   checkcites = { "refs", "Uncited entries and missing keys" },
