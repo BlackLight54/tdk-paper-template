@@ -258,14 +258,15 @@
 % cannot go (a float has no margin):
 %   \tbd{the proving time}          a value or a sentence still to write
 %   \citeneeded  \citeneeded[the 2023 survey]   a claim that still needs its source
-% Both print a small coloured marker in the draft, are listed with the todos, and disappear in the
+% Both print as coloured text in brackets in the draft, breaking across lines like the text around
+% them, are listed with the todos, and disappear in the
 % reviewer build. Never type TBD, [CITE], [?] or XXX into the text: the markers lint fails on them,
 % and on any \tbd or \citeneeded left at the final phase.
 \makeatletter
-\newcommand{\tdk@gap}[2]{\if@todonotes@disabled\else{\setlength{\fboxsep}{1pt}\colorbox{#1}{\scriptsize\sffamily #2}}\addcontentsline{tdo}{todo}{#2}\fi}
+\newcommand{\tdk@gap}[2]{\if@todonotes@disabled\else{\color{#1}\sffamily\small[#2]}\addcontentsline{tdo}{todo}{#2}\fi}
 \makeatother
-\DeclareRobustCommand{\tbd}[1]{\csname tdk@gap\endcsname{orange!40}{TODO: #1}}
-\DeclareRobustCommand{\citeneeded}[1][]{\if\relax\detokenize{#1}\relax\csname tdk@gap\endcsname{red!25}{citation needed}\else\csname tdk@gap\endcsname{red!25}{citation needed: #1}\fi}
+\DeclareRobustCommand{\tbd}[1]{\csname tdk@gap\endcsname{orange!75!black}{TODO: #1}}
+\DeclareRobustCommand{\citeneeded}[1][]{\if\relax\detokenize{#1}\relax\csname tdk@gap\endcsname{red!70!black}{citation needed}\else\csname tdk@gap\endcsname{red!70!black}{citation needed: #1}\fi}
 
 
 %--------------------------------------------------------------------------------------
