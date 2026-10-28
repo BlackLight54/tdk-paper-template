@@ -498,65 +498,94 @@ rule("bib", "source", "check", "always", "the bibliography: every cited key exis
   C.each_cite(MAIN, function(f, n, k) if not keys[k] then fail(f, n, "cited key " .. k .. " is in no .bib file") end end)
 end)
 
--- Two papers submitted to the same year's TDK, by one student or by two on neighbouring topics,
--- are each other's companion paper. Each is reviewed on its own while the other is unpublished,
--- so neither cites or links the other: the text says "a companion paper", and what this paper
--- needs from it is restated in the background, or as a last resort in an appendix (the guide's
--- app:tdk:companion). A TDK paper of an earlier year is on the portal and is cited like any
--- other source; so is this year's once a thesis builds on it (LINT_PROFILE=thesis).
+-- Two TDK papers of the same year on dependent or overlapping topics are each other's companion
+-- paper (the guide's app:tdk:companion): they are reviewed at the same time, each on its own, so
+-- neither cites or links the other; each says "a companion paper" and restates what it needs
+-- from the other. Which paper is the companion only the author knows, so the paper declares it:
+-- \newcommand{\lintcompanion}{<its bib keys, URLs or DOIs>} in thesis.tex. The rule fails on a
+-- declared key that is cited, on a cited entry or a link that reaches a declared URL or DOI, and
+-- on a citation or link attached to the words "companion paper". A cited entry that looks like
+-- a TDK paper of this year, a link to this year's portal or to an Overleaf project, is a
+-- question, not a failure. Whether the restated part is enough is the reader's to judge.
 local TDK_NAMES = { "%f[%a]o?tdk%f[%A]", "tudom%S*nyos%s+di%S*kk%S*ri", "scientific%s+students?%f[%A]",
   "students?%S*%s+scientific%s+conference", "students?%S*%s+scientific%s+association" }
--- what a link points at, when it is a draft or a TDK paper of the given year
-local function companion_link(url, year)
-  local u = url:lower()
-  if u:find("overleaf%.com") then return "an Overleaf project, a draft no reviewer can open," end
-  local y = u:match("tdk%.bme%.hu/conference/[^/]+/(%d%d%d%d)/sessions/")
-  if y and tonumber(y) >= year then return "a paper of the " .. y .. " TDK on the portal" end
-  if u:find("github%.com/[^/]+/[^/]*tdk" .. string.format("%02d", year % 100) .. "%f[%D]") then return "the repository of a " .. year .. " TDK paper" end
+local LINKS = { url = true, href = true, weblink = true }
+-- a URL or DOI, compared without its scheme, www., doi.org/ and trailing slash
+local function bare(u)
+  return (u:lower():gsub("%s+", ""):gsub("^%a[%w+.-]*://", ""):gsub("^www%.", ""):gsub("^dx%.doi%.org/", ""):gsub("^doi%.org/", ""):gsub("/+$", ""))
 end
-rule("companion", "source", "check", "always", "a TDK paper of the same year is a companion paper: never cited or linked (Overleaf, its portal page, its repository), and no citation or link is attached to the words companion paper; what this paper needs from it is restated in the background", function()
-  if C.opts.profile == "thesis" then note(nil, nil, "a thesis may cite the TDK paper it grew from: not checked"); return end
+-- the declared companion: { keys = { key = true }, urls = { bare url or DOI } }
+local function declared()
+  local d = { keys = {}, urls = {} }
+  for item in (C.setting("lintcompanion") or ""):gmatch("[^,%s]+") do
+    if item:find("/", 1, true) then d.urls[#d.urls + 1] = bare(item) else d.keys[item] = true end
+  end
+  return d
+end
+-- the declared URL that u is, or lies under
+local function reaches(u, d)
+  local b = bare(u)
+  for _, p in ipairs(d.urls) do
+    if b == p or (b:sub(1, #p) == p and b:sub(#p + 1, #p + 1):match("[/?#]")) then return p end
+  end
+end
+-- what a link that was not declared may be: a draft or a TDK paper of this year
+local function looks_companion(u, year)
+  local b = bare(u)
+  if b:match("^overleaf%.com/read/") or b:match("^overleaf%.com/project/") then return "an Overleaf project, a draft a reviewer cannot open" end
+  local y = b:match("^tdk%.bme%.hu/conference/[^/]+/(%d%d%d%d)/sessions/")
+  if y and tonumber(y) == year then return "a paper of the " .. y .. " TDK on the portal" end
+end
+local ASK = "if it is this paper's companion, add it to \\lintcompanion in thesis.tex, then name it instead of citing it; an unrelated source can stay"
+rule("companion", "source", "check", "always", "a companion paper (a TDK paper of the same year, declared in \\lintcompanion) is named, never cited or linked, and no citation or link is attached to the words companion paper; a source that looks like one is a question", function()
+  if C.opts.profile == "thesis" then C.skip("not applicable under the thesis profile, which assumes a thesis may cite the TDK paper it grew from"); return end
   local year = tonumber((C.readfile("include/tdk-variables.tex") or ""):match("\\newcommand{\\tdkev}{%s*(%d%d%d%d)%s*}")) or tonumber(os.date("%Y"))
+  local d = declared()
   local entries, first, times, flagged = C.bib_entries(), {}, {}, {}
   local function flag(f, n, msg) flagged[f .. ":" .. n] = true; fail(f, n, msg) end
   C.each_cite(CONTENT, function(f, n, k)
+    if d.keys[k] then flag(f, n, k .. " is the companion paper declared in \\lintcompanion: name it, \"a companion paper\", instead of citing it, and restate what this paper needs from it in the background") end
     first[k] = first[k] or { f, n }; times[k] = (times[k] or 0) + 1
   end)
   for k, at in pairs(first) do
     local e = entries[k]
-    if e then
-      -- Zotero writes accents as {\'a}: drop the commands and braces before matching the names
-      local plain = e.body:lower():gsub("\\%p", ""):gsub("\\%a+%s?", ""):gsub("[{}]", "")
-      local tdk = false
-      for _, p in ipairs(TDK_NAMES) do if plain:find(p) then tdk = true end end
-      local ey = tonumber(e.body:match("[,%s][yY][eE][aA][rR]%s*=%s*[{\"]?%s*(%d%d%d%d)") or e.body:match("[,%s][dD][aA][tT][eE]%s*=%s*[{\"]?%s*(%d%d%d%d)"))
+    if e and not d.keys[k] then
       local cited = string.format("cited %d time%s", times[k], times[k] == 1 and "" or "s")
-      if tdk and (not ey or ey >= year) then
-        flag(at[1], at[2], string.format("%s is a TDK paper of %s, %s: a paper of the same TDK is a companion paper; write \"a companion paper\" instead of citing it, and restate what this paper needs from it in the background, or as a last resort in an appendix", k, ey or "unknown year", cited))
+      local hit
+      for u in e.body:gmatch("https?://[^%s{}\"]+") do hit = hit or reaches(u, d) end
+      local doi = e.body:match("[,%s][dD][oO][iI]%s*=%s*[{\"]%s*([^}\"]+)")
+      if doi then hit = hit or reaches(doi, d) end
+      if hit then flag(at[1], at[2], string.format("%s, %s, points at %s, the companion paper declared in \\lintcompanion: name it instead of citing it", k, cited, hit))
       else
-        for url in e.body:gmatch("https?://[^%s{}\"]+") do
-          local what = companion_link(url, year)
-          if what then flag(at[1], at[2], string.format("%s, %s, points at %s: a TDK paper of the same year is a companion paper, named as one, never cited", k, cited, what)); break end
-        end
+        -- Zotero writes accents as {\'a}: drop the commands and braces before matching the names
+        local plain = e.body:lower():gsub("\\%p", ""):gsub("\\%a+%s?", ""):gsub("[{}]", "")
+        local tdk = false
+        for _, pat in ipairs(TDK_NAMES) do if plain:find(pat) then tdk = true end end
+        local ey = tonumber(e.body:match("[,%s][yY][eE][aA][rR]%s*=%s*[{\"]?%s*(%d%d%d%d)") or e.body:match("[,%s][dD][aA][tT][eE]%s*=%s*[{\"]?%s*(%d%d%d%d)"))
+        local what
+        for u in e.body:gmatch("https?://[^%s{}\"]+") do what = what or looks_companion(u, year) end
+        if tdk and ey == year then warn(at[1], at[2], string.format("%s looks like a TDK paper of %d, %s: %s", k, year, cited, ASK))
+        elseif what then warn(at[1], at[2], string.format("%s, %s, points at %s: %s", k, cited, what, ASK)) end
       end
     end
   end
+  C.each_call(CONTENT, function(name) return LINKS[name] end, function(f, n, _, arg)
+    local hit = reaches(arg, d)
+    if hit then flag(f, n, "links " .. hit .. ", the companion paper declared in \\lintcompanion: name it, never link it")
+    else
+      local what = looks_companion(arg, year)
+      if what then warn(f, n, "links " .. what .. ": " .. ASK) end
+    end
+  end)
+  -- "a companion paper~\cite{...}", "a \emph{companion paper}~\cite{...}" or a link whose text says
+  -- companion; a citation later in the sentence ("a companion paper verifies it in Tamarin~\cite{...}")
+  -- is another source's
   for _, f in ipairs(CONTENT) do
-    C.each_line({ f }, function(_, n, l)
-      for cmd, arg in l:gmatch("\\(%a+)%s*(%b{})") do
-        if cmd == "url" or cmd == "href" or cmd == "weblink" then
-          local what = companion_link(arg:sub(2, -2), year)
-          if what then flag(f, n, "links " .. what .. ": a TDK paper of the same year is a companion paper, named as one, never linked") end
-        end
-      end
-    end)
-    -- "a companion paper~\cite{...}" or a link whose text says companion; a citation later in the
-    -- sentence ("a companion paper verifies it in Tamarin~\cite{...}") is another source's
     local text = table.concat(C.prose_lines(f), "\n")
     local pats = { "\\href%s*%b{}%s*{()[^}]*[Cc]ompanion", "\\weblink%s*%b{}%s*{()[^}]*[Cc]ompanion" }
-    for _, cmd in ipairs({ "[cC]ite", "url", "href", "weblink" }) do pats[#pats + 1] = "()[Cc]ompanion%s*%a*[%s~,(%[]*\\" .. cmd end
-    for _, p in ipairs(pats) do
-      for at in text:gmatch(p) do
+    for _, cmd in ipairs({ "[cC]ite", "url", "href", "weblink" }) do pats[#pats + 1] = "()[Cc]ompanion%s*%a*[%s~,(%[}]*\\" .. cmd end
+    for _, pat in ipairs(pats) do
+      for at in text:gmatch(pat) do
         local n = 1 + C.count(text:sub(1, at), "\n")
         if not flagged[f .. ":" .. n] then flag(f, n, "a citation or link attached to a companion paper: a companion paper is named, not cited") end
       end
