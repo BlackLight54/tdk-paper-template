@@ -2,7 +2,7 @@
 \chapter{Related Work and Gap Analysis}\label{ch:related}
 %----------------------------------------------------------------------------
 \todo[inline, caption={Related work: criteria B/2 and D/1}]{\textbf{Criteria B/2 (0--4) and D/1 (0--5).} This chapter comes after the evaluation, as in research papers: the reader now knows what you built and measured, so each comparison can point to a concrete result instead of a promise.\\
-\textbf{Novelty:} compare the closest approaches against the requirements in a gap matrix (\cref{tab:related}) and end with the gap only your work fills.\\
+\textbf{Novelty:} place the related work on a positioning figure (\cref{fig:positioning}), compare the closest approaches against the requirements in a gap matrix (\cref{tab:related}), and end with the gap only your work fills.\\
 \textbf{Relevance:} include current industrial solutions and recent research, so the gap is visibly open today.\\
 \textbf{In the sheet's words.} The top of B/2: \enquote{3--4: újszerű ipari megoldások és kutatási eredmények (a dolgozat -- az újszerű ipari megoldásokon túl -- bemutatja a dolgozat témakörében releváns kutatási eredményeket a szakterületen)}; the step below, \enquote{2: újszerű ipari megoldások vagy közismert kutatási eredmények}, is where a chapter without recent research lands. D/1 falls to \enquote{1--2: ismert (a kutatási terület szakirodalomban számos megoldás ismert a tárgyalt problémára, és ezek „másolás jellegű” alkalmazására került sor a dolgozatban)} or \enquote{3--4: inkrementális (értékes inkrementális kontribúció, létező megoldások apró továbbfejlesztése)} when the gap matrix shows a close neighbour; argue the difference here.}
 
@@ -10,12 +10,69 @@
 TODO The comparison uses \cref{req:first,req:second,req:third} from \cref{ch:intro}. Add criteria only if a reader would ask about them, such as maturity or license.
 
 \section{Existing approaches}
-\beat{how each family of approaches works and where it falls short}{citations and the gap matrix}{what each approach does with the example}{the gap}
-TODO Group the related work into families and discuss each family against the requirements. \Cref{tab:related} summarises the comparison in a gap matrix: a reader should see the gap from the matrix alone, as the one column where every row is met.
+\beat{how each family of approaches works and where it falls short}{citations, the positioning figure and the gap matrix}{what each approach does with the example}{the gap}
+TODO Group the related work into families and discuss each family against the requirements. \Cref{fig:positioning} places every approach on the two properties that separate them most, so the gap shows as the one empty cell; \cref{tab:related} then compares the closest approaches requirement by requirement in a gap matrix: a reader should see the gap from the matrix alone, as the one column where every row is met.
 
 \begin{runningexample}[elsewhere]
 TODO How the closest approach would handle the scenario, and which requirement it fails on.
 \end{runningexample}
+
+% Positioning figure: the related work as dots on two axes of three levels each, this work as the
+% star in the cell no existing approach reaches, and an arrow from the closest approach that says
+% what this work adds. Choose the two properties that separate the approaches most: two
+% requirements, or two that each sum up several. Name the levels in words, never low/medium/high.
+\begin{figure}[!ht]
+  \centering
+  \begin{tikzpicture}[
+      work/.style={circle, fill=gray!60!black, draw=white, line width=0.5pt, inner sep=0pt, minimum size=2.3mm},
+      wlbl/.style={anchor=west, font=\footnotesize, inner sep=1pt, fill=white},
+      wnote/.style={anchor=north west, font=\scriptsize\itshape, text=gray!70!black, inner sep=1pt, fill=white},
+      tick/.style={font=\footnotesize\bfseries, align=center},
+      sub/.style={font=\scriptsize\itshape, text=gray!80!black, align=center}]
+    \def\cA{1.8}\def\cB{6.0}\def\cC{10.2} % columns: the levels of the second property
+    \def\rA{0.9}\def\rB{2.6}\def\rC{4.7}  % rows: the levels of the first property
+    \def\xmax{14.6}\def\ymax{5.8}
+    \fill[blue!8, rounded corners=4pt] ({(\cB+\cC)/2},3.95) rectangle (\xmax,\ymax-0.15); % the gap
+    \foreach \y in {\rA,\rB,\rC} \draw[gray!30, dashed] (0,\y) -- (\xmax,\y);
+    \foreach \x in {\cA,\cB,\cC} \draw[gray!30] (\x,0) -- (\x,\ymax-0.15);
+    \draw[line width=0.9pt, -{Stealth[length=2.6mm]}] (0,0) -- (\xmax+0.3,0);
+    \draw[line width=0.9pt, -{Stealth[length=2.6mm]}] (0,0) -- (0,\ymax+0.2);
+    \node[anchor=south west, inner sep=0pt, font=\footnotesize] at (0.15,\ymax+0.05)
+      {\textbf{TODO first property} $\uparrow$\enspace\textit{e.g.\ how far an approach meets \cref{req:first}}};
+    \node[anchor=north east, align=right, font=\footnotesize] at (\xmax+0.3,-0.85)
+      {\textbf{TODO second property} $\rightarrow$\\\textit{\scriptsize e.g.\ how far it meets \cref{req:second}}};
+    \foreach \y/\name in {\rC/TODO level 3, \rB/TODO level 2, \rA/TODO level 1} {%
+      \draw (-0.08,\y) -- (0.08,\y);
+      \node[tick, anchor=south east] at (-0.15,\y+0.02) {\name};
+      \node[sub, anchor=north east] at (-0.15,\y+0.02) {what it means};
+    }
+    \foreach \x/\name in {\cA/TODO level 1, \cB/TODO level 2, \cC/TODO level 3} {%
+      \draw (\x,-0.08) -- (\x,0.08);
+      \node[tick, anchor=north] at (\x,-0.15) {\name};
+      \node[sub, anchor=north] at (\x,-0.5) {what it means};
+    }
+    \node[work] (a) at (\cA,\rC) {};
+    \node[wlbl] at (a.east) {Approach A~\cite{lamport1978time}};
+    \node[wnote] at (\cA+0.05,\rC-0.2) {TODO family};
+    \node[work] (d) at (\cB,\rB) {};
+    \node[wlbl] at (d.east) {TODO one dot per work};
+    \node[work] (b) at (\cC,\rA) {};
+    \node[wlbl] at (b.east) {Approach B~\cite{w3c2025vcdm}};
+    \node[work] (c) at (\cC,\rB) {};
+    \node[wlbl] at (c.east) {Approach C (TODO)};
+    \node[wnote] at (\cC+0.05,\rB-0.2) {the closest approach};
+    % this work, reached from the closest approach
+    \draw[blue!60!black, line width=1.2pt, dashed, -{Stealth[length=2.6mm]}] (c.north) -- (\cC,\rC-0.32);
+    \node[star, star points=5, star point ratio=2.3, minimum size=6.5mm, inner sep=0pt,
+          fill=blue!60!black, draw=white, line width=0.6pt] (tw) at (\cC,\rC) {};
+    \node[anchor=west, font=\normalsize\bfseries, text=blue!60!black, inner sep=1pt] at ([xshift=2pt]tw.east) {This work};
+    \node[anchor=north west, font=\scriptsize\itshape, text=blue!60!black, inner sep=1pt] at (\cC+0.38,\rC-0.22) {TODO the contributions in a few words};
+    \node[anchor=west, font=\footnotesize, text=blue!60!black, align=left, inner sep=1pt] at (\cC+0.2,3.35)
+      {+ TODO what this work adds\\+ TODO what else};
+  \end{tikzpicture}
+  \caption{Positioning figure: the related work on the two properties that separate it most. Grey dots are existing approaches; the blue star is this work, in the cell no existing approach reaches, and the dashed arrow starts at the closest approach and says what this work adds. TODO Choose the axes, place every approach of \cref{tab:related} and the other works the chapter discusses, and name each level in words.}
+  \label{fig:positioning}
+\end{figure}
 
 \begin{table}[!ht]
   \centering
@@ -35,4 +92,4 @@ TODO How the closest approach would handle the scenario, and which requirement i
 
 \section{Gap}
 \beat{the gap in one sentence, closed by this work}{\cref{tab:related} and the results of \cref{ch:evaluation}}{the scenario as the case only this work handles}{the conclusion}
-TODO One paragraph that states the gap in one sentence, based on \cref{tab:related}, and shows with the results of \cref{ch:evaluation} that this work closes it. This paragraph is the novelty argument.
+TODO One paragraph that states the gap in one sentence, based on \cref{fig:positioning,tab:related}, and shows with the results of \cref{ch:evaluation} that this work closes it. This paragraph is the novelty argument.

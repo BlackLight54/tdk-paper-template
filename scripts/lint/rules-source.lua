@@ -7,7 +7,7 @@ local rule, fail, warn, note = C.rule, C.fail, C.warn, C.note
 local MAIN, CONTENT = C.MAIN, C.CONTENT
 
 -- template structure --------------------------------------------------------------------
-rule("structure", "source", "check", "always", "what the template provides is still there: the files, the tag lists, the running example, the gap matrix, the leading figure; a paper that replaced the template sees here what it lost", function()
+rule("structure", "source", "check", "always", "what the template provides is still there: the files, the tag lists, the running example, the gap matrix and the positioning figure, the leading figure; a paper that replaced the template sees here what it lost", function()
   -- the files thesis.tex includes are named NN-name.tex, numbered in reading order (00-abstract,
   -- 01-introduction, ...); the glossary, loaded by the preamble, has no number
   local last = -1
@@ -41,6 +41,7 @@ rule("structure", "source", "check", "always", "what the template provides is st
   atleast("g", "guarantees", C.ROLE.approach); atleast("lim", "limitations", C.ROLE.conclusion)
   if not labels["fig:overview"] then fail(C.ROLE.intro, nil, "no leading figure (fig:overview)") end
   if not labels["tab:related"] then fail(C.ROLE.related, nil, "no gap matrix (tab:related)") end
+  if not labels["fig:positioning"] then fail(C.ROLE.related, nil, "no positioning figure (fig:positioning)") end
   if not labels["tab:correctness"] then fail(C.ROLE.evaluation, nil, "no correctness table (tab:correctness)") end
   local pre = C.readfile("include/preamble.tex") or ""
   for _, m in ipairs({ "runningexample", "NewTagList", "beat", "gapyes", "atodo" }) do
