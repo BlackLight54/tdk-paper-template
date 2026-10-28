@@ -57,7 +57,7 @@ rule("frame", "source", "check", "always", "the template's frame is still there:
   if not C.FILES.abstract then fail(nil, nil, "no abstract file (a content file with \\chapter*{Abstract})") end
   if not C.FILES.aidecl then fail(nil, nil, "no AI declaration file (\\label{aidecl})") end
   if not C.FILES.glossary then fail(nil, nil, "no glossary file (\\newabbreviation or \\newglossaryentry in a file thesis.tex loads)") end
-  if not (C.readfile("thesis.tex") or ""):match("\\newcommand{\\lintphase}{%a+}") then fail("thesis.tex", nil, "no \\lintphase in thesis.tex: the lint needs the phase (topic, setup, research, plan, draft, polish or submit)") end
+  if not C.setting("lintphase") then fail("thesis.tex", nil, "no \\lintphase in thesis.tex: the lint needs the phase (topic, setup, research, plan, draft, polish or submit)") end
   local pre = C.readfile("include/preamble.tex") or ""
   for _, m in ipairs({ "runningexample", "NewTagList", "beat", "gapyes", "atodo" }) do
     if not pre:find(m, 1, true) then fail("include/preamble.tex", nil, "the preamble no longer defines " .. m) end
@@ -604,8 +604,11 @@ local function ref_fix(l)
   end)))
 end
 
+-- the printed lines only, and nothing inside \verb, \lstinline or a link: a Figure~\ref in a code
+-- listing is the program's text, and no fix touches it (lintcore.lua, M.literal_spans)
 rule("crefs", "source", "check", "always", "references go through \\cref: no 'Figure~\\ref', no \\autoref, \\Cref at the start of a sentence, and no bare \\ref outside table cells", function()
-  C.each_line(MAIN, function(f, n, l)
+  C.each_printed_line(MAIN, function(f, n, raw)
+    local l = C.unliteral(raw)
     if l:match("[Ff]igure~?\\ref") or l:match("[Tt]able~?\\ref") or l:match("[Ss]ection~?\\ref") or l:match("[Cc]hapter~?\\ref") or l:match("[Ll]isting~?\\ref") then fail(f, n, "a typed reference with \\ref", "write \\cref{...}", cref_fix(l, "(%a+)~?\\ref{([^}]*)}", function(w) return TYPED_REF[w:lower()] end)) end
     if l:match("\\autoref") then fail(f, n, "\\autoref", "the template uses cleveref, write \\cref", cref_fix(l, "\\(auto)ref{([^}]*)}", function() return true end)) end
     if l:match("\\figref") or l:match("\\tabref") or l:match("\\sectref") or l:match("\\listref") then fail(f, n, "the faculty template's \\figref family", "write \\cref", cref_fix(l, "\\(%a+)ref{([^}]*)}", function(w) return FACULTY_REF[w] end)) end
@@ -936,20 +939,18 @@ rule("companion", "source", "check", "always", "a TDK paper of the same year is 
       end
     end
   end
+  -- links, read as citations are (C.each_call): across spaces and line breaks, in the printed text only
+  C.each_call(CONTENT, function(name) return name == "url" or name == "href" or name == "weblink" end, function(f, n, _, arg)
+    local what = companion_link(arg, year, own)
+    if what then flag(f, n, "links " .. what .. ": a TDK paper of the same year is a companion paper, named as one, never linked") end
+  end)
   for _, f in ipairs(CONTENT) do
-    C.each_line({ f }, function(_, n, l)
-      for cmd, arg in l:gmatch("\\(%a+)%s*(%b{})") do
-        if cmd == "url" or cmd == "href" or cmd == "weblink" then
-          local what = companion_link(arg:sub(2, -2), year, own)
-          if what then flag(f, n, "links " .. what .. ": a TDK paper of the same year is a companion paper, named as one, never linked") end
-        end
-      end
-    end)
     -- "a companion paper~\cite{...}" or a link whose text says companion; a citation later in the
     -- sentence ("a companion paper verifies it in Tamarin~\cite{...}") is another source's
     local text = table.concat(C.prose_lines(f), "\n")
     local pats = { "\\href%s*%b{}%s*{()[^}]*[Cc]ompanion", "\\weblink%s*%b{}%s*{()[^}]*[Cc]ompanion" }
-    for _, cmd in ipairs({ "[cC]ite", "url", "href", "weblink" }) do pats[#pats + 1] = "()[Cc]ompanion%s*%a*[%s~,(%[]*\\" .. cmd end
+    -- the words may close an \emph{} or \enquote{} before the citation
+    for _, cmd in ipairs({ "[cC]ite", "url", "href", "weblink" }) do pats[#pats + 1] = "()[Cc]ompanion%s*%a*}?[%s~,(%[]*\\" .. cmd end
     for _, p in ipairs(pats) do
       for at in text:gmatch(p) do
         local n = 1 + C.count(text:sub(1, at), "\n")
@@ -1109,6 +1110,8 @@ local function in_grid(f, n)
   return grid_cache[f][n]
 end
 local function is_range(code, s, e) return not code:sub(s - 1, s - 1):match("[%w%-%.]") and not code:sub(e + 1, e + 1):match("[%w%-]") end
+-- doubled words that are grammar, not a slip: "the protocol that that process uses", "had had"
+local DOUBLED_OK = { that = true, had = true }
 
 rule("typography", "source", "advice", "polish", "the small things the reviewer sees: number ranges with --, a thin space before units, no straight quotes, no doubled words, \\eg and \\ie macros, no manual line breaks in prose", function()
   C.each_prose_line(MAIN, function(f, n, l)
@@ -1146,9 +1149,9 @@ rule("typography", "source", "advice", "polish", "the small things the reviewer 
       warn(f, n, "et al. typed out", "use \\etal", typo_fix(f, n, seen, "etal", "write \\etal", C.nmatch(p, "%f[%a]et al%."), "%f[%a]et al%.", function() if C.defines("etal") then return "\\etal" end end))
     end
     for w in p:gmatch("%f[%a](%a+) %1%f[%A]") do
-      if #w > 2 then
+      if #w > 2 and not DOUBLED_OK[w:lower()] then
         warn(f, n, "doubled word: " .. w .. " " .. w, typo_fix(f, n, seen, "double", "keep one", 1, "%f[%a](%a+) %1%f[%A]", function(_, _, _, d)
-          if #d > 2 then return d end
+          if #d > 2 and not DOUBLED_OK[d:lower()] then return d end
         end, "review"))
       end
     end

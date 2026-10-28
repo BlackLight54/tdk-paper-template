@@ -146,16 +146,27 @@ end
 -- the canonical label for a row found by its heading: par: on a paragraph, sec: otherwise
 function M.label_for(row, cmd) return (cmd == "paragraph" and "par:" or "sec:") .. row.key end
 
--- the first cited entry of the files that is a Zenodo record (10.5281/zenodo.<number>), the
--- archive the template's code repository releases to; any other DOI is a paper, not the artifact.
--- Whether it is the version the results came from, the lint cannot tell
+-- the first cited entry of the files whose doi or url field is a Zenodo record (10.5281/zenodo.N),
+-- the archive the template's code repository releases to, and whose type is an artifact's (@software,
+-- @dataset, @misc, @online): a paper with a Zenodo DOI, or a DOI mentioned only in a note, is not the
+-- artifact. Whether the record is this paper's code, and the version the results came from, the
+-- lint cannot tell; the reader checks that. Returns the key, or nil and why the nearest miss fails
+local ARTIFACT_TYPES = { software = true, dataset = true, misc = true, online = true, electronic = true, www = true, data = true }
+local function zenodo_in(body, field)
+  local v = body:match("[,%s]" .. field .. "%s*=%s*[{\"]([^}\"]*)")
+  return v and v:match("10%.5281/zenodo%.%d+")
+end
 local function cited_artifact(files)
-  local bib, found = C.bib_entries(), nil
+  local bib, found, why = C.bib_entries(), nil, nil
   C.each_cite(files, function(_, _, key)
     local e = bib[key]
-    if not found and e and e.body:match("10%.5281/zenodo%.%d+") then found = key end
+    if found or not e then return end
+    local doi = zenodo_in(e.body, "[dD][oO][iI]") or zenodo_in(e.body, "[uU][rR][lL]")
+    if not doi then return end
+    if ARTIFACT_TYPES[e.type] then found = key
+    else why = why or string.format("%s is an @%s entry with a Zenodo DOI, a publication rather than the artifact: cite the artifact's own record (@software or @misc)", key, e.type) end
   end)
-  return found
+  return found, why
 end
 
 local TEXT_USED = {
@@ -164,8 +175,9 @@ local TEXT_USED = {
     return false, "point to the full comparison: \\cref{ch:related}, \\cref{tab:related} or \\cref{fig:positioning}"
   end,
   setup = function()
-    if cited_artifact(C.role_files("evaluation")) then return true end
-    return false, "cite the archived artifact in the evaluation: a bibliography entry with its Zenodo DOI, 10.5281/zenodo.<number>"
+    local key, why = cited_artifact(C.role_files("evaluation"))
+    if key then return true end
+    return false, why or "cite the archived artifact in the evaluation: a bibliography entry with its Zenodo DOI, 10.5281/zenodo.<number>"
   end,
   scalability = function(f, a, b)
     for _, key in ipairs(labels_in_span(f, a, b)) do if (key:match("^fig:") or key:match("^tab:")) and main_refs(key) > 0 then return true end end
@@ -377,8 +389,24 @@ function M.gapmatrix()
     end
   end
   if #rows == 0 then return { "the gap matrix has no rows starting with \\ref{req:...}" } end
+  local declared = {}
   for _, it in ipairs(tag_items("req")) do
+    declared[it.key] = true
     if not seen[it.key] then fails[#fails + 1] = it.key .. " has no row in the gap matrix" end
+  end
+  for req in pairs(seen) do
+    if not declared[req] then fails[#fails + 1] = req .. " is a row of the gap matrix but no requirement carries that label" end
+  end
+  -- what this work's cells may point at: a label in an evaluation chapter, or a research question,
+  -- guarantee or derived requirement the evaluation answers; a chapter or an unknown label is no result
+  local labels = C.collect_labels_and_refs(C.main_chapters())
+  local evalfile = {}
+  for _, f in ipairs(C.role_files("evaluation")) do evalfile[f] = true end
+  local function result_problem(key)
+    local at = labels[key]
+    if not at then return key .. ", which no label defines" end
+    if evalfile[at.file] or key:match("^rq:") or key:match("^g:") or key:match("^dr:") then return nil end
+    return key .. " is not an evaluation result: point at a result in the evaluation chapter, or at the research question or guarantee it answers"
   end
   local approaches = ncols - 3 -- tag, name, approaches..., this work
   if approaches < 2 then M.gapwarn[#M.gapwarn + 1] = "fewer than two other approaches in the gap matrix: the gap is argued against the closest existing work, plural" end
@@ -386,7 +414,15 @@ function M.gapmatrix()
   for _, r in ipairs(rows) do
     local last = r[#r]
     if not last:match("\\gapyes") then fails[#fails + 1] = string.format("row %s: this work does not meet its own requirement; if a requirement is not met, say so in the text and the limitations", r[1])
-    elseif not last:match("\\[cC]ref{") and not last:match("\\ref{") then fails[#fails + 1] = string.format("row %s: this work's cell points at no evaluation result: add \\cref to the result that shows it", r[1]) end
+    else
+      local keys = {}
+      for list in last:gmatch("\\[cC]?ref%*?%s*{([^}]*)}") do for k in list:gmatch("[^,%s]+") do keys[#keys + 1] = k end end
+      if #keys == 0 then fails[#fails + 1] = string.format("row %s: this work's cell points at no evaluation result: add \\cref to the result that shows it", r[1]) end
+      for _, k in ipairs(keys) do
+        local why = result_problem(k)
+        if why then fails[#fails + 1] = string.format("row %s: this work's cell points at %s", r[1], why) end
+      end
+    end
     if (r[2] or ""):match("TODO") then M.gapwarn[#M.gapwarn + 1] = string.format("row %s: the requirement's short name is a TODO", r[1]) end
     for c = 3, #r - 1 do allmet[c] = (allmet[c] == nil or allmet[c]) and r[c]:match("\\gapyes") ~= nil end
   end

@@ -132,8 +132,8 @@ GAP = r"""\begin{table}[!ht]
     & \textbf{Requirement} & \makecell{\textbf{Ledger audit}\\\cite{lamport1978time}} & \makecell{\textbf{Status lists}\\\cite{w3c2025vcdm}} & \textbf{This work} \\
     \midrule
     \ref{req:first}  & Fast revocation & \gapyes & \gappartial & \gapyes\,(\cref{rq:correct}) \\
-    \ref{req:second} & Unlinkable checks & \gapno & \gapyes & \gapyes\,(\cref{rq:scale}) \\
-    \ref{req:third}  & Auditable history & \gappartial & \gapno & \gapyes\,(\cref{rq:robust}) \\
+    \ref{req:second} & Unlinkable checks & \gapno & \gapyes & \gapyes\,(\cref{sec:scalability}) \\
+    \ref{req:third}  & Auditable history & \gappartial & \gapno & \gapyes\,(\cref{sec:robustness}) \\
     \bottomrule
   \end{tabularx}
 \end{table}"""
@@ -188,7 +188,7 @@ MUTATIONS = [
     # (name, rule, edit, text the rule must print)
     ("gap matrix rows short", "essentials", both(filled_gap, drop_line("content/06-related-work.tex", "\\ref{req:third}  & Auditable")), "req:third has no row in the gap matrix"),
     ("a gap matrix row twice", "essentials", both(filled_gap, sub("content/06-related-work.tex", "\\ref{req:second} & Unlinkable", "\\ref{req:first} & Unlinkable")), "req:first has two rows"),
-    ("this work without a result pointer", "essentials", both(filled_gap, sub("content/06-related-work.tex", "\\gapyes\\,(\\cref{rq:scale})", "\\gapyes")), "points at no evaluation result"),
+    ("this work without a result pointer", "essentials", both(filled_gap, sub("content/06-related-work.tex", "\\gapyes\\,(\\cref{sec:scalability})", "\\gapyes")), "points at no evaluation result"),
     ("guarantee not in the correctness table", "essentials", both(own_items("content/03-approach.tex", "g"), drop_line("content/05-evaluation.tex", "\\ref{g:example} &")), "g:example is not checked in the evaluation"),
     ("contribution not restated", "essentials", own_items("content/01-introduction.tex", "c"), "c:method is not restated"),
     ("a restated contribution", "essentials", both(own_items("content/01-introduction.tex", "c"), append("content/07-conclusion.tex", "\\Cref{c:method} holds in every run.")), "!c:method is not restated"),
@@ -298,6 +298,37 @@ MUTATIONS = [
     ("an offline link check is skipped, not passed", "links", lambda d: None, "links         advice  skipped", {"fresh": True}),
     ("a PDF rule without a PDF is skipped", "pdf-margins", lambda d: None, "skipped", {"args": "--doc nosuchdoc --phase submit", "fresh": True}),
     ("json carries the findings of every rule", "bib", append(BG, "See~\\cite{nosuchref}."), '"msg":"cited key nosuchref is in no .bib file","rule":"bib"', {"args": "all --doc reviewer --phase submit --json", "exit": 1}),
+    # fixes never edit literal text: code listings, inline verbatim, links, maths
+    ("a code listing's Figure~\\ref is the program's text", "crefs", append(BG, "\\begin{lstlisting}\nFigure~\\ref{fig:overview}\n\\end{lstlisting}"), "!typed reference"),
+    ("inline verbatim is the program's text", "crefs", append(BG, "The macro \\verb|Figure~\\ref{fig:overview}| is typed as text."), "!typed reference"),
+    ("a quote inside verbatim is not rewritten", "typography", append(BG, 'The string \\verb|"abc"| is a literal; "quoted" text follows.'), '!\\verb|\\enquote{abc}|'),
+    ("a quote outside verbatim is rewritten", "typography", append(BG, 'The string \\verb|"abc"| is a literal; "quoted" text follows.'), '\\enquote{quoted} text follows'),
+    ("a range inside maths is a formula", "typography", append(BG, "The bound $12-18$ holds."), "!with a hyphen"),
+    ("that that is grammar, not a doubled word", "typography", append(BG, "The protocol that that process uses is sound."), "!doubled word"),
+    ("a doubled word", "typography", append(BG, "The protocol the the process uses is sound."), "doubled word: the the"),
+    # the phase declaration is read as TeX reads it
+    ("a phase declared across two lines is read", "markers", both(append(BG, "Proving takes \\tbd{the proving time}."), sub("thesis.tex", "\\newcommand{\\lintphase}{plan}", "\\newcommand{\\lintphase}\n  {submit}")), "is still here", {"args": "--doc reviewer"}),
+    ("a starred declaration is read", "markers", both(append(BG, "Proving takes \\tbd{the proving time}."), sub("thesis.tex", "\\newcommand{\\lintphase}{plan}", "\\newcommand*{\\lintphase}{submit}")), "is still here", {"args": "--doc reviewer"}),
+    ("a typo across two lines stops the lint", "markers", sub("thesis.tex", "\\newcommand{\\lintphase}{plan}", "\\newcommand{\\lintphase}\n  {fnial}"), "unknown phase 'fnial'", {"args": "--doc reviewer", "exit": 2}),
+    # links are read as citations are: across line breaks, in the printed text only
+    ("an Overleaf link across a line break", "companion", append(BG, "The draft is at \\url\n{https://www.overleaf.com/read/abcdefghijkl}."), "links an Overleaf project"),
+    ("an Overleaf link in a comment environment is not read", "companion", append(BG, "\\begin{comment}\n\\url{https://www.overleaf.com/read/abcdefghijkl}\n\\end{comment}"), "!Overleaf"),
+    ("an Overleaf link in a todo note is not read", "companion", append(BG, "Text.\\todo{Read \\url{https://www.overleaf.com/read/abcdefghijkl}.}"), "!Overleaf"),
+    ("a companion paper in emphasis, cited", "companion", append(BG, "A \\emph{companion paper}~\\cite{lamport1978time} verifies it."), "attached to a companion paper"),
+    ("a citation in a todo whose text follows a space", "companion", both(tdk_entry(YEAR), sub(BG, CITED, f"Text.\\todo[inline] {{Read~\\cite{{student{YEAR}companion}} again.}}")), "!is a TDK paper of"),
+    # the artifact is an artifact's entry with the DOI in its doi or url field
+    ("a publication's Zenodo DOI is not the artifact", "essentials", both(replace_line(EVAL, SETUP, words(120) + " A survey discusses clocks~\\cite{unrelated}."),
+        append("bib/references.bib", "@article{unrelated,\n  author = {Other, Author},\n  title = {A survey},\n  journal = {Reports},\n  year = {2025},\n  doi = {10.5281/zenodo.1234567}\n}")), "◕ Setup and artifact\n    help: unrelated is an @article entry with a Zenodo DOI"),
+    ("a Zenodo DOI only in a note is not the artifact", "essentials", both(replace_line(EVAL, SETUP, words(120) + " We discuss~\\cite{unrelated}."),
+        append("bib/references.bib", "@misc{unrelated,\n  author = {Other, Author},\n  title = {A survey},\n  year = {2025},\n  note = {The archive was once 10.5281/zenodo.1234567}\n}")), "◕ Setup and artifact\n    help: cite the archived artifact"),
+    # the gap matrix: every row is a declared requirement, and this work's cells point at results that exist
+    ("a gap matrix row that names no requirement", "essentials", both(filled_gap, sub("content/06-related-work.tex", "\\ref{req:third}  & Auditable", "\\ref{req:fourth} & Extra & \\gapno & \\gapno & \\gapyes\\,(\\cref{rq:correct}) \\\\\n    \\ref{req:third}  & Auditable")), "req:fourth is a row of the gap matrix but no requirement carries that label"),
+    ("this work points at a chapter, not a result", "essentials", both(filled_gap, sub("content/06-related-work.tex", "\\gapyes\\,(\\cref{sec:scalability})", "\\gapyes\\,(\\cref{ch:background})")), "ch:background is not an evaluation result"),
+    ("this work points at a label that does not exist", "essentials", both(filled_gap, sub("content/06-related-work.tex", "\\gapyes\\,(\\cref{sec:scalability})", "\\gapyes\\,(\\cref{fig:does-not-exist})")), "fig:does-not-exist, which no label defines"),
+    ("a pointer with a space after \\cref counts", "essentials", both(filled_gap, sub("content/06-related-work.tex", "\\gapyes\\,(\\cref{sec:scalability})", "\\gapyes\\,(\\cref {sec:scalability})")), "!Gap matrix\n    help:"),
+    # a rule whose own code fails did not run: exit 2, status error, never ok
+    ("a crashed rule stops the lint with exit 2", "sources", sub("scripts/lint/rules-source.lua", 'local bbl = C.readfile(C.bpath(C.opts.doc .. ".bbl"))', 'error("injected by the mutation suite") local bbl = C.readfile(C.bpath(C.opts.doc .. ".bbl"))'), "the rule itself failed", {"args": "--doc reviewer --phase submit", "exit": 2}),
+    ("a crashed rule is not ok in the JSON", "sources", sub("scripts/lint/rules-source.lua", 'local bbl = C.readfile(C.bpath(C.opts.doc .. ".bbl"))', 'error("injected by the mutation suite") local bbl = C.readfile(C.bpath(C.opts.doc .. ".bbl"))'), '"ok":false', {"args": "--doc reviewer --phase submit --json", "exit": 2}),
     ("a misspelt title", "spelling", sub("thesis.tex", "\\newcommand{\\vikcim}{TODO Title of the paper}", "\\newcommand{\\vikcim}{Revocation and revovation of credentials}"), "revovation"),
 ]
 
@@ -305,13 +336,18 @@ MUTATIONS = [
 ARGS = "--doc reviewer --phase submit"
 
 
-def lint(d, rule, args=ARGS):
-    """The rule's output and exit. args starting with a subcommand (overleaf, all) replace the rule."""
+def lint(d, rule, args=ARGS, env=None):
+    """The rule's output and exit. args starting with a subcommand (overleaf, all) replace the rule.
+    The cases read the lint's plain output, so GitHub's variables are kept from it: under
+    GITHUB_ACTIONS the lint prints workflow commands instead, with the help on the annotation."""
     cmd = args if args.split()[0] in ("overleaf", "all", "source") else f"{rule} {args}"
+    plain = {k: v for k, v in os.environ.items() if not k.startswith("GITHUB_")}
+    plain.update(env or {})
     if shutil.which("texlua"):
-        r = subprocess.run(["sh", "-c", f"LINT_OFFLINE=1 texlua scripts/lint.lua {cmd} 2>&1"], cwd=d, text=True, capture_output=True)
+        r = subprocess.run(["sh", "-c", f"LINT_OFFLINE=1 texlua scripts/lint.lua {cmd} 2>&1"], cwd=d, text=True, capture_output=True, env=plain)
     else:
-        r = subprocess.run(["docker", "run", "--rm", "-u", f"{os.getuid()}:{os.getgid()}", "-e", "HOME=/tmp", "-v", f"{d}:/w", "-w", "/w", IMAGE,
+        envargs = [x for k, v in (env or {}).items() for x in ("-e", f"{k}={v}")]
+        r = subprocess.run(["docker", "run", "--rm", "-u", f"{os.getuid()}:{os.getgid()}", "-e", "HOME=/tmp", *envargs, "-v", f"{d}:/w", "-w", "/w", IMAGE,
                             "sh", "-c", f"LINT_OFFLINE=1 texlua scripts/lint.lua {cmd} 2>&1"],
                            text=True, capture_output=True)
     return r.stdout, r.returncode
@@ -362,7 +398,7 @@ def main():
         negate = expect.startswith("!")
         if not opts.get("fresh"):
             if (rule, args) not in baseline:
-                baseline[rule, args] = lint(base, rule, args)
+                baseline[rule, args] = lint(base, rule, args, opts.get("env"))
             out, code = baseline[rule, args]
             why = ran(out, code, rule, {k: v for k, v in opts.items() if k != "exit"}) if opts.get("exit") != 2 else None
             if why:
@@ -381,7 +417,7 @@ def main():
             print(f"STALE {rule:13s} {name}: {e}")
             shutil.rmtree(d)
             continue
-        out, code = lint(d, rule, args)
+        out, code = lint(d, rule, args, opts.get("env"))
         why = ran(out, code, rule, opts)
         ok = why is None and ((expect[1:] not in out) if negate else (expect in out))
         missed += not ok
