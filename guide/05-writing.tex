@@ -197,6 +197,31 @@ A caption is the figure's own paragraph, and a reader who reads only figures and
 \section{The abstract}\label{app:writing:abstract}
 The abstract has a job before it has a structure: it must convince two readers that the paper is worth their time. The first is us, when you register the summary on the portal; the second is the committee that assigns the reviewers and, later, the reviewers themselves, who read it before anything else. Both have to come away believing that the topic is \textbf{relevant}, that solving it is \textbf{non-trivial}, that what you did is \textbf{novel}, and that it is \textbf{correct}: the same four things the review sheet scores (\cref{app:tdk:sheet}). Then follow \weblink{https://www.nature.com/documents/nature-summary-paragraph.pdf}{Nature's summary paragraph guide}; the abstract in this template already has its seven steps as placeholders.
 
+\section{The reference list}\label{app:writing:refs}
+The reference list shows whether you know the field, and the review sheet reads it twice (\cref{app:tdk:sheet}). B/1 wants the references accurate, \enquote{a szakirodalmi hivatkozások pontosak}; B/2 ranks the literature on a scale whose step 1 is a paper that learned its field from web pages: \enquote{1: ismert ipari gyakorlat (a dolgozat feldolgozta a weblapokról, technikai dokumentációkból közismert ipari megoldásokat)}. Below is the reference list we like to see, and the repair pass that gets a draft's list there.
+
+\paragraph{What we like.}
+\begin{itemize}
+  \item \textbf{Strong papers from strong venues, typically recent.} Peer-reviewed journal and conference papers from venues the field respects: the classics a result rests on, and the current state of the art. When you are unsure whether a venue is strong, ask us; the \href{https://portal.core.edu.au/conf-ranks/}{CORE ranking} for conferences and the \href{https://www.scimagojr.com/}{SJR quartiles} for journals are a first hint, not a verdict.
+  \item \textbf{arXiv only with a reason.} The usual reason is that the work is too recent to have been published yet. Otherwise cite the published version.
+  \item \textbf{No weak sources.} An encyclopedia article, a tutorial, a vendor's marketing page or a post nobody reviewed is not evidence. Find the paper, the standard or the documentation it took its claim from, and cite that.
+  \item \textbf{URLs, strictly selected.} In a technical topic, a specification, a standard, a project's official documentation or its repository can be the primary source, and then it is the right citation. Select them hard: the official documentation, not the 222nd blog post that explains it.
+  \item \textbf{Never URLs only.} A reference list of web pages alone is the sheet's step 1 above, however good the text is.
+  \item \textbf{Footnotes when the URLs pile up.} A URL that only points to a thing you name, such as a tool, a library, a repository or a product, goes in a footnote, \texttt{\textbackslash footnote\{\textbackslash url\{\dots\}\}}, and the reference list keeps the sources that back a claim. The web sources that stay in the list follow the faculty's rule: owner, title, URL and access date (\cref{app:latex:cite}).
+  \item \textbf{Fifty is plenty.} A TDK paper typically needs no more than 50 references. If yours has more, the last step of the repair pass cuts it.
+\end{itemize}
+
+\paragraph{The repair pass.} Run it once when the draft is full and again in the last week (\cref{tab:polish}). Fix each entry in the Zotero group library, not in \texttt{bib/zotero.bib}: a refresh overwrites the file, and the next student inherits the fixed entry.
+\begin{enumerate}
+  \item \textbf{Read what you cite.} Open every source and check that it says what your sentence claims. A citation suggested by an AI tool or copied from another paper's reference list counts only once you have read the source.
+  \item \textbf{Preprints.} Search \href{https://dblp.org/}{dblp} for the title of every arXiv entry; it lists the preprint and the published version as separate entries. If a published version exists, cite it instead.
+  \item \textbf{Web pages.} For every URL entry, ask whether it backs a claim. If it does not, it becomes a footnote. If it does, and a paper, a standard or official documentation says the same, cite that instead.
+  \item \textbf{Complete entries.} Authors, title, venue and year on every entry; volume, number and pages on journal articles; the DOI wherever one exists. Given a DOI, Zotero's \emph{Add Item by Identifier} fetches clean metadata, and dblp's BibTeX export is a good model for computer-science venues.
+  \item \textbf{One entry per work.} A preprint and its published version are one work, a venue has one name throughout, and titles stay in their original language, as the faculty's guideline asks.
+  \item \textbf{Cut to size.} Above 50 entries, drop the weakest sources first, starting with those another entry already covers.
+\end{enumerate}
+The \texttt{bib} lint rule checks the mechanical part: a title, a year and an author on every entry, an access date on web sources, bare DOIs (\cref{app:code:paperci}). The \texttt{sources} rule only advises: it names every arXiv preprint you cite, and warns when the list grows past 50 entries or holds nothing but web pages. The judgement is yours.
+
 \section{Style}
 \begin{itemize}
   \item The Chicago School of Writing lectures: \href{https://www.youtube.com/watch?v=vtIzMaLkCaM}{part I}, \href{https://www.youtube.com/watch?v=aFwVf5a3pZM}{part II}, \href{https://www.youtube.com/watch?v=gphdfSwYMWU}{part III}.
