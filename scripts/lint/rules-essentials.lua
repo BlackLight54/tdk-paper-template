@@ -411,7 +411,14 @@ local function eval_example(row, r)
   end
   if not found then return 0, row.add end
   r.where = place(found.file, found.line, found.last)
-  if not name or name:match("TODO") then return 1, "name the example: \\exname in thesis.tex is still a TODO" end
+  if not name or name:match("TODO") then
+    -- the finding sits on the example box; the fix shows the line to edit, in thesis.tex
+    for n, raw in ipairs(C.raw_lines("thesis.tex")) do
+      local def = C.strip_comment(raw):match("\\newcommand{\\exname}%b{}")
+      if def then r.fix = C.fix("placeholder", "name the running example", C.replace_at("thesis.tex", n, def, "\\newcommand{\\exname}{<the example's name>}")); break end
+    end
+    return 1, "name the example: \\exname in thesis.tex is still a TODO"
+  end
   local w, ps = 0, plines(found.file)
   for i = found.line, found.last do w = w + C.own_words(ps[i] or "") end
   if w < M.EXAMPLE_WORDS then return 2, "write the introduction's example box in your own words: the actors, what they want, what goes wrong" end
@@ -525,7 +532,7 @@ C.rule("essentials", "source", "check", "always", "the essentials every paper of
     local file = r.home
     local line = r.where and r.where.line
     local msg = string.format("%s %s: %s", M.GLYPH[r.level], r.row.title, r.next ~= "" and r.next or M.LEVEL_NAME[r.level])
-    if r.level < t then fail(file, line, msg) end
+    if r.level < t then fail(file, line, msg, r.fix) end
     if r.via == "heading" then note(file, line, string.format("%s found by its heading; add \\label{%s} so it is found when the heading changes", r.row.title, r.label), label_fix(r)) end
   end
   for _, w in ipairs(M.gapwarn) do warn(C.ROLE.related, nil, w) end
