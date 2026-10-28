@@ -117,6 +117,26 @@ function M.bib_entries()
   end
   return bib_cache
 end
+-- every key cited by \cite, \citet, \citep, \citeauthor, \Citet and the rest of the family (not
+-- \nocite, not the \citeneeded marker), as fn(file, line, key)
+function M.each_cite(files, fn)
+  M.each_line(files, function(f, n, l)
+    local pos = 1
+    while true do
+      local s, e = l:find("\\[cC]ite%a*%*?", pos); if not s then break end
+      pos = e + 1
+      if l:sub(s + 1, e) ~= "citeneeded" then
+        if l:sub(pos, pos) == "[" then local _, be = l:find("%b[]", pos); pos = (be or pos) + 1 end
+        if l:sub(pos, pos) == "[" then local _, be = l:find("%b[]", pos); pos = (be or pos) + 1 end
+        local bs, be = l:find("%b{}", pos)
+        if bs == pos then
+          for k in l:sub(bs + 1, be - 1):gmatch("[^,%s]+") do fn(f, n, k) end
+          pos = be + 1
+        end
+      end
+    end
+  end)
+end
 -- a rule that needs chapters by role calls this first; it fails with the right message and returns false
 function M.roles_ok(list)
   local ok = true
