@@ -570,6 +570,9 @@ rule("preamble", "source", "check", "always", "include/macros.tex does not fight
   end)
 end)
 
+-- the units a number takes a thin space before; Lua patterns have no alternation, so a set
+local UNITS = { ms = true, s = true, MB = true, GB = true, KB = true, kB = true, Hz = true, MHz = true, GHz = true, mm = true, cm = true, pt = true, KiB = true, MiB = true, GiB = true, bytes = true, B = true }
+
 rule("typography", "source", "advice", "polish", "the small things the reviewer sees: number ranges with --, a thin space before units, no straight quotes, no doubled words, \\eg and \\ie macros, no manual line breaks in prose", function()
   C.each_prose_line(MAIN, function(f, n, l)
     local p = C.prose(l)
@@ -577,7 +580,7 @@ rule("typography", "source", "advice", "polish", "the small things the reviewer 
     for s, a, b, e in p:gmatch("()(%d+)%-(%d+)()") do
       local before, after = p:sub(s - 1, s - 1), p:sub(e, e)
       if not before:match("[%w%-%.]") and not after:match("[%w%-]") and not l:match("\\label") and not l:match("label=") then warn(f, n, string.format("range %s-%s with a hyphen: write %s--%s", a, b, a, b)) end end
-    for num, unit in p:gmatch("(%d) (ms|s|MB|GB|KB|kB|Hz|MHz|GHz|mm|cm|pt|KiB|MiB|GiB|bytes|B)%f[%W]") do warn(f, n, string.format("'%s %s': use a thin space, %s\\,%s", num, unit, num, unit)) end
+    for num, unit in p:gmatch("(%d) (%a+)%f[%A]") do if UNITS[unit] then warn(f, n, string.format("'%s %s': use a thin space, %s\\,%s", num, unit, num, unit)) end end
     if p:match('"') then warn(f, n, "straight double quote: use \\enquote{...}") end
     if p:match("%f[%a]e%.g%.") or p:match("%f[%a]i%.e%.") then warn(f, n, "e.g./i.e. typed out: use \\eg and \\ie, which get the spacing right") end
     if p:match("%f[%a]et al%.") and not l:match("\\etal") then warn(f, n, "et al. typed out: use \\etal") end
