@@ -103,6 +103,9 @@ jobs:
       - name: source / bib (check)
         if: always()
         run: texlua scripts/lint.lua bib
+      - name: source / companion (check)
+        if: always()
+        run: texlua scripts/lint.lua companion
       - name: source / code (check)
         if: always()
         run: texlua scripts/lint.lua code
