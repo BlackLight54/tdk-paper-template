@@ -9,8 +9,10 @@ student's paper repository, including the build and lint workflow.
 - `thesis.tex` builds the draft with notes, the Checks page and the guide.
   The chapter files contain headings, stubs and notes linking to
   "The paper, chapter by chapter" in `guide/chapter-by-chapter.tex`, where the
-  instructions and worked examples live. `reviewer.tex` builds the submission-format PDF;
-  the final checks and advisor review determine whether it is ready to upload.
+  instructions and worked examples live. `reviewer.tex` builds the PDF in submission
+  format. It hides the notes and gap markers, so how it looks says nothing about
+  readiness: it is ready to upload only when `make check-final` passes and the advisors
+  have reviewed it.
 - `content/` holds the chapters, abstract, glossary and AI declaration; `guide/` holds
   the advisors' guide; `include/` the preamble; `bib/` the bibliographies; and `docs/`
   the review sheet.

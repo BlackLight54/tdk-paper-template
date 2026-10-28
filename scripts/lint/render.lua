@@ -213,15 +213,25 @@ local function other_checks(results)
   out[#out + 1] = "\\toprule " .. head .. " \\midrule \\endhead \\bottomrule \\endlastfoot"
   local first = true
   for _, g in ipairs(P.GROUPS) do
-    local shown, passing, nfix = {}, {}, 0
+    local shown, passing, nfix, ndue, nskip = {}, {}, 0, 0, 0
     for _, res in ipairs(results) do
       if res.rule ~= "essentials" and res.severity ~= "count" and P.group(res.rule) == g.id then
         if res.status == "pass" then passing[#passing + 1] = esc(P.title(res.rule)):gsub("^%u", string.lower)
-        else shown[#shown + 1] = res; if res.status == "fix" then nfix = nfix + 1 end end
+        else
+          shown[#shown + 1] = res
+          if res.status == "fix" then nfix = nfix + 1
+          elseif res.status == "skipped" then nskip = nskip + 1
+          elseif res.status:match("^due at ") then ndue = ndue + 1 end
+        end
       end
     end
     if #shown + #passing > 0 then
-      out[#out + 1] = string.format("%s\\multicolumn{3}{@{}l}{\\textsc{%s}\\enspace{\\footnotesize\\color{lintmute}--- %s}} \\\\", first and "" or "\\addlinespace[.8ex]", esc(g.title), nfix > 0 and (nfix .. " to fix") or "nothing to fix")
+      -- "nothing to fix" only when nothing fails, later or now, and every rule ran: a check that
+      -- fails but is not due yet, or a rule that could not run, is not a pass
+      local said = { nfix > 0 and (nfix .. " to fix") or (ndue + nskip > 0 and ("nothing to fix at " .. C.phase():upper())) or "nothing to fix" }
+      if ndue > 0 then said[#said + 1] = ndue .. " deferred" end
+      if nskip > 0 then said[#said + 1] = nskip .. " skipped" end
+      out[#out + 1] = string.format("%s\\multicolumn{3}{@{}l}{\\textsc{%s}\\enspace{\\footnotesize\\color{lintmute}--- %s}} \\\\", first and "" or "\\addlinespace[.8ex]", esc(g.title), table.concat(said, "; "))
       first = false
       for _, res in ipairs(shown) do
         local f = findings_cell(res)
