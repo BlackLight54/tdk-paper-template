@@ -298,8 +298,10 @@
 % counts once the .aux records a use of it, so a change shows one compile later, as references
 % do). A list starts on a new page unless its heading, its sentence, its column heads
 % and about two lines per entry fit on this one (at most 15 entries' worth), so a short list is not
-% split across two pages. (\Needspace, not \needspace: the latter leaves the break to be decided
-% inside the next longtable, which then prints its head and foot around the break.)
+% split across two pages. The first list follows the chapter heading on a fresh page, so it never
+% asks: a break there would leave the heading alone on its page. (\Needspace, not \needspace: the
+% latter leaves the break to be decided inside the next longtable, which then prints its head and
+% foot around the break.)
 \makeatletter
 \newcount\tdk@used
 % \tdk@ifused{<glossary type, or several, comma-separated>}{<code>}: counts the used entries in
@@ -309,9 +311,11 @@
   \@for\tdk@type:=#1\do{%
     \forglsentries[\tdk@type]{\tdk@entry}{\ifcsdef{glo@\tdk@entry @loclist}{\global\advance\tdk@used by 1 }{}}}%
   \ifnum\tdk@used>0 #2\fi}
-\newcommand{\tdk@keeplist}{\Needspace{\numexpr 8+2*\ifnum\tdk@used>15 15\else\tdk@used\fi\relax\baselineskip}}
+\newif\iftdk@firstlist
+\newcommand{\tdk@keeplist}{\iftdk@firstlist\global\tdk@firstlistfalse\else\Needspace{\numexpr 8+2*\ifnum\tdk@used>15 15\else\tdk@used\fi\relax\baselineskip}\fi}
 \newcommand{\printlists}{\tdk@ifused{abbreviations,symbols,main}{%
   \chapter*{Abbreviations, notation and terms}\addcontentsline{toc}{chapter}{Abbreviations, notation and terms}%
+  \global\tdk@firstlisttrue
   \tdk@ifused{abbreviations}{\tdk@keeplist
    {\renewcommand*{\entryname}{Abbreviation}\renewcommand*{\descriptionname}{Meaning}%
     \printnoidxglossary[type=abbreviations, style=long-booktabs, title={Abbreviations},
