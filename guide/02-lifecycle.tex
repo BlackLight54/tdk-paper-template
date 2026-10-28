@@ -4,7 +4,7 @@
 Plan the phases in \cref{tab:lifecycle} backwards from the official dates in \cref{app:tdk}. Each step has an owner, a completion condition and a link to guidance.
 We use these steps to track each student's progress at the weekly consultation (\cref{app:consult}).
 Set \texttt{\textbackslash lintphase} in \texttt{thesis.tex} to your phase's name in lower case, from \texttt{topic} to \texttt{submit}; the lint's checks come due by phase (\cref{app:code:paperci}). After the upload, leave it at \texttt{submit}: the paper is submitted and needs no further checks.
-Inspect this PDF every week. It is the version reviewers will read.
+Inspect the reviewer PDF every week. It is the version reviewers will read.
 
 Three steps are \anchor{}s: the topic manifest, the spine and the full draft. An anchor is a one-page artefact agreed with us that later work must follow. The topic starts as a direction. The spine fixes its claims and names; the full draft leaves only polishing. You can continue working at an anchor, but work that contradicts it is drift. Revisit the agreement first, or you may have to redo everything built on it.
 
@@ -60,7 +60,7 @@ Red rows mark anchors. Yellow rows marked \official{} are faculty steps with fix
   \rowcolor{anchorrow}
   Full draft \anchor & both & Every chapter is written and in our hands ten days before the deadline & --- \\
   \lcphase{5. Polish}{21--28 October}
-  Advisor review & both & Our comments are resolved and the list of todos is empty & \lcref{app:latex:todo}{Todo notes} \\
+  Advisor review & both & Our comments are resolved and the todo list is empty & \lcref{app:latex:todo}{Todo notes} \\
   Review sheet hill climb & you & You have scored A--E, fixed the weakest criterion and repeated until no cheap fixes remain & \lcref{app:tdk:sheet}{The review sheet} \\
   Skim pass (a hill climb) & you & The skim reviewer gives the maximum on every criterion from the skim view alone & \lcref{app:lifecycle:reviewers}{Reviewer passes} \\
   Code archive & you & The code is on Zenodo, cited by its concept DOI, and the results tag is named in the paper & \lcref{app:zenodo}{Zenodo} \\
@@ -73,59 +73,57 @@ Red rows mark anchors. Yellow rows marked \official{} are faculty steps with fix
   \lcphase{7. After the deadline}{2--16 November, while the reviewers read}
   Code polish & you & README complete, Docker images build, a new Zenodo version published; the results tag untouched & \lcref{app:zenodo:versions}{Release a new version} \\
   Demo & you & The demonstration is recorded by a script and published by CI on every push, with captions that carry the insight & \lcref{app:code:demo}{Demos} \\
-  Talk & you & Slides in the group's template, the leading figure second, one story in fifteen minutes, rehearsed about ten times & \href{https://github.com/ftsrg/cheat-sheets/wiki/TDK-Howto}{FTSRG TDK Howto} \\
+  Presentation & you & Slides in the group's template, the leading figure second, one story in fifteen minutes, rehearsed about ten times & \lcref{app:lifecycle:presentation}{The presentation}, \href{https://github.com/ftsrg/cheat-sheets/wiki/TDK-Howto}{FTSRG TDK Howto} \\
   Reviews and questions & you & Every review question, doubt and remaining panel objection has an answer prepared, with backup slides where useful & \lcref{app:tdk:sheet}{The review sheet}, \lcref{app:lifecycle:reviewers}{Reviewer passes} \\
   \rowcolor{department}
-  Talk rehearsal \department & both & You rehearsed two days before the conference, practised answering the reviewers' questions and fixed the problems found & --- \\
+  Presentation rehearsal \department & both & You rehearsed two days before the conference, practised answering the reviewers' questions and fixed the problems found & \lcref{app:lifecycle:presentation}{The presentation} \\
   \lcphase{8. Conference}{18 November}
   \rowcolor{official}
-  Conference \official & you & Fifteen minutes of talk and five of questions in your section; the awards the same evening & \lcref{app:tdk:dates}{Official dates} \\
+  Conference \official & you & You gave the presentation in your section & \lcref{app:lifecycle:presentation}{The presentation}, \lcref{app:tdk:dates}{Official dates} \\
   After the TDK & both & Decided together: the OTDK if nominated, a conference paper, or a thesis & \lcref{app:tdk:dates}{Placements} \\
 \end{xltabular}
 }
 
-\section{When to run reviewer passes}
-\paragraph{When.} Run the passes at four steps of \cref{tab:lifecycle}. First, use the panel for the spine's premortem: predict objections to the claims and answer them in the plan before drafting. Second, have every relevant persona read the draft. Fix each blocker or acknowledge it in the limitations before sending the full draft to us. Third, repeat the skim pass during polish. Fourth, after the deadline, use remaining panel objections to prepare likely reviewer questions for the rehearsal.
+\section{When to run reviewer passes}\label{app:lifecycle:when-passes}
+Run the reviewer passes (\cref{app:lifecycle:reviewers}) at four steps of \cref{tab:lifecycle}: the premortem, the panel pass, the skim pass, and the reviews and questions. Each row says when the step is done.
 
 \section{Last week's checklist}\label{app:lifecycle:polish}
-Use the polish phase for checks. Any row that takes more than an hour should have been completed in the draft phase. Mechanical checks are rules in \texttt{scripts/lint.lua}. Run all of them against the last build with \texttt{make check}, or against the reviewer build with \texttt{make check-reviewer}. Before you upload, run \texttt{make check-submit}: it checks the reviewer build at the submit phase whatever \texttt{\textbackslash lintphase} says, because the reviewer PDF hides todos and gap markers. Run an individual rule with, for example, \texttt{make lint-essentials}; list the rules with \texttt{texlua scripts/lint.lua list}. The paper CI (\cref{app:code:paperci}) runs the same rules on every push, so keep them passing before the last week. Check the remaining rows by reading.
+Use the polish phase for checks. Any row that takes more than an hour should have been completed in the draft phase. A rule name in brackets marks a row the lint checks: run the rules with \texttt{make check-reviewer} (\cref{app:code:paperci}), and keep them passing before the last week, as the paper CI runs them on every push. Check the remaining rows by reading.
 {\small
 \begin{xltabular}{\linewidth}{>{\raggedright\arraybackslash}p{0.26\linewidth} X}
-  \caption{Final checks. Rule names in brackets identify mechanical checks run by \texttt{make check} and the paper CI.}\label{tab:polish}\\
+  \caption{Last week's checks. Rule names in brackets identify lint rules (\cref{app:code:paperci}).}\label{tab:polish}\\
   \toprule \textbf{Check} & \textbf{Done when} \\ \midrule \endfirsthead
   \toprule \textbf{Check} & \textbf{Done when} \\ \midrule \endhead
   \bottomrule \endlastfoot
   Page count [pages] & The main text, from the first page of \tplref{ch:intro} to the last page of \tplref{ch:conclusion}, is 30--35 pages; appendices, the bibliography, the abstract and the title page do not count. \\
   Build log [build, overfull] & No undefined or multiply defined labels, no undefined citations, no overfull boxes, no missing fonts or files. \\
   Cross-references [figures] & Every reference uses \texttt{\textbackslash cref}; every figure, table, listing and equation is referenced from the text (\cref{app:latex:cref}). \\
-  Essentials [essentials] & Every essential in \cref{app:writing:essentials} has reached its highest level: written in your words and used in the argument. Each requirement has a gap-matrix row and an evaluation check; each derived requirement has an evaluation check; each adversary is addressed in the approach; each guarantee has a correctness-table row; and the conclusion restates every contribution with evidence. \\
-  Outline [outline, chapters, spine] & Chapters are renamed where the template says so, no heading is a TODO; each chapter is one file in reading order, the introduction first and nothing after the conclusion. \\
+  Essentials [essentials] & Every essential has reached its highest level, written and used (\cref{app:writing:essentials}). \\
+  Outline [outline, chapters, the chapter-order check (spine)] & Chapters are renamed where the template says so, no heading is a TODO; each chapter is one file in reading order, the introduction first and nothing after the conclusion. \\
   Every chapter written [stubs, orphans] & Chapters outside the essentials, such as background or implementation, have at least 150 words of their own, beyond the template skeleton or an outline. Every file containing text is included in the paper. \\
   Figures are vector & Every figure is TikZ in the paper repository, or has a written reason not to be; a draw.io draft was redrawn or exported as PDF only as a last resort (\cref{app:writing:figure}). \\
-  Yours is visible & The leading figure and every architecture-like figure use the same blue \texttt{ours} style for all your components, and explain it in the caption (\cref{app:writing:figure}). \\
+  Yours is visible & The leading figure and every architecture-like figure colour your components as \cref{app:writing:figure} says. \\
   Axes and legends & Every axis has a label with a unit; every legend entry names a thing the text also names. \\
-  Captions & Every caption explains the figure in the sense of \cref{app:writing:captions}: a claim first, then context. \\
+  Captions & Every caption follows \cref{app:writing:captions}. \\
   Readable in print [pdf-smalltext] & No text in a figure is below 8\,pt when printed, and 10\,pt where it fits; colour pairs are distinguishable in greyscale. \\
   Tables & Tables fit the text width, numbers are right-aligned with the same precision in a column, units are in the header. \\
   Spine drift & Every term, symbol and claim matches the spine; one name per concept across chapters. \\
-  English throughout [language, spelling] & No Hungarian outline sentence is left in a chapter, and the title and the abstract pass the spell check. \\
-  Own preamble [preamble] & \texttt{include/macros.tex} loads no package the template already loads with other options, no amssymb or amsthm, and redefines none of the template's theorem environments. \\
-  Citations [bib, sources] & Every claim from the literature is cited, and you have read every source you cite; bibliography entries have author, title, venue and year; DOIs where they exist; capitalisation protected with braces (\cref{app:latex:cite}); the reference list had its repair pass (\cref{app:writing:refs}). \\
-  Abbreviations, notation, terms [acronyms] & Every abbreviation goes through \texttt{\textbackslash gls}, every symbol of the model has a notation entry, and the three tables contain only what the text uses (\cref{app:latex:acro}). \\
+  English throughout [language, spelling] & No Hungarian outline sentence is left in a chapter; the whole paper, title and abstract included, passes a spell check; British or American spelling is consistent. \\
+  Own preamble [preamble] & \texttt{include/macros.tex} follows \cref{app:latex}. \\
+  Citations [bib] & Every claim from the literature is cited, the reference list had its repair pass (\cref{app:writing:refs}), and capitalisation is protected with braces (\cref{app:latex:cite}). \\
+  Abbreviations, notation, terms [acronyms] & Every abbreviation, symbol and term is declared and used through \texttt{\textbackslash gls} (\cref{app:latex:acro}). \\
   Front and back matter [placeholders, stock] & Title page variables, both abstracts, the AI declaration, acknowledgements and appendices are complete. No faculty-template placeholder text, \enquote{TODO} or placeholder figure remains. \\
   Notes gone [beats] & Every beat has become prose and every todo and advisor note is resolved; the burn-down counts are zero. \\
-  The reviewer PDF & The uploaded PDF is the one \texttt{reviewer.tex} builds (\cref{app:latex:todo}): no note, no list of todos, no guide. \\
   Read-only passes & Three readers can each follow one layer alone: figures and captions; running-example boxes; or the abstract and each chapter's first paragraph. Fill in any step missing from a layer. \\
   PDF & Bookmarks and metadata are correct, every link resolves, and the Zenodo DOI opens the record. \\
-  Spelling and language & A spell check in the paper's language passed; British or American spelling is consistent. \\
   Reproducibility & \texttt{docker run \dots{} reproduce} regenerates every figure and table from the results tag named in the paper (\cref{app:code:readme}). \\
   Reviewer passes & The skim reviewer gives the maximum on every criterion, and a run of the panel raises no blocker (\cref{app:lifecycle:reviewers}). \\
-  Review sheet & You scored the paper on criteria A--E yourself, and nothing cheap is left to fix (\cref{app:tdk:sheet}). \\
 \end{xltabular}
 }
 
 \section{The presentation}\label{app:lifecycle:presentation}
-\advisortodo{Link the group's slide template (Beamer and PowerPoint) here and in the Talk row of \cref{tab:lifecycle}.}
+You give the presentation on conference day, in your section; \cref{app:tdk:dates} gives the date and the format. The Presentation, Reviews and questions, and Presentation rehearsal rows of \cref{tab:lifecycle} say how to prepare it.
+\advisortodo{Link the group's slide template (Beamer and PowerPoint) here and in the Presentation row of \cref{tab:lifecycle}.}
 \begin{itemize}
-  \item \href{https://www.youtube.com/watch?v=Unzc731iCUY}{MIT: How to Speak}, for the conference talk.
+  \item \href{https://www.youtube.com/watch?v=Unzc731iCUY}{MIT: How to Speak}, for the presentation.
 \end{itemize}

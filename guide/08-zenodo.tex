@@ -8,7 +8,7 @@ These steps follow Zenodo's September 2026 documentation. If its interface has c
 \section{Prepare the repository}
 Prepare the \texttt{code/} submodule for archiving (\cref{app:code:github}); Zenodo archives this repository, not the notes repository.
 \begin{enumerate}
-  \item Complete \texttt{README.md} using \cref{app:code:readme}. At minimum, include the command that reproduces every measurement in \tplref{ch:evaluation} and the results map.
+  \item Complete \texttt{README.md} using \cref{app:code:readme}.
   \item Add a \texttt{LICENSE} file and ask us which license to use: Apache 2.0 for tools (\cref{app:code:readme}), MIT otherwise.
   \item Add \texttt{.zenodo.json} at the repository root (\cref{lst:zenodo-json}). It supplies the record's title, authors, license and links; see the \href{https://help.zenodo.org/docs/github/describe-software/zenodo-json/}{format and example}. Validate the JSON before releasing.
   \item If the repository has a \texttt{CITATION.cff}, keep its fields in line with \texttt{.zenodo.json}; Zenodo uses \texttt{.zenodo.json} when both exist.
@@ -44,11 +44,11 @@ If you cannot connect the repository, upload an archive manually. Choose \emph{+
 Each release has a \emph{version DOI}. The \emph{concept DOI} identifies all versions and resolves to the newest; see \href{https://support.zenodo.org/help/en-gb/1-upload-deposit/97-what-is-doi-versioning}{DOI versioning}.
 \begin{itemize}
   \item Cite the \textbf{concept DOI} in the paper, following the \texttt{artifact} entry in \texttt{bib/references.bib}, in \tplref{ch:implementation}. Beside it, name the \textbf{results tag}: the Git tag and corresponding Zenodo version used for every reported number. The DOI leads to the latest packaging; the tag identifies the exact measured version.
-  \item Put the concept DOI badge in \texttt{README.md} and give the results tag its own section (\cref{app:code:readme}). Copy the badge's Markdown from the record page's DOI badge dialog.
+  \item Put the concept DOI badge in \texttt{README.md} (\cref{app:code:readme}). Copy the badge's Markdown from the record page's DOI badge dialog.
   \item Copy both DOIs from the Zenodo record; never guess a DOI by changing its number.
 \end{itemize}
 
 \section{Release a new version}\label{app:zenodo:versions}
 After fixing code, update \texttt{version} and \texttt{publication\_date} in \texttt{.zenodo.json}, commit, and publish a release under a new tag, such as \texttt{v1.0.1}. Zenodo adds a version with its own DOI to the record; see \href{https://help.zenodo.org/docs/deposit/manage-versions/}{manage versions}. Never move an old tag or rerun the paper's measurements against a version it does not describe. Keep the paper's results tag unchanged.
 
-The lifecycle (\cref{tab:lifecycle}) allows code polish \emph{after} the paper deadline. Reviewers receive the paper about two weeks after upload, and the concept DOI opens the version current when they visit. You can finish the README, Docker images, results map and reproduction-limits section during that window and release them as a new version. Preserve everything the paper's numbers depend on. A changed algorithm or remeasured table must not replace the code and results under the tag named in the paper.
+The lifecycle (\cref{tab:lifecycle}) allows code polish \emph{after} the paper deadline. Reviewers receive the paper about two weeks after upload, and the concept DOI opens the version current when they visit. You can finish the README, Docker images, results map and reproduction-limits section during that window and release them as a new version.

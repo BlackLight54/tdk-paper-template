@@ -4,7 +4,7 @@
 This chapter demonstrates the packages in \texttt{include/packages.tex}, theorem environments and tagged lists using one example: an issuer revoking verifiable credentials in a shared registry.
 Copy examples from \texttt{guide/09-latex-template.tex}.
 Put your packages and macros in \texttt{include/macros.tex}. \texttt{thesis.tex} loads it after the template preamble. Template updates preserve this file but replace the others under \texttt{include/}.
-Use the existing theorem environments (\cref{app:latex:theorems}). A duplicate \texttt{\textbackslash newtheorem} with the same name stops the build.
+Do not load amssymb, amsthm or any package the template already loads with other options. Use the existing theorem environments (\cref{app:latex:theorems}). A duplicate \texttt{\textbackslash newtheorem} with the same name stops the build.
 \Cref{tab:package-index} lists all packages and links to their examples.
 
 %----------------------------------------------------------------------------
@@ -18,9 +18,9 @@ With 15\,mm margins, margin notes extend into the text edge to remain readable. 
 \missingfigure{A placeholder for a figure that does not exist yet.}
 \beat{what a paragraph establishes}{its evidence}{what the running example shows in it}{the next paragraph}
 \advisortodo{A note for the advisors: a draft to confirm or a link to add.}
-A margin comment from the supervisor.\atodo[nolist]{Cite this.}
+A margin comment from an advisor.\atodo[nolist]{Cite this.}
 
-Mark missing content in the sentence: proving one slice takes \tbd{the proving time} on a laptop; an unsupported claim needs a source\citeneeded[the 2023 survey]. These markers also work in table cells and captions, where margin notes cannot go (\cref{tab:latex:gaps}). Both appear in the todo list and disappear from the reviewer build. Use them instead of typed placeholder words or bracketed citation marks. The lint rejects typed markers and, at the final phase, any remaining \texttt{\textbackslash tbd} or \texttt{\textbackslash citeneeded}.
+Mark missing content in the sentence: proving one slice takes \tbd{the proving time} on a laptop; an unsupported claim needs a source\citeneeded[the 2023 survey]. These gap markers also work in table cells and captions, where margin notes cannot go (\cref{tab:latex:gaps}). Both appear in the todo list and disappear from the reviewer PDF. Use them instead of typed marker words or bracketed citation marks. The lint rejects typed markers and, at the submit phase, any remaining \texttt{\textbackslash tbd} or \texttt{\textbackslash citeneeded}.
 \begin{table}[!ht]
   \centering
   \caption{A table with a value still to measure, marked in its cell.}
@@ -34,19 +34,18 @@ Mark missing content in the sentence: proving one slice takes \tbd{the proving t
   \end{tabular}
 \end{table}
 \begin{runningexample}[a box]
-Set the example's name with \texttt{\textbackslash exname} in \texttt{thesis.tex}. If you use a custom example environment, name it in \texttt{\textbackslash lintexamplebox} so the lint checks that environment.
+If you use a custom example environment, name it in \texttt{\textbackslash lintexamplebox} so the lint checks that environment.
 \end{runningexample}
 
-The todo list follows the table of contents. Next comes the \emph{Checks} page, generated on each compile by the source lint (\cref{app:code:paperci}). The first page shows the phase and a mark for each essential (\cref{app:writing:essentials}) in reading order. It also groups essentials by chapter, marking those below the required level in red. The second page lists their next steps, other checks grouped by subject with initial findings, and counts. Failed checks also appear as \texttt{tdk-lint} package warnings in Overleaf's log.
+The todo list follows the table of contents. Next comes the \emph{Checks} page, generated on each compile by the lint (\cref{app:code:paperci}). The first page shows the phase and a mark for each essential (\cref{app:writing:essentials}) in reading order. It also groups essentials by chapter, marking those below the required level in red. The second page lists their next steps, other checks grouped by subject with initial findings, and counts. Failed checks also appear as \texttt{tdk-lint} package warnings in Overleaf's log.
 
-Two lines in \texttt{thesis.tex} control the page. Set \texttt{\textbackslash lintphase} to your phase in the lifecycle as work progresses (\cref{app:code:paperci}); checks become required when their phase is reached. Change \texttt{\textbackslash linttrue} to \texttt{\textbackslash lintfalse} to hide the page. To suppress a finding you have checked and rejected, add \texttt{\% lint-ignore: <rule> <reason>} on its line. A reason is required, and the page counts these suppressions.
-
+Two lines in \texttt{thesis.tex} control the page. Set \texttt{\textbackslash lintphase} to your phase in the lifecycle as work progresses (\cref{app:code:paperci}). Change \texttt{\textbackslash linttrue} to \texttt{\textbackslash lintfalse} to hide the page. To suppress a finding you have checked and rejected, add \texttt{\% lint-ignore: <rule> <reason>} on its line. A reason is required, and the page counts these suppressions.
 Each finding says what is wrong and, under it, what to do: after an arrow, the text to write instead where the lint can work it out; otherwise, in italics, the instruction. A fix marked \emph{read it first} is most likely right but may change the meaning, and one with \texttt{<holes>} is a placeholder only you can fill. Overleaf cannot write fixes for you, so there you copy the text. In a local clone, \texttt{make fix} writes the safe fixes and prints what it changed, \texttt{make fix-dry} only prints them, and \texttt{make fix-review} also writes the ones to read first.
-Build the submission from \texttt{reviewer.tex}. This four-line root sets the \texttt{final} class option, disables todonotes, defines \texttt{\textbackslash reviewermode} and inputs \texttt{thesis.tex}. The resulting PDF omits notes, the todo list and the guide. In Overleaf, open \texttt{reviewer.tex} and select \emph{Recompile from this file}; locally, run \texttt{make reviewer}. Inspect this PDF every week. It is the version reviewers will read.
+Build the reviewer PDF from \texttt{reviewer.tex}. This four-line root sets the \texttt{final} class option, disables todonotes, defines \texttt{\textbackslash reviewermode} and inputs \texttt{thesis.tex}. The resulting PDF omits notes, the todo list and the guide. In Overleaf, open \texttt{reviewer.tex} and select \emph{Recompile from this file}; locally, run \texttt{make reviewer}.
 
 %----------------------------------------------------------------------------
 \section{Abbreviations, notation and terms (glossaries-extra)}\label{app:latex:acro}
-Declare abbreviations, notation and terms in \texttt{content/glossary.tex}. The three tables after the acknowledgements contain only entries used in the text. Each use links to its table row. The entries our topics share are already declared in \texttt{include/glossary-common.tex} (\cref{tab:glossary-common}): write \texttt{\textbackslash gls\{did\}} without declaring anything.
+Declare abbreviations, notation and terms in \texttt{content/glossary.tex}. The three lists after the acknowledgements contain only entries used in the text. Each use links to its table row. The entries our topics share are already declared in \texttt{include/glossary-common.tex} (\cref{tab:glossary-common}): write \texttt{\textbackslash gls\{did\}} without declaring anything.
 \begin{itemize}[noitemsep]
   \item \textbf{Abbreviations.} First use expands the term: \glsreset{vc}\gls{vc}. Later uses are short: \gls{vc}. Use \glspl{vc} for the plural, or request a specific form with \glsxtrshort{zkp} and \glsxtrlong{zkp}. Declare it with \texttt{\textbackslash newabbreviation\{vc\}\{VC\}\{verifiable credential\}}.
   \item \textbf{Notation.} Declare each symbol once, with a description linking to its definition. For example, \gls{Rt} is the registry; $\gls{valid}$ also works in math. You may type \texttt{\$R\_t\$} directly elsewhere, but declare every symbol used in \cref{app:latex:theorems} and use \texttt{\textbackslash gls} at least when introducing it, so it enters the table.
@@ -64,11 +63,11 @@ Links: \url{https://github.com/ftsrg} prints the address, \href{https://ftsrg.mi
 The PDF bookmarks in the viewer's sidebar come from hyperref and bookmark.
 Icons: \faGithub~source code, \faFilePdf~paper, \faEnvelope~contact. Author ORCID: \orcidlink{0000-0000-0000-0000}.
 
-Zotero records the access date on saving and exports it as \texttt{urldate}. The template's \texttt{tdkieee.bst} prints it after the URL, for example \enquote{Accessed: 2026-10-25}; stock styles would omit it. Follow the \texttt{w3c2025vcdm} entry in \texttt{bib/references.bib}. The \texttt{bib} rule flags missing access dates. Use \cref{app:writing:refs} to decide whether a link belongs in the bibliography or a footnote.
+Zotero records the access date on saving and exports it as \texttt{urldate}. The template's \texttt{tdkieee.bst} prints it after the URL, for example \enquote{Accessed: 2026-10-25}; stock styles would omit it. Follow the \texttt{w3c2025vcdm} entry in \texttt{bib/references.bib}. Use \cref{app:writing:refs} to decide whether a link belongs in the bibliography or a footnote.
 
-Overleaf's Zotero integration imports the group as \texttt{bib/zotero.bib} (\cref{app:start:access}). Use \emph{Refresh} to pull in additions. Zotero generates the citation keys; Overleaf suggests them when you type \texttt{\textbackslash cite\{}. For help, see the \href{https://www.zotero.org/support/quick_start_guide}{Zotero quick start guide}, \href{https://www.zotero.org/support/groups}{group libraries} and Overleaf's \href{https://www.overleaf.com/learn/how-to/How_to_link_your_Overleaf_account_to_Mendeley_and_Zotero}{linking your account to Zotero}. Locally, \href{https://retorque.re/zotero-better-bibtex/}{Better BibTeX} can keep an exported \texttt{.bib} in sync and provide stable citation keys.
+Overleaf's Zotero integration imports the group as \texttt{bib/zotero.bib} (\cref{app:start:access}). Zotero generates the citation keys; Overleaf suggests them when you type \texttt{\textbackslash cite\{}. For help, see the \href{https://www.zotero.org/support/quick_start_guide}{Zotero quick start guide}, \href{https://www.zotero.org/support/groups}{group libraries} and Overleaf's \href{https://www.overleaf.com/learn/how-to/How_to_link_your_Overleaf_account_to_Mendeley_and_Zotero}{linking your account to Zotero}. Locally, \href{https://retorque.re/zotero-better-bibtex/}{Better BibTeX} can keep an exported \texttt{.bib} in sync and provide stable citation keys.
 
-When saving an entry, check its type and title capitalisation. Protect names and acronyms with braces, such as \texttt{\{BPMN\}}, and add a DOI if available. Keep hand-written Zenodo artifact and AI entries in \texttt{bib/references.bib}, because refresh overwrites \texttt{zotero.bib}.
+When saving an entry, check its type and title capitalisation. Protect names and acronyms with braces, such as \texttt{\{BPMN\}}. Keep hand-written Zenodo artifact and AI entries in \texttt{bib/references.bib}, because refresh overwrites \texttt{zotero.bib}.
 
 %----------------------------------------------------------------------------
 \section{Cross-references (cleveref)}\label{app:latex:cref}
@@ -142,7 +141,7 @@ Use tagged lists for stable names: C for contributions, REQ for requirements, DR
 Each item starts with a short name in bold, and a gap-matrix row reuses its requirement's name.
 A reference prints only the tag: \verb|\cref{asm:latex:clock}| prints \cref{asm:latex:clock}. Three or more consecutive tags become a range.
 Add a new kind with one \texttt{\textbackslash NewTagList} line in \texttt{include/preamble.tex}.
-\Cref{app:chapters} demonstrates all lists in their chapters: contributions and requirements in the introduction; threats, assumptions, guarantees and derived requirements in the approach; research questions in the evaluation; limitations in the conclusion. Here is one list with references:
+\Cref{app:chapters} demonstrates all lists in their chapters: contributions and requirements in the introduction; adversaries, assumptions, guarantees and derived requirements in the approach; research questions in the evaluation; limitations in the conclusion. Here is one list with references:
 \begin{assumptions}
   \item\label{asm:latex:clock} \textbf{Bounded drift.} Participants' clocks drift by at most $\delta$.
   \item\label{asm:latex:sig} \textbf{Unforgeable signatures.} The issuer's signature scheme is unforgeable.
