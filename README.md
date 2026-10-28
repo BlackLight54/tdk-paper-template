@@ -5,7 +5,10 @@ built into the draft. The source of truth is the Overleaf project; this reposito
 for browsing and for its CI. Students get an Overleaf project copied from it, and Overleaf's
 GitHub sync creates their paper repository, which carries this CI.
 
-- `thesis.tex` is the draft: the paper with its todos, beats, the Checks page and the guide.
+- `thesis.tex` is the draft: the paper with its notes, the Checks page and the guide.
+  The chapter files hold only headings, one note each that links to the guide's
+  "The paper, chapter by chapter" (`guide/chapter-by-chapter.tex`), and stubs; the
+  instructions and every item in action live there.
   `reviewer.tex` builds the paper as the reviewer sees it; that is the PDF to upload.
 - `content/` holds the chapters, the abstract, the glossary and the AI declaration; `guide/` the
   advisors' guide; `include/` the preamble; `bib/` the bibliographies; `docs/` the review sheet.

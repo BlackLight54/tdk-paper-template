@@ -1,253 +1,46 @@
 %----------------------------------------------------------------------------
 \chapter{Evaluation}\label{ch:evaluation}
 %----------------------------------------------------------------------------
-\todo[inline, caption={Evaluation: criteria E and D/2}]{\textbf{Criteria E (0--8) and D/2.}\\
-\textbf{Correctness:} report setup, versions and repetitions so every number can be checked; D/2 penalises results that cannot be.\\
-\textbf{Novelty:} compare against the closest existing approach named in the introduction; \cref{ch:related} then places the results in the wider literature.\\
-\textbf{Beyond small examples:} E gives 7--8 points only for evaluation beyond small examples: scalability and robustness measurements showing the system holds up in an industrial setting. What that means for a formal or an analysis topic is in \cref{tab:eval-tracks}.\\
-\textbf{In the sheet's words.} D/2 gives \enquote{3--4: jó (színvonalas kidolgozás, de esetleg egyes eredmények helyessége nincs kellőképpen alátámasztva)} when a result is reported without the setup that supports it, and E gives \enquote{3--4: pontatlan -- ha a dolgozat bevezetése megfelelő és a dolgozatban szerepel az eredmények kis mintapéldákon túlmenő értékelése is, de az utóbbi hiányos, pontatlan} or \enquote{5--6: pontos, de hiányos} when the evaluation stops at small examples.}
-
-\todo[inline, caption={Three kinds of work, one chapter}]{\textbf{Three kinds of work, one chapter.} The sections below are written for a system that is run and measured (track S). Formal work (track F: a Tamarin or ProVerif model, a Lean or Coq proof, a model checker) and an analysis tool evaluated on a benchmark (track T: a detector, a static analyser, a generator) answer the same three questions with different evidence. \Cref{tab:eval-tracks} translates each section, every placeholder figure and table has a sibling for the other tracks, and the research questions below have their track F and T wording in the source. Keep the siblings of your track and delete the others.}
-
-\begin{table}[!ht]
-  \centering
-  \caption{The evaluation by kind of work: what each section shows and the placeholder that holds it. Track S is a system that is run and measured; track F is formal work (a protocol model, a mechanised proof, a model checker); track T is an analysis tool evaluated on a benchmark.}
-  \label{tab:eval-tracks}
-  {\small
-  \begin{tabularx}{\linewidth}{>{\raggedright\arraybackslash}p{0.13\linewidth} >{\raggedright\arraybackslash}X >{\raggedright\arraybackslash}X >{\raggedright\arraybackslash}X}
-    \toprule
-    & \textbf{S: system} & \textbf{F: formal} & \textbf{T: analysis tool} \\
-    \midrule
-    Setup & Hardware, software versions, workloads, repetitions, the rerun command & Prover and version, heuristics and oracles, time limit, machine; which parts of the model are hand-written and which generated & Benchmark origin and size, how the ground truth was built, tool versions, the rerun command \\
-    \addlinespace
-    Correctness (\cref{rq:correct}) & Test suite and model-checked properties per requirement; the running example before and after (\cref{tab:correctness}, \cref{fig:example-trace}) & Every property of the threat model proved, or an attack found: per lemma, proved, falsified with the trace, or timed out; the attack on the running example reconstructed (\cref{tab:correctness}, one row per lemma) & Precision and recall against the ground truth, every false positive and false negative explained (\cref{tab:precision}); the running example's verdict (\cref{fig:example-trace}) \\
-    \addlinespace
-    Scalability (\cref{rq:scale}) & Throughput and latency as the input grows (\cref{fig:scalability}) & Verification time and memory as the model grows: sessions, agents, bound, lemma count; where the prover times out, and what helper lemmas buy (\cref{fig:scalability-formal}) & Analysis time as the input grows: circuit size, lines, model elements; the largest real instance it handles (\cref{fig:scalability}) \\
-    \addlinespace
-    Robustness (\cref{rq:robust}) & Faults, load spikes and parameter sensitivity, with degradation and recovery (\cref{tab:robustness}, \cref{fig:robustness}) & The properties re-verified under a stronger adversary and with each assumption dropped: which hold, which break and how (\cref{tab:robustness-formal}) & Thresholds and parameters varied, mutated or adversarial inputs, benchmark instances from another source (\cref{tab:robustness}) \\
-    \bottomrule
-  \end{tabularx}
-  }
-\end{table}
+\guidetodo{Evaluation}{app:chapters:evaluation}
 
 \section{Research questions}
+\guidetodo{Research questions}{app:chapters:research-questions}
 \begin{rqlist}
-  \item\label{rq:correct} \textbf{TODO Correctness.} Does the approach handle the running example and the cases in \cref{ch:intro} correctly?
-    % Track F: Does the model satisfy every property of the threat model, and does it find the known attacks?
-    % Track T: Does the tool find the real instances in the benchmark, and only those?
-  \item\label{rq:scale} \textbf{TODO Scale.} How do time and resource use grow with input size?
-    % Track F: How do verification time and memory grow with the size of the model, and where does the prover stop?
-    % Track T: How does analysis time grow with input size, and what is the largest real instance it handles?
-  \item\label{rq:robust} \textbf{TODO Robustness.} How does the system behave under faults, adversarial input, or load spikes?
-    % Track F: Which properties survive a stronger adversary and each dropped assumption, and how do the others break?
-    % Track T: How do the results change under parameter changes, mutated inputs, and a benchmark from another source?
+  \item\label{rq:correct} \textbf{TODO Correctness.} Does the approach handle the running example correctly?
 \end{rqlist}
 
 \section{Setup}\label{sec:setup}
-\beat{how the measurements were made, so that each can be checked}{hardware, software versions, workloads, repetitions, the rerun command}{the example as the base workload, scaled up for \cref{rq:scale}}{the results}
-TODO
+\guidetodo{Setup}{app:chapters:setup}
 
 \paragraph{Artifact availability.}
-TODO The code, the models and the measurement scripts are archived on Zenodo~\cite{artifact}; every number in this chapter comes from tag \texttt{v1.0.0} of that archive, and \texttt{just reproduce} regenerates every figure and table from it (\guideref{Archiving the code on Zenodo}).
+\guidetodo{Artifact availability}{app:chapters:artifact-availability}
 
 \section{Correctness (RQ1)}
-\beat{that the approach is correct on the example and on every requirement case}{test, proof or model-checking results}{the scenario's outcome, before and after}{scalability}
-TODO
+\guidetodo{Correctness (RQ1)}{app:chapters:correctness}
 \begin{runningexample}[solved]
-TODO What happens in the scenario with this work, compared with what went wrong in \cref{ch:intro} (\cref{fig:example-trace}).
+TODO The scenario with this work, against \cref{ch:intro}; every case is in \cref{tab:correctness}.
 \end{runningexample}
-
-\todo[inline, caption={Correctness in two ways}]{\textbf{Show correctness in two ways.} \Cref{tab:correctness} lists every guarantee and requirement with how it was checked: a proof (Tamarin, Lean, \dots), model checking, or a test suite, for this work and the baseline. Keep the rows that fit your contribution: formal topics fill it with proofs and counterexamples, empirical ones with test and benchmark outcomes; an analysis tool adds \cref{tab:precision}. \Cref{fig:example-trace} shows the running example concretely: what goes wrong with the baseline and what this work does instead; for a protocol, a sequence chart, otherwise the corresponding before-and-after picture.}
 
 \begin{table}[!ht]
   \centering
-  \caption{Correctness: how each guarantee and requirement was checked. \gapyes{} proved or passed, \gappartial{} partially, \gapno{} counterexample or failed. Placeholder rows, replace with your own.}
+  \caption{TODO Correctness: how each guarantee and requirement was checked. \gapyes{} proved or passed, \gappartial{} partially, \gapno{} counterexample or failed.}
   \label{tab:correctness}
   {\small
   \begin{tabularx}{\linewidth}{l >{\raggedright\arraybackslash}X l c c r}
     \toprule
     & \textbf{Property} & \textbf{Checked by} & \textbf{This work} & \textbf{Baseline} & \textbf{Time} \\
     \midrule
-    \ref{g:example} & TODO The guarantee, as a lemma (\cref{thm:main}) & Tamarin & \gapyes & \gapno & TODO\,s \\
-    \ref{req:first} & TODO The requirement's test cases & test suite & \gapyes\,42/42 & \gappartial\,30/42 & TODO\,s \\
-    \ref{req:second} & TODO & TODO & \gapyes & \gapno & TODO\,s \\
-    \ref{req:third} & TODO & TODO & \gapyes & \gappartial & TODO\,s \\
+    \ref{g:example} & TODO & TODO & \gapyes & \gapno & TODO\,s \\
     \bottomrule
   \end{tabularx}
   }
 \end{table}
-
-\begin{table}[!ht]
-  \centering
-  \caption{Track T sibling of \cref{tab:correctness}: precision and recall against the ground truth, per benchmark family. Every false positive and false negative is explained in the text. Placeholder rows, replace with your own.}
-  \label{tab:precision}
-  {\small
-  \begin{tabularx}{\linewidth}{>{\raggedright\arraybackslash}X r r r r r r r}
-    \toprule
-    \textbf{Benchmark family} & \textbf{Instances} & \textbf{TP} & \textbf{FP} & \textbf{FN} & \textbf{Precision} & \textbf{Recall} & \textbf{Baseline recall} \\
-    \midrule
-    TODO Hand-written cases from \cref{ch:intro} & 12 & 12 & 0 & 0 & 1.00 & 1.00 & 0.75 \\
-    TODO Mutated real instances & 40 & 37 & 2 & 3 & 0.95 & 0.93 & 0.60 \\
-    TODO Real instances from another source & 25 & 21 & 1 & 4 & 0.95 & 0.84 & 0.52 \\
-    \bottomrule
-  \end{tabularx}
-  }
-\end{table}
-
-\begin{figure}[!ht]
-  \centering
-  \tikzset{lifeline/.style={dashed, gray}, role/.style={draw, rounded corners, fill=blue!8, minimum width=12mm, inner sep=2pt, font=\scriptsize}, msg/.style={-Stealth, font=\scriptsize}}
-  \newcommand{\lifelines}{%
-    \foreach \x/\n in {0/Issuer, 2.1/Holder, 4.2/Verifier, 6.3/Registry} {%
-      \node[role] at (\x, 0) {\n}; \draw[lifeline] (\x, -0.3) -- (\x, -3.4);}%
-    \draw[msg] (0, -0.8) -- node[above] {issue $c$} (2.1, -0.8);
-    \draw[msg] (0, -1.4) -- node[above, pos=0.82] {revoke $c$} (6.3, -1.4);
-    \draw[msg] (2.1, -2.0) -- node[above] {present $c$} (4.2, -2.0);}
-  \begin{subfigure}[b]{0.49\linewidth}
-    \centering
-    \begin{tikzpicture}
-      \lifelines
-      \draw[msg] (4.2, -2.6) -- node[above] {check (stale)} (6.3, -2.6);
-      \node[font=\footnotesize\bfseries, text=red!70!black] at (4.2, -3.7) {accepts $c$};
-    \end{tikzpicture}
-    \caption{Baseline: the revoked credential is accepted.}\label{fig:example-trace-baseline}
-  \end{subfigure}\hfill
-  \begin{subfigure}[b]{0.49\linewidth}
-    \centering
-    \begin{tikzpicture}
-      \lifelines
-      \draw[msg] (4.2, -2.6) -- node[above] {check (current)} (6.3, -2.6);
-      \node[font=\footnotesize\bfseries, text=green!45!black] at (4.2, -3.7) {rejects $c$};
-    \end{tikzpicture}
-    \caption{This work: the revocation is seen and the credential rejected.}\label{fig:example-trace-ours}
-  \end{subfigure}
-  \caption{The running example as a sequence chart, before and after. Placeholder scenario, replace it with \exname.}
-  \label{fig:example-trace}
-\end{figure}
 
 \section{Scalability (RQ2)}\label{sec:scalability}
-\beat{how the cost grows with the input}{\cref{fig:scalability}}{the example multiplied to $n$ participants or items}{robustness}
-TODO Describe \cref{fig:scalability}: what grows, how fast, and where the limit is. Put the better result on top: plot a metric where higher is better (\cref{fig:scalability-throughput}), or reverse the axis of one where lower is better (\cref{fig:scalability-time}).
-
-\begin{figure}[!ht]
-  \centering
-  \begin{subfigure}[b]{0.48\linewidth}
-    \centering
-    \begin{tikzpicture}
-      \begin{axis}[width=\linewidth, height=55mm, xlabel={Input size $n$}, xmode=log, ymode=log, ymajorgrids, legend style={font=\footnotesize}, ylabel={Throughput [operations/s]}, legend pos=south west]
-        \addplot+[mark=*, error bars/.cd, y dir=both, y explicit]
-          coordinates {(10,5000) +- (0,300) (100,4800) +- (0,250) (1000,4500) +- (0,300) (10000,4100) +- (0,350)};
-        \addlegendentry{This work}
-        \addplot+[mark=square*, dashed]
-          coordinates {(10,3000) (100,1500) (1000,400) (10000,60)};
-        \addlegendentry{Baseline}
-      \end{axis}
-    \end{tikzpicture}
-    \caption{Throughput; higher is better.}\label{fig:scalability-throughput}
-  \end{subfigure}\hfill
-  \begin{subfigure}[b]{0.48\linewidth}
-    \centering
-    \begin{tikzpicture}
-      \begin{axis}[width=\linewidth, height=55mm, xlabel={Input size $n$}, xmode=log, ymode=log, ymajorgrids, legend style={font=\footnotesize}, ylabel={Time [ms]}, y dir=reverse, legend pos=south west]
-        \addplot+[mark=*, error bars/.cd, y dir=both, y explicit]
-          coordinates {(10,2) +- (0,0.3) (100,9) +- (0,1) (1000,85) +- (0,6) (10000,870) +- (0,40)};
-        \addlegendentry{This work}
-        \addplot+[mark=square*, dashed]
-          coordinates {(10,3) (100,30) (1000,800) (10000,9500)};
-        \addlegendentry{Baseline}
-      \end{axis}
-    \end{tikzpicture}
-    \caption{Time, axis reversed; lower is better, better is still up.}\label{fig:scalability-time}
-  \end{subfigure}
-  \caption{Scalability as the input grows. Both panels put the better result on top. Mean of TODO runs; error bars show one standard deviation. Placeholder data, replace with your measurements.}
-  \label{fig:scalability}
-\end{figure}
-
-\begin{figure}[!ht]
-  \centering
-  \begin{tikzpicture}
-    \begin{axis}[width=0.7\linewidth, height=55mm, xlabel={Sessions in the model}, ylabel={Verification time [s]}, ymode=log, ymajorgrids, legend style={font=\footnotesize}, legend pos=north west, xmin=0.5, xmax=6.5, xtick={1,...,6}, ymax=20000]
-      \draw[dashed, red!70!black] (axis cs:0.5,3600) -- (axis cs:6.5,3600) node[pos=0.85, above, font=\scriptsize] {time limit};
-      \addplot+[mark=*] coordinates {(1,4) (2,21) (3,140) (4,1100)};
-      \addlegendentry{all lemmas}
-      \addplot+[mark=square*, dashed] coordinates {(1,3) (2,9) (3,30) (4,95) (5,310) (6,1200)};
-      \addlegendentry{with helper lemmas}
-      \node[font=\scriptsize, text=red!70!black, anchor=west] at (axis cs:4.12,1100) {timeout at 5};
-    \end{axis}
-  \end{tikzpicture}
-  \caption{Track F sibling of \cref{fig:scalability}: verification time as the model grows, with the time limit and the point where the prover stops. What grows is whatever your model is parametrised by: sessions, agents, the bound of a bounded check, or the number of lemmas. Placeholder data, replace with your measurements.}
-  \label{fig:scalability-formal}
-\end{figure}
+\guidetodo{Scalability (RQ2)}{app:chapters:scalability}
 
 \section{Robustness analysis (RQ3)}\label{sec:robustness}
-\todo[inline, caption={Robustness is scored separately from scalability}]{\textbf{Robustness is scored separately from scalability.} The review sheet gives 7--8 points on criterion E only if \enquote{a szerző skálázhatósági, robosztussági vizsgálatokat is elvégzett, mellyel igazolta, hogy rendszere ipari környezetben is megállja a helyét}: scalability \emph{and} robustness studies showing the system holds up in an industrial setting. Scalability alone does not earn it.\\
-\textbf{Track S:} perturb the system on purpose and report what happens: \cref{tab:robustness} lists the perturbations and their outcomes, \cref{fig:robustness} shows how the system degrades and recovers during a fault, and how sensitive it is to its main parameter.\\
-\textbf{Track F:} \cref{tab:robustness-formal}: re-verify every property under a stronger adversary and with each assumption dropped, and report which still hold, which break, and the attack that breaks them.\\
-\textbf{Track T:} \cref{tab:robustness} with the tool's own perturbations: thresholds and parameters varied around their defaults, mutated or adversarial inputs (bugs injected on purpose: does the tool still find them), and benchmark instances from another source than the one it was developed on.}
-\beat{how the system behaves when its assumptions are stressed: faults, attacks, load spikes, parameter changes}{\cref{tab:robustness}, with the setup of each perturbation}{the example under \cref{thr:example}}{the threats to validity}
-TODO
-
-\begin{table}[!ht]
-  \centering
-  \caption{Robustness: each perturbation, what it tests, and how the system behaved. Placeholder rows, replace with your own.}
-  \label{tab:robustness}
-  {\small
-  \begin{tabularx}{\linewidth}{>{\raggedright\arraybackslash}p{0.2\linewidth} >{\raggedright\arraybackslash}X >{\raggedright\arraybackslash}p{0.16\linewidth} >{\raggedright\arraybackslash}p{0.16\linewidth} >{\raggedright\arraybackslash}p{0.12\linewidth}}
-    \toprule
-    \textbf{Perturbation} & \textbf{What it tests} & \textbf{Expected} & \textbf{Observed} & \textbf{Recovery} \\
-    \midrule
-    Fault injection & A participant crashes or messages are dropped & TODO & TODO & TODO \\
-    Adversarial input & The attack of \cref{thr:example} on the running example & TODO & TODO & TODO \\
-    Load spike & TODO$\times$ the nominal load for TODO seconds & TODO & TODO & TODO \\
-    Parameter sensitivity & Timeouts, batch sizes, thresholds varied around their defaults & TODO & TODO & TODO \\
-    \bottomrule
-  \end{tabularx}
-  }
-\end{table}
-
-\begin{table}[!ht]
-  \centering
-  \caption{Track F sibling of \cref{tab:robustness}: each property re-verified under a stronger adversary and with each assumption of \cref{ch:approach} dropped. \gapyes{} proved, \gapno{} attack found (the trace is in the appendix), \gappartial{} timed out. Placeholder rows, replace with your own.}
-  \label{tab:robustness-formal}
-  {\small
-  \begin{tabularx}{\linewidth}{l >{\raggedright\arraybackslash}X *{4}{>{\centering\arraybackslash}p{0.13\linewidth}}}
-    \toprule
-    & \textbf{Property} & \textbf{Base threat model} & \textbf{Key leaked} & \textbf{\ref{asm:example} dropped} & \textbf{Weaker primitive} \\
-    \midrule
-    \ref{g:example} & TODO The guarantee, as a lemma (\cref{thm:main}) & \gapyes & \gapyes & \gapno & \gappartial \\
-    \ref{req:first} & TODO A requirement stated as a property & \gapyes & \gapno & \gapyes & \gapyes \\
-    \bottomrule
-  \end{tabularx}
-  }
-\end{table}
-
-\begin{figure}[!ht]
-  \centering
-  \begin{subfigure}[b]{0.48\linewidth}
-    \centering
-    \begin{tikzpicture}
-      \begin{axis}[width=0.88\linewidth, height=50mm, xlabel={Time [s]}, ylabel={Throughput [operations/s]}, ymin=0, ymax=6000, xmin=0, xmax=100, ymajorgrids, font=\footnotesize]
-        \fill[red!12] (axis cs:30,0) rectangle (axis cs:40,6000);
-        \node[font=\scriptsize, text=red!60!black] at (axis cs:35,5600) {fault};
-        \addplot[mark=none, thick, blue] coordinates {(0,5000) (10,5050) (20,4980) (30,5000) (31,1600) (35,1500) (40,1550) (45,3900) (50,4900) (60,5000) (80,4980) (100,5020)};
-      \end{axis}
-    \end{tikzpicture}
-    \caption{A participant fails between 30 and 40\,s: degradation and recovery.}\label{fig:robustness-fault}
-  \end{subfigure}\hfill
-  \begin{subfigure}[b]{0.48\linewidth}
-    \centering
-    \begin{tikzpicture}
-      \begin{axis}[width=0.88\linewidth, height=50mm, xlabel={Timeout [ms]}, ylabel={Success rate [\%]}, xmode=log, log basis x=2, xtick={50,100,200,400,800}, xticklabels={50,100,200,400,800}, ymin=50, ymax=100, ymajorgrids, font=\footnotesize]
-        \draw[dashed, gray] (axis cs:200,50) -- (axis cs:200,100) node[pos=0.1, right, font=\scriptsize] {default};
-        \addplot[mark=*, blue] coordinates {(50,62) (100,91) (200,99) (400,99.5) (800,99.6)};
-      \end{axis}
-    \end{tikzpicture}
-    \caption{Sensitivity to the main parameter, around its default.}\label{fig:robustness-sensitivity}
-  \end{subfigure}
-  \caption{Robustness: behaviour during a fault and under parameter changes. Placeholder data, replace with your measurements.}
-  \label{fig:robustness}
-\end{figure}
+\guidetodo{Robustness analysis (RQ3)}{app:chapters:robustness}
 
 \section{Threats to validity}\label{sec:validity}
-\beat{what could make the results wrong or not generalise, and what was done about each}{the mitigations}{whether the example is representative of real use}{related work}
-TODO
+\guidetodo{Threats to validity}{app:chapters:validity}

@@ -1,76 +1,40 @@
 %----------------------------------------------------------------------------
 \chapter{Introduction}\label{ch:intro}
 %----------------------------------------------------------------------------
-\todo[inline, caption={The review sheet and the four things to argue}]{\textbf{The review sheet} (\texttt{docs/TDK2025\_biralati\_pontozolap\_hallgatoi.pdf}), 35 points: A form and style 0--5 (30--35 pages; about 1 point off per 3 pages outside that range), B figures and literature 0--4, C topic 0--8, D originality and soundness 0--10, E introduction and evaluation 0--8.\\
-\textbf{Argue four things throughout the paper.} The todo at the top of each chapter says which of them that chapter carries, and quotes the criterion in the sheet's words.\\
-\textbf{Relevance} (C): the topic matters now.\\
-\textbf{Non-triviality} (C and D/1): solving it takes deep or scientific knowledge, not a textbook recipe or a copy of known solutions.\\
-\textbf{Novelty} (D/1): full marks for a solution that is new at least in Hungary or does not exist yet; an incremental improvement earns 3--4 of 5.\\
-\textbf{Correctness} (D/2): every result is backed and checkable.\\
-\textbf{In the sheet's words.} Criterion A is scored on the whole paper: \enquote{4--5: kiváló (ha a dolgozat közel hibamentes, jól tagolt, követhető, gördülékeny stílusú)}, and \enquote{Terjedelmi korlát 30--35 oldal. Ettől eltérés esetén 3 oldalanként 1 pont levonás javasolt.}}
-\todo[inline, caption={Introduction: criteria C and E}]{\textbf{Criteria C and E.} A reviewer who reads only this chapter and \cref{fig:overview} should be able to say what you did and why it matters.\\
-\textbf{Relevance:} open with why the problem matters now and to whom.\\
-\textbf{Non-triviality:} show why the obvious solutions fail.\\
-\textbf{Novelty:} state the contributions as checkable claims.\\
-\textbf{In the sheet's words.} The top of C: \enquote{7--8: tudományos vizsgálat szükséges (ha a dolgozat témája korszerű, nem lezárt, vizsgálata magas szintű, tudományos, elmélyült tudást igényel)}. The bottom of E names what this chapter must contain: \enquote{0: teljesen hiányzik -- ha a dolgozat bevezetése hiányos (tématerület áttekintése, problémafelvetés, fő kontribúció kimondása)}.}
+\guidetodo{Introduction}{app:chapters:intro}
 
 \paragraph{Context.}\label{par:context}
-\beat{why the field matters now}{a trend, a regulation or an incident, cited}{not yet introduced}{the problem}
-TODO Every abbreviation goes through \texttt{\textbackslash gls}, as in \gls{vc}, which spells it out on first use; declare it in \texttt{content/glossary.tex}, together with the paper's notation and terms.
+\guidetodo{Context}{app:chapters:context}
 
 \paragraph{Problem.}\label{par:problem}
-\beat{the concrete problem, ending in a one-sentence problem statement}{the running example}{introduced here: who the actors are, what they want to do, and what goes wrong}{the requirements}
-TODO
+\guidetodo{Problem}{app:chapters:problem}
 \begin{runningexample}
 TODO Two or three sentences: the actors, what they want to do, and what goes wrong today. Every chapter returns to this scenario, so choose one small enough to follow and rich enough to show every requirement.
 \end{runningexample}
 
 \paragraph{Requirements.}
-\beat{what a solution must do}{one requirement per failure of the example; they are the rows of the gap matrix (\cref{ch:related}) and the yardstick of \cref{ch:evaluation}}{the part of the scenario each requirement comes from}{the gap}
-TODO
+\guidetodo{Requirements}{app:chapters:requirements}
 \begin{requirements}
   \item\label{req:first} \textbf{TODO Short name.} A property the running example needs, stated so it can be checked.
-  \item\label{req:second} \textbf{TODO Short name.} A second requirement.
-  \item\label{req:third} \textbf{TODO Short name.} A third requirement; typically one that existing approaches trade off against the others.
 \end{requirements}
 
 \paragraph{Gap.}\label{par:gap}
-\beat{that no existing approach meets the requirements together; the full comparison comes after the evaluation (\cref{ch:related}), so this paragraph carries the novelty claim on its own}{the closest approaches, cited}{what the closest approach does with the example, and where it fails}{the contributions}
-TODO
+\guidetodo{Gap}{app:chapters:introgap}
 
 \begin{figure}[!ht]
   \centering
-  \begin{tikzpicture}[
-      node distance=6mm and 10mm,
-      col/.style={draw, rounded corners, minimum width=38mm, minimum height=26mm, align=center, font=\small},
-      part/.style={ours, rounded corners=1pt, minimum width=34mm, minimum height=7mm, align=center, font=\footnotesize},
-      lbl/.style={font=\small\bfseries, above=1mm}]
-    \node[col, problem]   (problem) {\exname\\[1mm]\footnotesize what goes wrong today\\\footnotesize(TODO)};
-    \node[part, right=12mm of problem, yshift=9mm] (c1) {C1: TODO};
-    \node[part, below=1.5mm of c1] (c2) {C2: TODO};
-    \node[part, below=1.5mm of c2] (c3) {C3: TODO};
-    \node[draw=none, fit=(c1)(c3), inner sep=2mm] (approach) {};
-    \node[col, result, right=of approach] (result) {Result\\[1mm]\footnotesize the guarantee or number\\\footnotesize you can claim (TODO)};
-    \node[lbl] at (problem.north)  {Problem};
-    \node[lbl] at (approach.north) {This work};
-    \node[lbl] at (result.north)   {Evaluation};
-    \draw[-Stealth, thick] (problem) -- (approach);
-    \draw[-Stealth, thick] (approach) -- (result);
-  \end{tikzpicture}
-  \caption{Leading figure: the problem, the contributions, and the headline result in one picture. Blue is this work, every component of it in the same blue; the problem is red, the result green. TODO Replace with your own; it should be understandable without reading the text, and what is yours must be visible at a glance.}
+  \missingfigure[figheight=2cm]{Leading figure: \cref{fig:guide:overview}}
+  \caption{TODO leading figure.}
   \label{fig:overview}
 \end{figure}
-\todo[inline, caption={Leading figure: criterion B/1}]{\textbf{Criterion B/1} is scored on figures like this one. Well thought out means: the reader takes away one thing, the caption explains it (\guideref{Captions}), and it is vector (\guideref{Figures}).\\
-\textbf{In the sheet's words.} \enquote{4: kiváló (a dolgozat megfelelő számú és jól átgondolt ábrát, táblázatot tartalmaz, és a szakirodalmi hivatkozások pontosak)}; the step below is \enquote{2: átlagos (a dolgozat megfelelő számú ábrát és táblázatot tartalmaz, ám azok több esetben nem jól átgondoltak vagy rossz minőségűek)}.}
 
 \paragraph{Contributions.}
-\beat{what this work claims, as checkable items with pointers to their support}{the chapters behind each contribution}{\cref{fig:overview} shows the example solved}{the structure of the paper}
-TODO
+\guidetodo{Contributions}{app:chapters:contributions}
+TODO The contributions, which \cref{fig:overview} shows in one picture.
 \begin{contributions}
   \item\label{c:method} \textbf{TODO Short name.} A theoretical contribution: a model, formalisation, algorithm or protocol, with what it guarantees (\cref{ch:approach}).
-  \item\label{c:impl} \textbf{TODO Short name.} A technical contribution: the tool, system or artifact that realises it (\cref{ch:implementation}).
-  \item\label{c:eval} \textbf{TODO Short name.} An evaluation, including scalability measurements (\cref{ch:evaluation}).
 \end{contributions}
 
 \paragraph{Structure.}
+\guidetodo{Structure}{app:chapters:structure}
 \Cref{ch:background} introduces the background, \cref{ch:approach} presents the approach, \cref{ch:implementation} the implementation, and \cref{ch:evaluation} the evaluation. \Cref{ch:related} compares the results with related work, and \cref{ch:conclusion} concludes with future work.

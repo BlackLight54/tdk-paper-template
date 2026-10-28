@@ -667,7 +667,7 @@ rule("beats", "source", "count", "final", "beats and notes still printing: the s
   local beats, todos = 0, 0
   C.each_line(MAIN, function(f, n, l)
     if l:match("\\beat{") then beats = beats + 1; note(f, n, "beat") end
-    if l:match("\\todo") or l:match("\\atodo") or l:match("\\advisortodo") then todos = todos + 1 end
+    if l:match("\\todo") or l:match("\\atodo") or l:match("\\advisortodo") or l:match("\\guidetodo") then todos = todos + 1 end
   end)
   return string.format("beats=%d notes=%d", beats, todos)
 end)
