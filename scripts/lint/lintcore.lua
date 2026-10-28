@@ -30,9 +30,12 @@ function M.count(s, pat) return select(2, s:gsub(pat, "")) end
 -- counted, the guide is skipped, and commented-out lines do not count. M.BIB holds the .bib
 -- files of \bibliography. A paper without a thesis.tex that includes anything falls back to the
 -- files in content/. The main-text chapters are the ones with a numbered \chapter; chapters are
--- found by role through their label (ch:intro, ch:approach, ...), never by file name or
--- folder, so a student may rename, move or merge files
-M.CONTENT, M.MAIN, M.ROLE, M.FILES, M.BIB = {}, {}, {}, {}, {}
+-- found by role through their label, never by file name or folder, so a student may rename,
+-- move or merge files. A chapter has role R if it carries \label{ch:R} or \label{ch:R:<name>}:
+-- a role may span several chapters, and a chapter may have two roles. M.ROLES[R] lists the
+-- chapters of R in reading order, M.ROLES_OF[file] is the set of a file's roles, and M.ROLE[R] is
+-- the first chapter of R
+M.CONTENT, M.MAIN, M.ROLE, M.ROLES, M.ROLES_OF, M.FILES, M.BIB = {}, {}, {}, {}, {}, {}, {}
 M.ROLE_LABEL = { intro = "ch:intro", background = "ch:background", approach = "ch:approach", implementation = "ch:implementation", evaluation = "ch:evaluation", related = "ch:related", conclusion = "ch:conclusion" }
 M.ROLE_NAME = { intro = "introduction", background = "background chapter", approach = "approach chapter", implementation = "implementation chapter", evaluation = "evaluation chapter", related = "related-work chapter", conclusion = "conclusion" }
 M.MANDATORY = { "intro", "approach", "evaluation", "related", "conclusion" }
@@ -67,17 +70,34 @@ do
     local s = M.readfile(f) or ""
     local body = s:gsub("%%[^\n]*", "")
     if body:match("\\chapter{") then M.MAIN[#M.MAIN + 1] = f end
-    for role, lab in pairs(M.ROLE_LABEL) do if body:find("\\label{" .. lab .. "}", 1, true) then M.ROLE[role] = f end end
+    for lab in body:gmatch("\\label{(ch:[^}]*)}") do
+      local role = lab:match("^ch:([%a]+)$") or lab:match("^ch:([%a]+):.+$")
+      if role and M.ROLE_LABEL[role] and not (M.ROLES_OF[f] and M.ROLES_OF[f][role]) then
+        M.ROLES_OF[f] = M.ROLES_OF[f] or {}
+        M.ROLES_OF[f][role] = true
+        M.ROLES[role] = M.ROLES[role] or {}
+        table.insert(M.ROLES[role], f)
+        M.ROLE[role] = M.ROLE[role] or f
+      end
+    end
     if body:match("\\chapter%*{Abstract}") then M.FILES.abstract = f end
     if body:find("\\label{aidecl}", 1, true) then M.FILES.aidecl = f end
     if body:match("\\DeclareAcronym") or body:match("\\newabbreviation") or body:match("\\newglossaryentry") then M.FILES.glossary = f end
   end
 end
+-- the chapters of a role, in reading order; empty when no chapter has it
+function M.role_files(r) return M.ROLES[r] or {} end
+-- the text of all chapters of a role, joined in reading order
+function M.role_text(r)
+  local t = {}
+  for _, f in ipairs(M.role_files(r)) do t[#t + 1] = M.readfile(f) or "" end
+  return table.concat(t, "\n")
+end
 -- a rule that needs chapters by role calls this first; it fails with the right message and returns false
 function M.roles_ok(list)
   local ok = true
   for _, r in ipairs(list) do
-    if not M.ROLE[r] then M.fail(nil, nil, string.format("no %s: no chapter file carries \\label{%s}", M.ROLE_NAME[r], M.ROLE_LABEL[r])); ok = false end
+    if not M.ROLE[r] then M.fail(nil, nil, string.format("no %s: no chapter file carries \\label{%s} or \\label{%s:<name>}", M.ROLE_NAME[r], M.ROLE_LABEL[r], M.ROLE_LABEL[r])); ok = false end
   end
   return ok
 end

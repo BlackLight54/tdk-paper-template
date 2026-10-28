@@ -8,8 +8,8 @@
 --
 -- Severity: check (fails once its phase is reached), advice (warns, never fails), count (numbers).
 -- Phase: the manual phase from \newcommand{\lintphase}{plan|draft|polish|final} in thesis.tex;
--- a check whose phase is not reached yet only reports. Chapters are found by their labels
--- (ch:intro, ...), not by file name. "% lint-ignore: <rule> <reason>" silences one finding.
+-- a check whose phase is not reached yet only reports. Chapters are found by their role labels
+-- (ch:<role> or ch:<role>:<name>; a role may span chapters), not by file name. "% lint-ignore: <rule> <reason>" silences one finding.
 -- Needs texlua (TeX Live); the pdf family needs poppler-utils, the tools family what it names.
 
 package.path = "scripts/lint/?.lua;" .. package.path

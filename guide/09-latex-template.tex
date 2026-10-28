@@ -60,6 +60,8 @@ Ranges compress: \cref{eq:latex:window,eq:latex:fresh,eq:latex:valid}.
 \Cref{app:latex:theorems,app:latex:tags} reference every theorem-like environment and tagged list.
 Label prefixes are listed in \texttt{include/preamble.tex}.
 
+A chapter's label also says its role in the argument, and the lint finds chapters by it, never by file name: \texttt{ch:intro}, \texttt{ch:background}, \texttt{ch:approach}, \texttt{ch:implementation}, \texttt{ch:evaluation}, \texttt{ch:related} or \texttt{ch:conclusion}. A role may span chapters: the first keeps the plain label, and the others add a name, as in \texttt{ch:approach:monitors}. A chapter that plays two roles carries two labels, for example \texttt{ch:implementation} and \texttt{ch:evaluation}. Every numbered chapter needs a role.
+
 %----------------------------------------------------------------------------
 \section{Mathematics and theorems (amsmath, unicode-math, ntheorem)}\label{app:latex:theorems}
 A numbered equation:
