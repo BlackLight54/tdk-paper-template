@@ -89,7 +89,7 @@ return {
   { id = "setup", role = "evaluation", kind = "text", title = "Setup and artifact", criterion = "D/2", example = "app:chapters:setup", key = "setup", label = "sec:setup",
     headings = { "setup" }, words = 100,
     why = "how the measurements were made, so each can be checked, and where the archived artifact is",
-    used = "the evaluation cites the archived artifact with a real DOI",
+    used = "the evaluation cites the archived artifact by its Zenodo DOI",
     add = "add a section \\section{Setup}\\label{sec:setup} to the evaluation" },
 
   { id = "correctness", role = "evaluation", kind = "float", title = "Correctness", criterion = "D/2", example = "tab:guide:correctness", label = "tab:correctness",
@@ -121,7 +121,7 @@ return {
 
   { id = "gapmatrix", role = "related", kind = "float", title = "Gap matrix", criterion = "D/1", example = "tab:guide:related", label = "tab:related",
     why = "each requirement against the closest approaches: every other approach misses something, this work meets all",
-    used = "rows are the requirements, this work's column is all met with pointers to results, and every other approach misses one",
+    used = "each requirement has exactly one row, this work meets every one with a pointer to a result, and every other approach misses one",
     add = "add the gap matrix, \\label{tab:related}, to the related work" },
 
   { id = "gap", role = "related", kind = "text", title = "The gap", criterion = "D/1", example = "app:chapters:gap", key = "gap", label = "sec:gap",
