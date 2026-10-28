@@ -176,7 +176,11 @@ local function findings_cell(res)
         local where = f.file and (loc(f.file, f.line) .. " ") or ""
         local msg = f.msg
         if #msg > 150 then msg = msg:sub(1, 147):gsub("[\128-\191]*$", "") .. "..." end
-        shown[#shown + 1] = where .. esc(msg) .. (f.fix and fix_cell(f.fix) or "")
+        -- under the message, the fix's text when there is one, or else the help, in italics
+        local under = ""
+        if f.fix then under = fix_cell(f.fix)
+        elseif f.help then under = "\\newline\\hspace*{1em}{\\itshape " .. esc(cut(f.help, 150)) .. "}" end
+        shown[#shown + 1] = where .. esc(msg) .. under
       else extra = extra + 1 end
     end
   end
@@ -282,14 +286,15 @@ function M.checks_page(results)
   w(other_checks(C.results))
   w(counts_table(C.results))
   w("\\par\\medskip\\noindent\\rule{.4\\linewidth}{.4pt}\\par")
-  w(string.format("{\\footnotesize\\color{lintmute}\\noindent Generated %s by \\texttt{texlua scripts/lint.lua overleaf}. The build log's own warnings and the PDF rules are not here: Overleaf shows the first, CI runs the second. A finding judged and rejected is silenced by \\texttt{\\%% lint-ignore: <id> <reason>} on its line. After $\\to$ is the text to write instead; in a local clone, \\texttt{make fix} writes the safe ones and prints the diff.\\par}", os.date("%Y-%m-%d")))
+  w(string.format("{\\footnotesize\\color{lintmute}\\noindent Generated %s by \\texttt{texlua scripts/lint.lua overleaf}. The build log's own warnings and the PDF rules are not here: Overleaf shows the first, CI runs the second. A finding judged and rejected is silenced by \\texttt{\\%% lint-ignore: <id> <reason>} on its line. Under a finding, after $\\to$, is the text to write instead, or else in italics what to do; in a local clone, \\texttt{make fix} writes the safe fixes and prints the diff.\\par}", os.date("%Y-%m-%d")))
   -- failing checks as package warnings, for Overleaf's log panel
   for _, res in ipairs(C.results) do
     if res.severity == "check" and res.status == "fix" then
       for _, f in ipairs(res.findings) do
         if f.level == "error" then
           local where = f.file and (f.file .. (f.line and (":" .. f.line) or "") .. ": ") or ""
-          w(string.format("\\PackageWarningNoLine{tdk-lint}{%s: %s%s%s}", res.rule, where, (f.msg:gsub("[%%#{}\\]", " "):gsub("\n", " ")), f.fix and log_fix(f.fix) or ""))
+          local text = f.msg .. (C.help_of(f) and (" -- " .. C.help_of(f)) or "")
+          w(string.format("\\PackageWarningNoLine{tdk-lint}{%s: %s%s%s}", res.rule, where, (text:gsub("[%%#{}\\]", " "):gsub("\n", " ")), f.fix and log_fix(f.fix) or ""))
         end
       end
     end
@@ -395,7 +400,7 @@ function M.json()
     for _, f in ipairs(res.findings) do
       local fix
       if f.fix then fix = { safety = f.fix.safety, help = f.fix.help, edits = f.fix.edits, text = C.fix_lines(f) } end
-      findings[#findings + 1] = { rule = res.rule, level = f.level, file = f.file, line = f.line, msg = f.msg, fix = fix }
+      findings[#findings + 1] = { rule = res.rule, level = f.level, file = f.file, line = f.line, msg = f.msg, help = f.help, fix = fix }
     end
   end
   return js({ phase = C.phase(), target = E.target(), fingerprint = E.fingerprint(C.ESSENTIALS or {}), rows = rows, roles = roles, example_box = C.example_box(), findings = findings }) .. "\n"

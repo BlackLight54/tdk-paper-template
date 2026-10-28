@@ -65,7 +65,7 @@ rule("pdf-file", "pdf", "check", "polish", "the PDF exists, is A4, under the fac
   if not (w and math.abs(w - 595.3) < 3 and math.abs(h - 841.9) < 3) then fail(nil, nil, string.format("page size %s x %s pt is not A4", tostring(w), tostring(h))) end
   local title = C.trim(info:match("Title:%s*([^\n]*)") or "")
   local author = C.trim(info:match("Author:%s*([^\n]*)") or "")
-  if title == "" or title:match("TODO") or title:match("Elektronikus terel") then fail("thesis.tex", nil, "PDF title metadata is empty or a placeholder: set \\vikcim") end
+  if title == "" or title:match("TODO") or title:match("Elektronikus terel") then fail("thesis.tex", nil, "PDF title metadata is empty or a placeholder", "set \\vikcim") end
   if author == "" or author:match("Gipsz") then fail("thesis.tex", nil, "PDF author metadata is empty or the sample author") end
   local size = lfs.attributes(pdf(), "size") or 0
   if size > 15 * 1024 * 1024 then fail(nil, nil, string.format("PDF is %.1f MB; the faculty allows 15 MB", size / 1048576))

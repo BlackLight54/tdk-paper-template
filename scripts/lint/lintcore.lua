@@ -184,7 +184,7 @@ local function ignored(file, line)
     local rule, reason = l:match("%%%s*lint%-ignore:%s*([%w%-]+)%s*(.*)$")
     if rule == M.current_rule or rule == "all" then
       if not reason or #M.trim(reason) < 3 then
-        M.findings[#M.findings + 1] = { level = "warning", file = file, line = line, msg = "lint-ignore without a reason: say why" }
+        M.findings[#M.findings + 1] = { level = "warning", file = file, line = line, msg = "lint-ignore without a reason", help = "say why" }
         return false
       end
       M.ignored = M.ignored + 1
@@ -193,15 +193,17 @@ local function ignored(file, line)
   end
   return false
 end
--- fixes --------------------------------------------------------------------------------------
--- A finding may carry a fix, the text to write instead, the way a compiler suggests one. Its
--- safety says how far to trust it:
+-- findings, help and fixes ----------------------------------------------------------------
+-- A finding says what is wrong, its help what to do, and its fix, when the lint can compute one,
+-- the text to write instead, the way a compiler reports them:
+--   fail(f, n, "a typed reference with \\ref", "write \\cref{...}", fix)
+-- Both help and fix are optional: a string after the message is the help, a table the fix. The
+-- help is the general instruction; the fix's own help names the change, and stands in for the
+-- help where a finding has none. A fix's safety says how far to trust it:
 --   safe         the exact inverse of a slip; `lint.lua fix` writes it
 --   review       most likely right, but read it first; `lint.lua fix --review` writes it
 --   placeholder  the text to write, with <holes> only the author can fill; shown, never written
--- A rule passes one as the finding's last argument:
---   fail(f, n, "a typed reference with \\ref: write \\cref{...}",
---        C.fix("safe", "write \\cref", C.replace("Figure~\\ref{" .. key .. "}", "\\cref{" .. key .. "}")))
+--   C.fix("safe", "write \\cref", C.replace("Figure~\\ref{" .. key .. "}", "\\cref{" .. key .. "}"))
 -- An edit replaces the first old on the finding's line (every old with all), adds a line after
 -- it, or names a command for the author to run; replace_at and after_at do the same elsewhere.
 -- C.matches makes one edit per match of a pattern, each at its own column. An edit never touches
@@ -271,11 +273,14 @@ local function bind(fx, file, line)
   end
   return fx
 end
+local FIX_WHO = { safe = "make fix writes it", review = "make fix-review writes it; read it first", placeholder = "fill in the <holes>" }
 -- the fix as lines of text, under the finding: "fix (safe): ...", then "- old" and "+ new" for each
 -- line it changes, "@ file:line" before a line elsewhere, "$ command" for a command
 function M.fix_lines(f)
   local fx = f.fix
-  local out = { string.format("fix (%s): %s", fx.safety, fx.help) }
+  local command = false
+  for _, e in ipairs(fx.edits) do if e.cmd then command = true end end
+  local out = { string.format("fix (%s): %s", fx.safety, command and "run it yourself" or FIX_WHO[fx.safety]) }
   local groups, order = {}, {}
   for _, e in ipairs(fx.edits) do
     local k = e.cmd and ("$" .. #order) or (e.file .. ":" .. e.line)
@@ -308,31 +313,39 @@ local function columns(f)
   end
 end
 
-local function finding(level, file, line, msg, fx)
+local function finding(level, file, line, msg, help, fx)
+  if type(help) ~= "string" then help, fx = nil, help end
   if ignored(file, line) then return end
-  M.findings[#M.findings + 1] = { level = level, file = file, line = line, msg = msg, fix = bind(fx, file, line) }
+  M.findings[#M.findings + 1] = { level = level, file = file, line = line, msg = msg, help = help, fix = bind(fx, file, line) }
 end
+-- the help a finding shows: its own, or else its fix's
+function M.help_of(f) return f.help or (f.fix and f.fix.help) end
 -- findings are printed by M.report, after sorting, so the output is the same on every run
 -- GitHub's workflow commands end a message at a newline, and read % as an escape
 local function ghesc(s) return (s:gsub("%%", "%%25"):gsub("\r", "%%0D"):gsub("\n", "%%0A")) end
+-- a property (title=...) also ends at a comma or a colon
+local function ghprop(s) return (ghesc(s):gsub(":", "%%3A"):gsub(",", "%%2C")) end
 local function print_finding(f)
-  local fix = f.fix and M.fix_lines(f) or {}
+  local lines = {}
+  local help = M.help_of(f)
+  if help then lines[1] = "help: " .. help end
+  for _, l in ipairs(f.fix and M.fix_lines(f) or {}) do lines[#lines + 1] = l end
   if gh then
+    -- the message is the annotation's title, the help and the fix its body
     local loc = f.file and ("file=" .. f.file .. (f.line and (",line=" .. f.line) or "")) or ""
     local c1, c2 = columns(f)
     if c1 then loc = loc .. string.format(",col=%d,endColumn=%d", c1, c2) end
-    local body = f.msg
-    if #fix > 0 then body = body .. "\n" .. table.concat(fix, "\n") end
-    io.write(string.format("::%s %s::%s\n", f.level, loc, ghesc(body)))
+    if #lines == 0 then io.write(string.format("::%s %s::%s\n", f.level, loc, ghesc(f.msg)))
+    else io.write(string.format("::%s %s%stitle=%s::%s\n", f.level, loc, loc ~= "" and "," or "", ghprop(f.msg), ghesc(table.concat(lines, "\n")))) end
   else
     local tag = ({ error = " FAIL", warning = " warn", notice = "     " })[f.level]
     io.write(string.format("%s%s %s\n", f.file and (f.file .. (f.line and (":" .. f.line) or "") .. ":") or "", tag, f.msg))
-    for _, l in ipairs(fix) do io.write("    ", l, "\n") end
+    for _, l in ipairs(lines) do io.write("    ", l, "\n") end
   end
 end
-function M.fail(file, line, msg, fx) finding("error", file, line, msg, fx) end
-function M.warn(file, line, msg, fx) finding("warning", file, line, msg, fx) end
-function M.note(file, line, msg, fx) finding("notice", file, line, msg, fx) end
+function M.fail(file, line, msg, help, fx) finding("error", file, line, msg, help, fx) end
+function M.warn(file, line, msg, help, fx) finding("warning", file, line, msg, help, fx) end
+function M.note(file, line, msg, help, fx) finding("notice", file, line, msg, help, fx) end
 
 M.results = {}
 -- severity: check (fails on errors once its phase is reached), advice (warns, never fails), count (numbers)
