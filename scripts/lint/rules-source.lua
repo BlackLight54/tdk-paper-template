@@ -509,7 +509,7 @@ local TDK_NAMES = { "%f[%a]o?tdk%f[%A]", "tudom%S*nyos%s+di%S*kk%S*ri", "scienti
 -- what a link points at, when it is a draft or a TDK paper of the given year
 local function companion_link(url, year)
   local u = url:lower()
-  if u:find("overleaf%.com") then return "an Overleaf project, a draft no reviewer can open," end
+  if u:find("overleaf%.com/project/") or u:find("overleaf%.com/read/") then return "an Overleaf project, a draft no reviewer can open," end
   local y = u:match("tdk%.bme%.hu/conference/[^/]+/(%d%d%d%d)/sessions/")
   if y and tonumber(y) >= year then return "a paper of the " .. y .. " TDK on the portal" end
   if u:find("github%.com/[^/]+/[^/]*tdk" .. string.format("%02d", year % 100) .. "%f[%D]") then return "the repository of a " .. year .. " TDK paper" end
