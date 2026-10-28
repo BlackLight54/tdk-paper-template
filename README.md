@@ -1,10 +1,10 @@
 # FTSRG TDK paper template
 
 This is the FTSRG advisors' LaTeX template for a TDK paper at BME VIK. The advisors'
-guide is included in the draft PDF. **The Overleaf project is the canonical source.**
-This GitHub copy is not a maintained mirror and may be out of date. Students receive
-a copy of the Overleaf project; its GitHub integration creates each student's paper
-repository, including the build and lint workflow.
+guide is included in the draft PDF. **This repository is the canonical source.** The
+template's Overleaf project is synced with it through Overleaf's GitHub integration.
+Students receive a copy of that Overleaf project; its GitHub integration creates each
+student's paper repository, including the build and lint workflow.
 
 - `thesis.tex` builds the draft with notes, the Checks page and the guide.
   The chapter files contain headings, stubs and notes linking to

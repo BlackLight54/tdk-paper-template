@@ -23,10 +23,10 @@ jobs:
       - name: Inkscape for SVG figures, poppler for the PDF rules, hunspell for spelling
         run: apt-get update -qq && apt-get install -y -qq --no-install-recommends inkscape poppler-utils hunspell hunspell-en-gb hunspell-en-us >/dev/null
       - name: template / the lint's skeleton copy matches content/ (the template's repository only)
-        if: github.repository == 'BlackLight54/tdk-paper-template'
+        if: github.repository == 'BlackLight54/TDK-template'
         run: for f in content/0[1-7]-*.tex; do cmp "$f" "scripts/lint/skeleton/${f#content/}" || exit 1; done
       - name: template / the guide's essentials page matches scripts/lint/essentials.lua (the template's repository only)
-        if: github.repository == 'BlackLight54/tdk-paper-template'
+        if: github.repository == 'BlackLight54/TDK-template'
         run: texlua scripts/lint.lua essentials --guide | cmp - guide/essentials.tex
       - name: Build the draft
         run: make all
