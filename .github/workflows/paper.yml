@@ -58,9 +58,6 @@ jobs:
       - name: source / roles (check, draft)
         if: always()
         run: texlua scripts/lint.lua roles
-      - name: source / markers (check, draft)
-        if: always()
-        run: texlua scripts/lint.lua markers
       - name: source / chapters (check)
         if: always()
         run: texlua scripts/lint.lua chapters
@@ -174,6 +171,9 @@ jobs:
       - name: pdf / pdf-parts (check, final)
         if: always()
         run: texlua scripts/lint.lua pdf-parts --doc reviewer
+      - name: source / markers (check, draft)
+        if: always()
+        run: texlua scripts/lint.lua markers
       - name: source / placeholders (count, final)
         if: always()
         run: texlua scripts/lint.lua placeholders
