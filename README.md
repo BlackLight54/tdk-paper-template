@@ -1,3 +1,13 @@
+---
+role: paper-template
+canonical: https://github.com/BlackLight54/TDK-template
+mirror: https://github.com/BlackLight54/tdk-paper-template
+overleaf: https://www.overleaf.com/project/6aa7d78f4bf131387fb7c710
+related:
+  notes: https://github.com/BlackLight54/tdk-notes-template
+  code: https://github.com/BlackLight54/tdk-code-template
+---
+
 # FTSRG TDK paper template
 
 This is the FTSRG advisors' LaTeX template for a TDK paper at BME VIK. The advisors'
@@ -6,12 +16,16 @@ template's Overleaf project is synced with it through Overleaf's GitHub integrat
 Students receive a copy of that Overleaf project; its GitHub integration creates each
 student's paper repository, including the build and lint workflow.
 
+Use `main` here for template maintenance. The public
+[tdk-paper-template](https://github.com/BlackLight54/tdk-paper-template) is a mirror
+of the same source. Overleaf receives updates through its GitHub sync menu.
+
 - `thesis.tex` builds the draft with notes, the Checks page and the guide.
   The chapter files contain headings, stubs and notes linking to
-  "The paper, chapter by chapter" in `guide/chapter-by-chapter.tex`, where the
+  "The paper, chapter by chapter" in `guide/05-chapter-by-chapter.tex`, where the
   instructions and worked examples live. `reviewer.tex` builds the PDF in submission
   format. It hides the notes and gap markers, so how it looks says nothing about
-  readiness: it is ready to upload only when `make check-final` passes and the advisors
+  readiness: it is ready to upload only when `make check-submit` passes and the advisors
   have reviewed it.
 - `content/` holds the chapters, abstract, glossary and AI declaration; `guide/` holds
   the advisors' guide; `include/` the preamble; `bib/` the bibliographies; and `docs/`
@@ -28,5 +42,5 @@ for the code repository. The guide explains all three after the draft's appendic
 
 Build locally with `make all` for the draft and `make reviewer` for the reviewer PDF.
 Use TeX Live with XeLaTeX, Inkscape and shell escape enabled.
-`make check-reviewer` runs the lint on the reviewer build, and `make check-final` runs it
-at the final phase: the check before you upload.
+`make check-reviewer` runs the lint on the reviewer build, and `make check-submit` runs it
+at the submit phase: the check before you upload.

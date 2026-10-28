@@ -57,7 +57,7 @@ rule("frame", "source", "check", "always", "the template's frame is still there:
   if not C.FILES.abstract then fail(nil, nil, "no abstract file (a content file with \\chapter*{Abstract})") end
   if not C.FILES.aidecl then fail(nil, nil, "no AI declaration file (\\label{aidecl})") end
   if not C.FILES.glossary then fail(nil, nil, "no glossary file (\\newabbreviation or \\newglossaryentry in a file thesis.tex loads)") end
-  if not (C.readfile("thesis.tex") or ""):match("\\newcommand{\\lintphase}{%a+}") then fail("thesis.tex", nil, "no \\lintphase in thesis.tex: the lint needs the phase (plan, draft, polish, final)") end
+  if not C.setting("lintphase") then fail("thesis.tex", nil, "no \\lintphase in thesis.tex: the lint needs the phase (topic, setup, research, plan, draft, polish or submit)") end
   local pre = C.readfile("include/preamble.tex") or ""
   for _, m in ipairs({ "runningexample", "NewTagList", "beat", "gapyes", "atodo" }) do
     if not pre:find(m, 1, true) then fail("include/preamble.tex", nil, "the preamble no longer defines " .. m) end
@@ -223,18 +223,19 @@ local function marker_fix(f, n, l, t)
   return C.fix(known and "review" or "placeholder", gap and "write \\tbd" or "write \\citeneeded", table.unpack(edits))
 end
 
-rule("markers", "source", "check", "draft", "gaps are marked with \\tbd{...} or \\citeneeded[...], which the draft shows and the reviewer build hides: never typed as TBD, [CITE], [?] or XXX; at the final phase no marker is left", function()
-  local final = C.phase_reached("final")
+rule("markers", "source", "check", "draft", "gaps are marked with \\tbd{...} or \\citeneeded[...], which the draft shows and the reviewer build hides: never typed as TBD, [CITE], [?] or XXX; at the submit phase no marker is left", function()
+  local final = C.phase_reached("submit")
   local gaps = 0
   for _, f in ipairs(CONTENT) do
-    for n, l in ipairs(C.prose_lines(f)) do
+    for n, raw in ipairs(C.prose_lines(f)) do
+      local l = C.unliteral(raw) -- a TBD in \verb|..| is the program's text
       for _, t in ipairs(TYPED) do
         if l:find(t[1]) then fail(f, n, "a typed " .. t[2] .. " prints in the reviewer PDF", "write \\tbd{what is missing} or \\citeneeded[which source] instead", marker_fix(f, n, l, t)) end
       end
       for m in l:gmatch("\\(%a+)") do
         if m == "tbd" or m == "citeneeded" then
           gaps = gaps + 1
-          if final then fail(f, n, "\\" .. m .. " is still here", "fill the gap before the final version") end
+          if final then fail(f, n, "\\" .. m .. " is still here", "fill the gap before you submit") end
         end
       end
     end
@@ -350,16 +351,39 @@ rule("build", "source", "check", "always", "the build log: undefined references 
   end
 end)
 
-rule("overfull", "source", "check", "always", "overfull boxes in the build log: text or tables running into the margin", function()
+-- an overfull box under a point is invisible in print; the one that runs into the margin is wider
+local OVERFULL_PT = 1
+-- the source file open in the log at line i: TeX writes "(./content/03-approach.tex" when it
+-- opens a file and ")" when it closes it, so a balanced scan of the parentheses, with the ones
+-- that open no file (a font's "(0)", a warning's aside) on the same stack, gives the file on top
+local function log_files(ls)
+  local stack, at = {}, {}
+  for i, l in ipairs(ls) do
+    for c, path in l:gmatch("([%(%)])([%w%./_%-]*)") do
+      if c == "(" then stack[#stack + 1] = path:match("%.%a+$") and (path:gsub("^%./", "")) or false
+      elseif #stack > 0 then stack[#stack] = nil end
+    end
+    for j = #stack, 1, -1 do if stack[j] then at[i] = stack[j]; break end end
+  end
+  return at
+end
+rule("overfull", "source", "check", "always", "overfull boxes of a point or more in the build log: text or tables running into the margin, each placed at the source lines the log names so a lint-ignore there can silence it", function()
   local log = C.bpath(C.opts.doc .. ".log")
   if not C.exists(log) then fail(nil, nil, "no " .. log .. ": build first"); return end
   local ls = C.lines(log)
+  local files = log_files(ls)
   for i, l in ipairs(ls) do
-    local pt, from = l:match("^Overfull \\hbox %(([%d%.]+)pt too wide%) in paragraph at lines (%d+)")
-    if pt then
+    local pt = l:match("^Overfull \\hbox %(([%d%.]+)pt too wide%)")
+    if pt and tonumber(pt) >= OVERFULL_PT then
+      -- "in paragraph at lines 45--47", "in alignment at lines 10--20", "detected at line 12"; a box
+      -- that overflows "while \output is active" names no line
+      local from, to = l:match("at lines? (%d+)%-?%-?(%d*)")
       local sample = (ls[i + 1] or ""):gsub("\\[%w/%(%)%.]+%s*", ""):gsub("%s+", " ")
-      fail(nil, nil, string.format("overfull by %spt near log line %d: %s", pt, i, sample:sub(1, 60)))
-    elseif l:match("^Overfull \\hbox") then fail(nil, nil, l) end
+      local file, line = files[i], tonumber(from)
+      if file and not C.exists(file) then file, line = nil, nil end
+      local where = from and (to ~= "" and ("at lines " .. from .. "-" .. to) or ("at line " .. from)) or ("near log line " .. i)
+      fail(file, line, string.format("overfull by %spt %s: %s", pt, where, sample:sub(1, 60)), "shorten the line, let the table or listing break, or lint-ignore it with a reason")
+    elseif l:match("^Overfull \\hbox") and not pt then fail(nil, nil, l) end
   end
 end)
 
@@ -382,7 +406,7 @@ local function main_pages()
   return stop - first, first, stop - 1
 end
 
-rule("pages", "source", "check", "final", "main text, from the first numbered chapter to the page before the back matter (read from the .toc), is 30-35 pages", function()
+rule("pages", "source", "check", "submit", "main text, from the first numbered chapter to the page before the back matter (read from the .toc), is 30-35 pages", function()
   local p, s, e = main_pages()
   if not p then fail(nil, nil, "no numbered chapter followed by an unnumbered one in " .. C.opts.doc .. ".toc (build first; pdf-pages counts from the outline instead)"); return end
   if p < 30 or p > 35 then fail(C.ROLE.intro, 2, string.format("main text is %d pages (%d-%d); the call asks for 30-35, about 1 point off per 3 pages", p, s, e))
@@ -604,8 +628,11 @@ local function ref_fix(l)
   end)))
 end
 
+-- the printed lines only, and nothing inside \verb, \lstinline or a link: a Figure~\ref in a code
+-- listing is the program's text, and no fix touches it (lintcore.lua, M.literal_spans)
 rule("crefs", "source", "check", "always", "references go through \\cref: no 'Figure~\\ref', no \\autoref, \\Cref at the start of a sentence, and no bare \\ref outside table cells", function()
-  C.each_line(MAIN, function(f, n, l)
+  C.each_printed_line(MAIN, function(f, n, raw)
+    local l = C.unliteral(raw)
     if l:match("[Ff]igure~?\\ref") or l:match("[Tt]able~?\\ref") or l:match("[Ss]ection~?\\ref") or l:match("[Cc]hapter~?\\ref") or l:match("[Ll]isting~?\\ref") then fail(f, n, "a typed reference with \\ref", "write \\cref{...}", cref_fix(l, "(%a+)~?\\ref{([^}]*)}", function(w) return TYPED_REF[w:lower()] end)) end
     if l:match("\\autoref") then fail(f, n, "\\autoref", "the template uses cleveref, write \\cref", cref_fix(l, "\\(auto)ref{([^}]*)}", function() return true end)) end
     if l:match("\\figref") or l:match("\\tabref") or l:match("\\sectref") or l:match("\\listref") then fail(f, n, "the faculty template's \\figref family", "write \\cref", cref_fix(l, "\\(%a+)ref{([^}]*)}", function(w) return FACULTY_REF[w] end)) end
@@ -621,13 +648,16 @@ rule("acronyms", "source", "check", "polish", "glossary entries: every \\gls key
   local G = C.FILES.glossary or "content/glossary.tex"
   local CG = C.FILES.common_glossary
   local declared, short, used, kind, lastabbr = {}, {}, {}, {}, nil
-  -- the entries of one glossary file, in file order: key, short form (abbreviations), kind, line
+  -- the entries of one glossary file, in file order: key, short form (abbreviations, declared
+  -- with \newabbreviation or glossaries' \newacronym), kind, line
   local function entries(file)
     local t = {}
     C.each_line({ file }, function(f, n, l)
-      local k, sh = l:match("\\newabbreviation%b[]{([^}]*)}{([^}]*)}")
-      if not k then k, sh = l:match("\\newabbreviation{([^}]*)}{([^}]*)}") end
-      if k then t[#t + 1] = { key = k, short = sh, kind = "abbreviation", file = f, line = n } end
+      for _, cmd in ipairs({ "newabbreviation", "newacronym" }) do
+        local k, sh = l:match("\\" .. cmd .. "%b[]{([^}]*)}{([^}]*)}")
+        if not k then k, sh = l:match("\\" .. cmd .. "{([^}]*)}{([^}]*)}") end
+        if k then t[#t + 1] = { key = k, short = sh, kind = "abbreviation", file = f, line = n } end
+      end
       local s1 = l:match("\\glsxtrnewsymbol%b[]{([^}]*)}") or l:match("\\glsxtrnewsymbol{([^}]*)}")
       if s1 then t[#t + 1] = { key = s1, kind = "symbol", file = f, line = n } end
       local t1 = l:match("\\newglossaryentry{([^}]*)}")
@@ -936,20 +966,18 @@ rule("companion", "source", "check", "always", "a TDK paper of the same year is 
       end
     end
   end
+  -- links, read as citations are (C.each_call): across spaces and line breaks, in the printed text only
+  C.each_call(CONTENT, function(name) return name == "url" or name == "href" or name == "weblink" end, function(f, n, _, arg)
+    local what = companion_link(arg, year, own)
+    if what then flag(f, n, "links " .. what .. ": a TDK paper of the same year is a companion paper, named as one, never linked") end
+  end)
   for _, f in ipairs(CONTENT) do
-    C.each_line({ f }, function(_, n, l)
-      for cmd, arg in l:gmatch("\\(%a+)%s*(%b{})") do
-        if cmd == "url" or cmd == "href" or cmd == "weblink" then
-          local what = companion_link(arg:sub(2, -2), year, own)
-          if what then flag(f, n, "links " .. what .. ": a TDK paper of the same year is a companion paper, named as one, never linked") end
-        end
-      end
-    end)
     -- "a companion paper~\cite{...}" or a link whose text says companion; a citation later in the
     -- sentence ("a companion paper verifies it in Tamarin~\cite{...}") is another source's
     local text = table.concat(C.prose_lines(f), "\n")
     local pats = { "\\href%s*%b{}%s*{()[^}]*[Cc]ompanion", "\\weblink%s*%b{}%s*{()[^}]*[Cc]ompanion" }
-    for _, cmd in ipairs({ "[cC]ite", "url", "href", "weblink" }) do pats[#pats + 1] = "()[Cc]ompanion%s*%a*[%s~,(%[]*\\" .. cmd end
+    -- the words may close an \emph{} or \enquote{} before the citation
+    for _, cmd in ipairs({ "[cC]ite", "url", "href", "weblink" }) do pats[#pats + 1] = "()[Cc]ompanion%s*%a*}?[%s~,(%[]*\\" .. cmd end
     for _, p in ipairs(pats) do
       for at in text:gmatch(p) do
         local n = 1 + C.count(text:sub(1, at), "\n")
@@ -1083,13 +1111,9 @@ local function typo_fix(f, n, seen, kind, help, count, pattern, fn, tier)
   local edits = C.matches(C.raw_lines(f)[n], pattern, fn)
   return C.fix(tier or (#edits == count and "safe" or "review"), help, table.unpack(edits))
 end
--- a line with its inline maths and escaped dollars blanked to "#", column for column: TeX ignores
--- the spaces in $k : x$, so they are not a slip
-local function mask_math(l)
-  l = l:gsub("\\%$", "##")
-  l = l:gsub("%$%$.-%$%$", function(m) return ("#"):rep(#m) end)
-  return (l:gsub("%$[^$]*%$", function(m) return ("#"):rep(#m) end))
-end
+-- a space before punctuation, a ratio excepted (3 : 1 keeps its spaces): at the end of the line
+-- too, where the frontier sees TeX's end of string, \0
+local PUNCT = "([%w%)])%s+([,%.;:])%f[%s\0]"
 -- whether a line sits inside a table or an array, where \\ ends a row and not a line of prose
 local GRID = { tabular = true, ["tabular*"] = true, tabularx = true, tabulary = true, longtable = true, xltabular = true, supertabular = true, array = true,
   tabbing = true, matrix = true, pmatrix = true, bmatrix = true, vmatrix = true, cases = true, aligned = true, split = true, gathered = true, eqnarray = true }
@@ -1109,9 +1133,14 @@ local function in_grid(f, n)
   return grid_cache[f][n]
 end
 local function is_range(code, s, e) return not code:sub(s - 1, s - 1):match("[%w%-%.]") and not code:sub(e + 1, e + 1):match("[%w%-]") end
+-- doubled words that are grammar, not a slip: "the protocol that that process uses", "had had"
+local DOUBLED_OK = { that = true, had = true }
 
 rule("typography", "source", "advice", "polish", "the small things the reviewer sees: number ranges with --, a thin space before units, no straight quotes, no doubled words, \\eg and \\ie macros, no manual line breaks in prose", function()
-  C.each_prose_line(MAIN, function(f, n, l)
+  C.each_prose_line(MAIN, function(f, n, raw)
+    -- the literal spans blanked (lintcore.lua, M.literal_spans): x : Nat in \texttt{} or $k : x$
+    -- is code or a formula, not a slip, and no fix touches it
+    local l = C.unliteral(raw)
     local p = C.prose(l)
     local seen = {}
     -- a range stands alone: BLS12-381 and i7-9750H are names, not ranges
@@ -1146,17 +1175,15 @@ rule("typography", "source", "advice", "polish", "the small things the reviewer 
       warn(f, n, "et al. typed out", "use \\etal", typo_fix(f, n, seen, "etal", "write \\etal", C.nmatch(p, "%f[%a]et al%."), "%f[%a]et al%.", function() if C.defines("etal") then return "\\etal" end end))
     end
     for w in p:gmatch("%f[%a](%a+) %1%f[%A]") do
-      if #w > 2 then
+      if #w > 2 and not DOUBLED_OK[w:lower()] then
         warn(f, n, "doubled word: " .. w .. " " .. w, typo_fix(f, n, seen, "double", "keep one", 1, "%f[%a](%a+) %1%f[%A]", function(_, _, _, d)
-          if #d > 2 then return d end
+          if #d > 2 and not DOUBLED_OK[d:lower()] then return d end
         end, "review"))
       end
     end
-    local flat = mask_math(l)
-    if flat:match("[%w%)]%s+[,%.;:]%f[%s]") then
-      -- a ratio, 3 : 1, keeps its spaces
-      warn(f, n, "space before punctuation", typo_fix(f, n, seen, "punct", "delete the space", C.nmatch(flat, "[%w%)]%s+[,%.;:]%f[%s]"), "([%w%)])%s+([,%.;:])%f[%s]", function(m, s, code, c, q)
-        if mask_math(code):sub(s, s + #m - 1) == m and not (q == ":" and c:match("%d")) then return c .. q end
+    if l:match(PUNCT) then
+      warn(f, n, "space before punctuation", typo_fix(f, n, seen, "punct", "delete the space", C.nmatch(l, PUNCT), PUNCT, function(_, _, _, c, q)
+        if not (q == ":" and c:match("%d")) then return c .. q end
       end))
     end
     if l:match("\\\\%s*$") and not l:match("&") and not l:match("\\\\%[") and not l:match("^%s*\\\\") then
@@ -1195,7 +1222,7 @@ rule("terms", "source", "advice", "polish", "one name per concept: hyphenated, o
     local hy = select(2, all:gsub("%f[%a]" .. a .. "%-" .. b .. "%f[%A]", ""))
     if open > 0 or closed > 0 then n = n + 1; warn(nil, nil, string.format("%s (%d) also appears as %s%s", h, hy, open > 0 and string.format("'%s %s' (%d)", a, b, open) or "", closed > 0 and string.format("%s'%s%s' (%d)", open > 0 and " and " or "", a, b, closed) or ""), "pick one") end
   end
-  -- British/American pairs that hunspell would not catch together
+  -- British/American pairs that a spell checker would not catch together
   local pairs_ = { { "modelling", "modeling" }, { "colour", "color" }, { "behaviour", "behavior" }, { "analyse", "analyze" }, { "optimise", "optimize" }, { "optimisation", "optimization" }, { "formalisation", "formalization" }, { "formalise", "formalize" }, { "centre", "center" }, { "licence", "license" }, { "catalogue", "catalog" }, { "parametrised", "parameterized" }, { "synchronise", "synchronize" }, { "realise", "realize" }, { "serialisation", "serialization" }, { "authorisation", "authorization" } }
   local brit, amer = 0, 0
   for _, pr in ipairs(pairs_) do
@@ -1238,7 +1265,7 @@ rule("numbers", "source", "advice", "polish", "the headline numbers of the abstr
   return string.format("missing=%d", missing)
 end)
 
-rule("aidecl", "source", "check", "final", "the AI declaration is filled in: exactly one box marked, and if AI was used, at least one row, the overall share and its justification", function()
+rule("aidecl", "source", "check", "submit", "the AI declaration is filled in: exactly one box marked, and if AI was used, at least one row, the overall share and its justification", function()
   local f = C.FILES.aidecl
   local s = f and C.readfile(f); if not s then fail(nil, nil, "no AI declaration file (\\label{aidecl})"); return end
   local body = s:gsub("\\newcommand{\\aiboxmarked}[^\n]*", "")
@@ -1255,7 +1282,7 @@ rule("aidecl", "source", "check", "final", "the AI declaration is filled in: exa
   if s:match("\\todo") then warn(f, nil, "the declaration's instructions todo is still in the file") end
 end)
 
-rule("titlepage", "source", "check", "final", "the title page variables are filled in: title, author, year, the second author where there is one", function()
+rule("titlepage", "source", "check", "submit", "the title page variables are filled in: title, author, year, the second author where there is one", function()
   local th = C.readfile("thesis.tex") or ""
   local title = th:match("\\newcommand{\\vikcim}{([^}]*)}") or ""
   if title == "" or title:match("TODO") then fail("thesis.tex", nil, "\\vikcim (the title) is not set") end
@@ -1269,7 +1296,7 @@ rule("titlepage", "source", "check", "final", "the title page variables are fill
 end)
 
 -- burn-down --------------------------------------------------------------------------------
-rule("placeholders", "source", "count", "final", "what the template left for you: TODO strings, placeholder figures and tables, sample citations in the gap matrix, the Zenodo DOI", function()
+rule("placeholders", "source", "count", "submit", "what the template left for you: TODO strings, placeholder figures and tables, sample citations in the gap matrix, the Zenodo DOI", function()
   local todo, ph = 0, 0
   local files = {}
   for _, f in ipairs(CONTENT) do files[#files + 1] = f end
@@ -1288,7 +1315,7 @@ rule("placeholders", "source", "count", "final", "what the template left for you
   return string.format("todo=%d placeholders=%d", todo, ph)
 end)
 
-rule("beats", "source", "count", "final", "beats and notes still printing: the skeleton is done when every beat has become prose", function()
+rule("beats", "source", "count", "submit", "beats and notes still printing: the skeleton is done when every beat has become prose", function()
   local beats, todos = 0, 0
   C.each_line(MAIN, function(f, n, l)
     if l:match("\\beat{") then beats = beats + 1; note(f, n, "beat") end
@@ -1302,6 +1329,6 @@ rule("burndown", "source", "count", "always", "one line of JSON with the counts 
   local j = string.format('{"date":"%s","pages":%d,"todo":%d,"beats":%d,"notes":%d,"placeholders":%d,"citations":%d,"figures":%d}',
     os.date("!%Y-%m-%d"), main_pages() or 0, count(CONTENT, "TODO"), count(MAIN, "\\beat{"), count(MAIN, "\\a?d?v?i?s?o?r?todo%["),
     count(CONTENT, "[Pp]laceholder"), count(MAIN, "\\cite[tp]?{"), count(MAIN, "\\label{fig:"))
-  if not C.opts.tex and not C.opts.json then io.write(j, "\n") end -- --json carries it as the counts
+  if not C.quiet() then io.write(j, "\n") end -- --json carries it as the counts
   return j
 end)

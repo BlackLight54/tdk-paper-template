@@ -25,7 +25,9 @@ TODO How the closest approach would handle the scenario, and which requirement i
   \centering
   \caption{TODO Gap matrix: each requirement against the closest approaches. \gaplegend.}
   \label{tab:related}
-  \begin{tabularx}{\linewidth}{l X c c c c}
+  % Every column but the requirement's has a fixed width and wraps, so a long cell grows downwards
+  % instead of squeezing the requirement column under its heading.
+  \begin{tabularx}{\linewidth}{>{\raggedright\arraybackslash}p{3.2em} >{\raggedright\arraybackslash}X *{3}{>{\centering\arraybackslash}p{5.5em}} >{\centering\arraybackslash}p{6.5em}}
     \toprule
     & \textbf{Requirement} & \makecell{\textbf{Approach A}\\\cite{lamport1978time}} & \makecell{\textbf{Approach B}\\\cite{w3c2025vcdm}} & \textbf{Approach C} & \textbf{This work} \\
     \midrule

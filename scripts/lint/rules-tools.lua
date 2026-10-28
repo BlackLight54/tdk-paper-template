@@ -1,5 +1,5 @@
 -- Rules that wrap the tools TeX Live and the CI container provide: chktex, lacheck, texcount,
--- checkcites, the BibTeX log, hunspell. All report; none is a gate, because each has its noise.
+-- checkcites, the BibTeX log, aspell. All report; none is a gate, because each has its noise.
 local C = require("lintcore")
 local rule, fail, warn, note = C.rule, C.fail, C.warn, C.note
 
@@ -80,12 +80,15 @@ rule("bibtex-log", "tools", "count", "always", "the BibTeX log: empty fields and
   return string.format("warnings=%d", n)
 end)
 
-rule("spelling", "tools", "advice", "always", "hunspell on the detexed chapters: unknown words, and whether British and American spellings are mixed", function()
-  if not (C.have("hunspell") and C.have("detex")) then C.skip("hunspell or detex not installed"); return end
-  local dicts = C.run("hunspell -D 2>&1 | grep -E '/en_(GB|US)$' | sed 's#.*/##' | sort -u") or ""
-  local have_gb, have_us = dicts:match("en_GB") ~= nil, dicts:match("en_US") ~= nil
-  if not (have_gb or have_us) then C.skip("no English hunspell dictionary"); return end
-  local personal = C.exists("scripts/words.txt") and (" -p scripts/words.txt") or ""
+rule("spelling", "tools", "advice", "always", "aspell on the detexed chapters: unknown words, and whether British and American spellings are mixed", function()
+  if not (C.have("aspell") and C.have("detex")) then C.skip("aspell or detex not installed"); return end
+  local dicts = C.run("aspell dump dicts 2>/dev/null") or ""
+  local have_gb, have_us = dicts:match("%f[%w]en_GB%f[%W]") ~= nil, dicts:match("%f[%w]en_US%f[%W]") ~= nil
+  if not (have_gb or have_us) then C.skip("no English aspell dictionary"); return end
+  -- the project's own words, one per line; aspell's personal lists need a header line, so the
+  -- words are dropped from its output here instead
+  local personal = {}
+  for w in (C.readfile("scripts/words.txt") or ""):gmatch("[^%s]+") do personal[w] = true end
   -- the prose only: todos, beats, pictures, code and maths removed, and the arguments that are not
   -- words (labels, references, citations, glossary keys, file names), written to a file for detex
   local tmp = os.tmpname()
@@ -100,9 +103,9 @@ rule("spelling", "tools", "advice", "always", "hunspell on the detexed chapters:
     h:close()
   end
   local function unknown(dict)
-    local out = C.run("detex " .. tmp .. " | tr -c \"[:alpha:]'\" '\\n' | grep -E \"^[A-Za-z][a-z']{3,}$\" | hunspell -d " .. dict .. personal .. " -l | sort | uniq -c | sort -rn") or ""
+    local out = C.run("detex " .. tmp .. " | tr -c \"[:alpha:]'\" '\\n' | grep -E \"^[A-Za-z][a-z']{3,}$\" | aspell -d " .. dict .. " list | sort | uniq -c | sort -rn") or ""
     local t, order = {}, {}
-    for l in out:gmatch("[^\n]+") do local c, w = l:match("^%s*(%d+)%s+(%S+)"); if w then t[w] = tonumber(c); order[#order + 1] = w end end
+    for l in out:gmatch("[^\n]+") do local c, w = l:match("^%s*(%d+)%s+(%S+)"); if w and not personal[w] then t[w] = tonumber(c); order[#order + 1] = w end end
     return t, order
   end
   local gb, gborder = {}, {}; local us, usorder = {}, {}

@@ -59,10 +59,11 @@
 \usepackage[table]{xcolor} % Load before tikz, todonotes and tcolorbox so the options stick.
 \usepackage{graphicx}
 \usepackage[hang]{caption}
-\usepackage{subcaption}
+\usepackage[justification=centering]{subcaption} % subfigure captions are narrow, so they are centred
 \usepackage{wrapfig}
 \usepackage{rotating}
 \usepackage{placeins} % \FloatBarrier
+\usepackage{needspace} % \Needspace: keeps a short list after the acknowledgements on one page
 
 % SVG figures: \includesvg[width=\linewidth]{figures/foo}. Needs shell escape and Inkscape,
 % both available on Overleaf. Locally run the compiler with -shell-escape.

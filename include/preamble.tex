@@ -139,7 +139,6 @@
 	aboveskip=10pt}
 
 \renewcommand{\captionlabelfont}{\bf}
-\captionsetup[sub]{justification=centering} % subfigure captions are narrow
 
 % Number column in the list of figures and tables, wide enough for A.3.1.
 \makeatletter
@@ -152,6 +151,9 @@
 
 % Ragged right bibliography: long URLs and DOIs otherwise stretch the line.
 \renewcommand{\bibfont}{\raggedright}
+% The bibliography's line in the contents and its bookmark come from its own heading, so both point
+% at the page it starts on (an \addcontentsline before \bibliography points at the page before).
+\renewcommand{\bibsection}{\chapter*{\bibname}\addcontentsline{toc}{chapter}{\bibname}}
 %\renewcommand{\captionfont}{\footnotesize\it}
 
 %--------------------------------------------------------------------------------------
@@ -166,17 +168,17 @@
 %--------------------------------------------------------------------------------------
 % Todo notes
 %--------------------------------------------------------------------------------------
-% The page margins are narrow (see \marginsize in thesis.tex), so margin notes get
-% squeezed. Prefer \todo[inline]{...} for anything longer than a few words.
+% The page margins are 15mm (see \marginsize in thesis.tex): too narrow for a readable note
+% that does not cover the text or run off the bottom of the page. So every \todo prints
+% inline, a block across the text width under the line it is written on. \todo[noinline]{...}
+% still puts a word or two in the margin, in a box about 10mm wide, clear of the text and of the
+% page edge; anything longer than "cite" or "typo" belongs inline.
 % todonotes checks for at least 2cm at \begin{document}; the narrow width is deliberate,
-% so it is set after that check.
+% so it is set after that check. Both kinds disappear with todonotes' disable option.
 \setlength{\marginparwidth}{2cm}
-% 15mm margins leave no room for a readable note, so margin notes are 18mm wide, set in
-% footnotesize, and shifted 4mm into the text: they touch the text edge but stay readable.
-% Inline notes keep the text width. Both kinds disappear with todonotes' disable option.
-\AtBeginDocument{\setlength{\marginparwidth}{18mm}\setlength{\marginparsep}{-4mm}}
+\AtBeginDocument{\setlength{\marginparwidth}{11mm}\setlength{\marginparsep}{1.5mm}}
 \makeatletter
-\@ifpackageloaded{todonotes}{\setlength{\@todonotes@textwidth}{18mm}}{}
+\@ifpackageloaded{todonotes}{\setlength{\@todonotes@textwidth}{9.5mm}\presetkeys{todonotes}{inline}{}}{}
 \makeatother
 \newcommand{\todoinline}[1]{\todo[inline]{#1}}
 
@@ -186,12 +188,14 @@
 %   \beat{what it establishes}{its evidence}{what the running example shows here}{what it leads to}
 \newcommand{\beat}[4]{\todo[inline, caption={Beat: #1}]{\textbf{Beat.} \textit{Establishes:} #1. \textit{Evidence:} #2. \textit{Running example:} #3. \textit{Leads to:} #4.}}
 % A heading's pointer to its instruction and example in the guide chapter "The paper, chapter by
-% chapter" (guide/chapter-by-chapter.tex). Prints as a student todo, so the reviewer build drops it.
+% chapter" (guide/05-chapter-by-chapter.tex). Prints as a student todo, so the reviewer build drops it.
 %   \guidetodo{Context}{app:chapters:context}
 \newcommand{\guidetodo}[2]{\todo[inline, caption={#1}]{\textbf{#1.} What goes here, with an example: \cref{#2}.}}
 % The guide prints its beats as text, so they stay out of the paper's list of todos, and marks a
 % heading whose section holds something a skimming reviewer reads.
-\newcommand{\guidebeat}[4]{\par{\small\color{gray!30!black}\textbf{Beat.} \textit{Establishes:} #1. \textit{Evidence:} #2. \textit{Running example:} #3. \textit{Leads to:} #4.\par}\smallskip}
+% (\leavevmode before \color: a colour switch between a heading and its text would let the page
+% break there and leave the heading alone at the bottom of a page.)
+\newcommand{\guidebeat}[4]{\par{\small\leavevmode\color{gray!30!black}\textbf{Beat.} \textit{Establishes:} #1. \textit{Evidence:} #2. \textit{Running example:} #3. \textit{Leads to:} #4.\par}\smallskip}
 \newcommand{\skimmark}{\enspace{\small\faEye}}
 
 % The running example, named once in thesis.tex (\exname) and revisited in every chapter.
@@ -200,17 +204,20 @@
   colback=teal!5, borderline west={2pt}{0pt}{teal!60!black}, left=6pt, right=4pt, top=3pt, bottom=3pt,
   before upper={{\raggedright\textbf{Running example, \exname\if\relax\detokenize{#1}\relax\else: #1\fi}\par}\smallskip}}
 
-% The guide is deleted before submission, so the paper names its sections instead of
-% referencing them, and the guide names the paper's files.
+% The reviewer build (reviewer.tex) leaves the guide out, so the paper names its sections instead
+% of referencing them, and the guide names the paper's files.
 \newcommand{\guideref}[1]{\enquote{#1} in the guide}
 \makeatletter
 % File paths break after / and - (\path from the url package), so they fit narrow table columns.
 \g@addto@macro\UrlBreaks{\do\-}
 \newcommand{\deftplref}[4]{\@namedef{tpl@#1}{#2 (\path{content/#4.tex})}\@namedef{Tpl@#1}{#3 (\path{content/#4.tex})}}
-\newcommand{\tplref}[1]{\@nameuse{tpl@#1}}
-\newcommand{\Tplref}[1]{\@nameuse{Tpl@#1}}
+% An unknown key prints ?? and warns, as an undefined \ref does, instead of printing nothing.
+\newcommand{\tdk@tplref}[2]{\@ifundefined{#1@#2}{\PackageWarning{tdk}{\string\tplref\space key `#2' undefined; add it with \string\deftplref}\textbf{??}}{\@nameuse{#1@#2}}}
+\newcommand{\tplref}[1]{\tdk@tplref{tpl}{#1}}
+\newcommand{\Tplref}[1]{\tdk@tplref{Tpl}{#1}}
 \makeatother
 \deftplref{ch:intro}{the introduction}{The introduction}{01-introduction}
+\deftplref{ch:conclusion}{the conclusion}{The conclusion}{07-conclusion}
 \deftplref{ch:approach}{the approach chapter}{The approach chapter}{03-approach}
 \deftplref{ch:implementation}{the implementation chapter}{The implementation chapter}{04-implementation}
 \deftplref{ch:evaluation}{the evaluation chapter}{The evaluation chapter}{05-evaluation}
@@ -248,10 +255,10 @@
 
 % Review comments from the supervisor in the student's paper:
 %   \atodo[options]{comment}
-% Pre-fills a green color and "A" (advisor) as author; like \todo, it is a margin note unless
-% given [inline]. Every \todo option
+% Pre-fills a green color and "A" (advisor) as author; like \todo, it prints inline unless
+% given [noinline]. Every \todo option
 % still works, and options given here override the defaults:
-%   \atodo{short margin comment}  \atodo[inline]{longer comment}  \atodo[author=IK]{...}
+%   \atodo{review comment}  \atodo[noinline]{cite}  \atodo[author=IK]{...}
 \newcommand{\atodo}[2][]{\todo[color=green!25, bordercolor=green!50!black, author=A, #1]{#2}}
 
 % A gap the paper still has to fill, in a sentence, a table cell or a caption, where a margin note
@@ -261,7 +268,7 @@
 % Both print as coloured text in brackets in the draft, breaking across lines like the text around
 % them, are listed with the todos, and disappear in the
 % reviewer build. Never type TBD, [CITE], [?] or XXX into the text: the markers lint fails on them,
-% and on any \tbd or \citeneeded left at the final phase.
+% and on any \tbd or \citeneeded left at the submit phase.
 \makeatletter
 \newcommand{\tdk@gap}[2]{\if@todonotes@disabled\else{\color{#1}\sffamily\small[#2]}\addcontentsline{tdo}{todo}{#2}\fi}
 \makeatother
@@ -284,20 +291,44 @@
 \loadglsentries{content/glossary}
 \loadglsentries{include/glossary-common} % the entries our topics share; a paper's own declaration wins
 \ifdefined\reviewermode\else\loadglsentries{guide/glossary}\fi % the guide's own examples, only when the guide is built
-% The three lists on one page, as booktabs tables with their own column heads, each with a sentence
+% The three lists, as booktabs tables with their own column heads, each with a sentence
 % that says what the table is for. \printlists goes after the acknowledgements in thesis.tex.
-\newcommand{\printlists}{%
+% The chapter, and each list in it, is left out while the text uses none of its entries (an entry
+% counts once the .aux records a use of it, so a change shows one compile later, as references
+% do). A list starts on a new page unless its heading, its sentence, its column heads
+% and about two lines per entry fit on this one (at most 15 entries' worth), so a short list is not
+% split across two pages. The first list follows the chapter heading on a fresh page, so it never
+% asks: a break there would leave the heading alone on its page. (\Needspace, not \needspace: the
+% latter leaves the break to be decided inside the next longtable, which then prints its head and
+% foot around the break.)
+\makeatletter
+\newcount\tdk@used
+% \tdk@ifused{<glossary type, or several, comma-separated>}{<code>}: counts the used entries in
+% \tdk@used and runs the code if there is one
+\newcommand{\tdk@ifused}[2]{%
+  \global\tdk@used=0
+  \@for\tdk@type:=#1\do{%
+    \forglsentries[\tdk@type]{\tdk@entry}{\ifcsdef{glo@\tdk@entry @loclist}{\global\advance\tdk@used by 1 }{}}}%
+  \ifnum\tdk@used>0 #2\fi}
+\newif\iftdk@firstlist
+\newcommand{\tdk@keeplist}{\iftdk@firstlist\global\tdk@firstlistfalse\else\Needspace{\numexpr 8+2*\ifnum\tdk@used>15 15\else\tdk@used\fi\relax\baselineskip}\fi}
+\newcommand{\printlists}{\tdk@ifused{abbreviations,symbols,main}{%
   \chapter*{Abbreviations, notation and terms}\addcontentsline{toc}{chapter}{Abbreviations, notation and terms}%
-  {\renewcommand*{\entryname}{Abbreviation}\renewcommand*{\descriptionname}{Meaning}%
-   \printnoidxglossary[type=abbreviations, style=long-booktabs, title={Abbreviations},
-     preamble={Every abbreviation is spelled out where it first appears in the text; this table repeats the expansions for a reader who starts in the middle, and each use in the text links here.}]}%
-  {\renewcommand*{\entryname}{Symbol}\renewcommand*{\descriptionname}{Meaning}%
-   \printnoidxglossary[type=symbols, style=long-booktabs, title={Notation},
-     preamble={The symbols of the formal model, in one place. Each is introduced once, in the definition the description points at, and keeps that meaning in every chapter; nothing is overloaded.}]}%
-  {\renewcommand*{\entryname}{Term}\renewcommand*{\descriptionname}{Meaning}%
-   \printnoidxglossary[type=main, style=long-booktabs, title={Terms},
-     preamble={Words this paper uses in one fixed sense, often narrower than everyday or vendor usage. The description is that sense; where the literature uses the word differently, the background chapter says so.}]}%
-}
+  \global\tdk@firstlisttrue
+  \tdk@ifused{abbreviations}{\tdk@keeplist
+   {\renewcommand*{\entryname}{Abbreviation}\renewcommand*{\descriptionname}{Meaning}%
+    \printnoidxglossary[type=abbreviations, style=long-booktabs, title={Abbreviations},
+      preamble={Every abbreviation is spelled out where it first appears in the text; this table repeats the expansions for a reader who starts in the middle, and each use in the text links here.}]}}%
+  \tdk@ifused{symbols}{\tdk@keeplist
+   {\renewcommand*{\entryname}{Symbol}\renewcommand*{\descriptionname}{Meaning}%
+    \printnoidxglossary[type=symbols, style=long-booktabs, title={Notation},
+      preamble={The symbols of the formal model, in one place. Each is introduced once, in the definition the description points at, and keeps that meaning in every chapter; nothing is overloaded.}]}}%
+  \tdk@ifused{main}{\tdk@keeplist
+   {\renewcommand*{\entryname}{Term}\renewcommand*{\descriptionname}{Meaning}%
+    \printnoidxglossary[type=main, style=long-booktabs, title={Terms},
+      preamble={Words this paper uses in one fixed sense, often narrower than everyday or vendor usage. The description is that sense; where the literature uses the word differently, the background chapter says so.}]}}%
+}}
+\makeatother
 
 
 %--------------------------------------------------------------------------------------
