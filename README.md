@@ -26,4 +26,5 @@ for the code repository. The guide explains all three after the draft's appendic
 
 Build locally with `make all` for the draft and `make reviewer` for the reviewer PDF.
 Use TeX Live with XeLaTeX, Inkscape and shell escape enabled.
-`make check-reviewer` runs the lint on the reviewer build.
+`make check-reviewer` runs the lint on the reviewer build, and `make check-final` runs it
+at the final phase: the check before you upload.

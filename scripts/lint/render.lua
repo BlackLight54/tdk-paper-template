@@ -144,6 +144,7 @@ end
 local STATUS = {
   fix = "\\leavevmode\\textcolor{lintaccent}{\\textsc{fix}}",
   suggestion = "\\textit{suggestion}",
+  skipped = "\\leavevmode{\\color{lintmute}\\textit{skipped}}",
 }
 local function status_cell(s)
   if STATUS[s] then return STATUS[s] end
@@ -349,18 +350,30 @@ local function js(v)
   end
   return "null"
 end
-function M.json()
-  local E = C.ESS
-  local rows = {}
-  for _, r in ipairs(C.ESSENTIALS or {}) do
-    local row = r.row
-    rows[#rows + 1] = { id = row.id, role = row.role, kind = row.kind, title = row.title, level = r.level, glyph = E.GLYPH[r.level],
-      next = r.next, via = r.via, cmd = r.cmd, label = r.label or row.label, prefix = row.prefix, key = row.key,
-      where = r.where, words = r.words }
+-- everything the run established, for scripts: the phase and where it came from, every rule that
+-- ran with its status and counts, every finding, and, when the essentials ran, their rows. ok is
+-- the exit status: true when every gate passed
+function M.json(ok)
+  local out = { ok = ok, phase = C.phase(), phase_source = C.opts.phase_source, profile = C.opts.profile, doc = C.opts.doc, rules = {}, findings = {} }
+  for _, res in ipairs(C.results) do
+    out.rules[#out.rules + 1] = { rule = res.rule, family = res.family, severity = res.severity, phase = res.phase, status = res.status,
+      errors = res.errors, warnings = res.warnings, ignored = res.ignored, counts = res.counts }
+    for _, f in ipairs(res.findings) do out.findings[#out.findings + 1] = { rule = res.rule, level = f.level, file = f.file, line = f.line, msg = f.msg } end
   end
-  local roles = {}
-  for _, role in ipairs(E.ROLE_ORDER) do roles[role] = C.role_files(role) end
-  return js({ phase = C.phase(), target = E.target(), fingerprint = E.fingerprint(C.ESSENTIALS or {}), rows = rows, roles = roles, example_box = C.example_box() }) .. "\n"
+  if C.ESSENTIALS then
+    local E = C.ESS
+    out.rows = {}
+    for _, r in ipairs(C.ESSENTIALS) do
+      local row = r.row
+      out.rows[#out.rows + 1] = { id = row.id, role = row.role, kind = row.kind, title = row.title, criterion = row.criterion, level = r.level, glyph = E.GLYPH[r.level],
+        next = r.next, via = r.via, cmd = r.cmd, label = r.label or row.label, prefix = row.prefix, key = row.key,
+        where = r.where, words = r.words }
+    end
+    out.roles = {}
+    for _, role in ipairs(E.ROLE_ORDER) do out.roles[role] = C.role_files(role) end
+    out.target, out.fingerprint, out.example_box = E.target(), E.fingerprint(C.ESSENTIALS), C.example_box()
+  end
+  return js(out) .. "\n"
 end
 
 return M

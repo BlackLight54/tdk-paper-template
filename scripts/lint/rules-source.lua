@@ -495,20 +495,91 @@ rule("bib", "source", "check", "always", "the bibliography: every cited key exis
       end
     end
   end
-  C.each_line(MAIN, function(f, n, l)
-    local pos = 1
-    while true do
-      local s, e = l:find("\\cite[tp]?%*?", pos); if not s then break end
-      pos = e + 1
-      if l:sub(pos, pos) == "[" then local _, be = l:find("%b[]", pos); pos = (be or pos) + 1 end
-      if l:sub(pos, pos) == "[" then local _, be = l:find("%b[]", pos); pos = (be or pos) + 1 end
-      local bs, be = l:find("%b{}", pos)
-      if bs == pos then
-        for k in l:sub(bs + 1, be - 1):gmatch("[^,%s]+") do if not keys[k] then fail(f, n, "cited key " .. k .. " is in no .bib file") end end
-        pos = be + 1
+  C.each_cite(MAIN, function(f, n, k) if not keys[k] then fail(f, n, "cited key " .. k .. " is in no .bib file") end end)
+end)
+
+-- Two papers submitted to the same year's TDK, by one student or by two on neighbouring topics,
+-- are each other's companion paper. Each is reviewed on its own while the other is unpublished,
+-- so neither cites or links the other: the text says "a companion paper", and what this paper
+-- needs from it is restated in the background, or as a last resort in an appendix (the guide's
+-- app:tdk:companion). A TDK paper of an earlier year is on the portal and is cited like any
+-- other source; so is this year's once a thesis builds on it (LINT_PROFILE=thesis).
+local TDK_NAMES = { "%f[%a]o?tdk%f[%A]", "tudom%S*nyos%s+di%S*kk%S*ri", "scientific%s+students?%f[%A]",
+  "students?%S*%s+scientific%s+conference", "students?%S*%s+scientific%s+association" }
+-- the github.com/<owner>/<name> a URL or bib entry points into, lower case, without .git
+local function github_repo(s)
+  local r = s:lower():match("github%.com/[^/%s{}\",]+/[^/%s{}\",?#]+")
+  return r and (r:gsub("%.git$", ""))
+end
+-- this paper's own repository: the first GitHub repository the implementation chapter cites or
+-- links, as the template's overview does; its tdkYY name makes it no companion paper
+local function own_repo(entries)
+  local own
+  C.each_call(C.role_files("implementation"), function(name) return name == "url" or name == "href" or name == "weblink" or (name:match("^[cC]ite") and name ~= "citeneeded") end, function(_, _, name, arg)
+    if own then return end
+    if name:match("^[cC]ite") then
+      for k in arg:gmatch("[^,%s]+") do own = own or (entries[k] and github_repo(entries[k].body)) end
+    else own = github_repo(arg) end
+  end)
+  return own
+end
+-- what a link points at, when it is a draft or a TDK paper of the given year, other than own
+local function companion_link(url, year, own)
+  local u = url:lower()
+  if u:find("overleaf%.com/project/") or u:find("overleaf%.com/read/") then return "an Overleaf project, a draft no reviewer can open," end
+  local y = u:match("tdk%.bme%.hu/conference/[^/]+/(%d%d%d%d)/sessions/")
+  if y and tonumber(y) >= year then return "a paper of the " .. y .. " TDK on the portal" end
+  if u:find("github%.com/[^/]+/[^/]*tdk" .. string.format("%02d", year % 100) .. "%f[%D]") and github_repo(u) ~= own then return "the repository of a " .. year .. " TDK paper" end
+end
+rule("companion", "source", "check", "always", "a TDK paper of the same year is a companion paper: never cited or linked (Overleaf, its portal page, its repository), and no citation or link is attached to the words companion paper; what this paper needs from it is restated in the background", function()
+  if C.opts.profile == "thesis" then C.skip("a thesis may cite the TDK paper it grew from"); return end
+  local year = tonumber((C.readfile("include/tdk-variables.tex") or ""):match("\\newcommand{\\tdkev}{%s*(%d%d%d%d)%s*}")) or tonumber(os.date("%Y"))
+  local entries, first, times, flagged = C.bib_entries(), {}, {}, {}
+  local own = own_repo(entries)
+  local function flag(f, n, msg) flagged[f .. ":" .. n] = true; fail(f, n, msg) end
+  C.each_cite(CONTENT, function(f, n, k)
+    first[k] = first[k] or { f, n }; times[k] = (times[k] or 0) + 1
+  end)
+  for k, at in pairs(first) do
+    local e = entries[k]
+    if e and not (own and github_repo(e.body) == own) then
+      -- Zotero writes accents as {\'a}: drop the commands and braces before matching the names
+      local plain = e.body:lower():gsub("\\%p", ""):gsub("\\%a+%s?", ""):gsub("[{}]", "")
+      local tdk = false
+      for _, p in ipairs(TDK_NAMES) do if plain:find(p) then tdk = true end end
+      local ey = tonumber(e.body:match("[,%s][yY][eE][aA][rR]%s*=%s*[{\"]?%s*(%d%d%d%d)") or e.body:match("[,%s][dD][aA][tT][eE]%s*=%s*[{\"]?%s*(%d%d%d%d)"))
+      local cited = string.format("cited %d time%s", times[k], times[k] == 1 and "" or "s")
+      if tdk and (not ey or ey >= year) then
+        flag(at[1], at[2], string.format("%s is a TDK paper of %s, %s: a paper of the same TDK is a companion paper; write \"a companion paper\" instead of citing it, and restate what this paper needs from it in the background, or as a last resort in an appendix", k, ey or "unknown year", cited))
+      else
+        for url in e.body:gmatch("https?://[^%s{}\"]+") do
+          local what = companion_link(url, year, own)
+          if what then flag(at[1], at[2], string.format("%s, %s, points at %s: a TDK paper of the same year is a companion paper, named as one, never cited", k, cited, what)); break end
+        end
       end
     end
-  end)
+  end
+  for _, f in ipairs(CONTENT) do
+    C.each_line({ f }, function(_, n, l)
+      for cmd, arg in l:gmatch("\\(%a+)%s*(%b{})") do
+        if cmd == "url" or cmd == "href" or cmd == "weblink" then
+          local what = companion_link(arg:sub(2, -2), year, own)
+          if what then flag(f, n, "links " .. what .. ": a TDK paper of the same year is a companion paper, named as one, never linked") end
+        end
+      end
+    end)
+    -- "a companion paper~\cite{...}" or a link whose text says companion; a citation later in the
+    -- sentence ("a companion paper verifies it in Tamarin~\cite{...}") is another source's
+    local text = table.concat(C.prose_lines(f), "\n")
+    local pats = { "\\href%s*%b{}%s*{()[^}]*[Cc]ompanion", "\\weblink%s*%b{}%s*{()[^}]*[Cc]ompanion" }
+    for _, cmd in ipairs({ "[cC]ite", "url", "href", "weblink" }) do pats[#pats + 1] = "()[Cc]ompanion%s*%a*[%s~,(%[]*\\" .. cmd end
+    for _, p in ipairs(pats) do
+      for at in text:gmatch(p) do
+        local n = 1 + C.count(text:sub(1, at), "\n")
+        if not flagged[f .. ":" .. n] then flag(f, n, "a citation or link attached to a companion paper: a companion paper is named, not cited") end
+      end
+    end
+  end
 end)
 
 -- the reference list as BibTeX printed it: the \bibitem keys of the .bbl, so a citation counts
@@ -758,6 +829,6 @@ rule("burndown", "source", "count", "always", "one line of JSON with the counts 
   local j = string.format('{"date":"%s","pages":%d,"todo":%d,"beats":%d,"notes":%d,"placeholders":%d,"citations":%d,"figures":%d}',
     os.date("!%Y-%m-%d"), main_pages() or 0, count(CONTENT, "TODO"), count(MAIN, "\\beat{"), count(MAIN, "\\a?d?v?i?s?o?r?todo%["),
     count(CONTENT, "[Pp]laceholder"), count(MAIN, "\\cite[tp]?{"), count(MAIN, "\\label{fig:"))
-  io.write(j, "\n")
+  if not C.opts.tex and not C.opts.json then io.write(j, "\n") end -- --json carries it as the counts
   return j
 end)

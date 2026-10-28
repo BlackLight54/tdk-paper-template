@@ -6,13 +6,15 @@
 --   texlua scripts/lint.lua list [--tsv]                              the rules, their severity, phase and group
 --   texlua scripts/lint.lua overleaf --tex > lint-checks.tex          the Checks page and the package warnings
 --   texlua scripts/lint.lua essentials --guide > guide/essentials.tex the guide's reference of the essentials
---   texlua scripts/lint.lua essentials --json                         the essentials, for work/essentials-labels.py
+--   texlua scripts/lint.lua <rule>... --json                          every rule's status and findings, and the essentials' rows
 --
 -- Severity: check (fails once its phase is reached), advice (warns, never fails), count (numbers).
--- Phase: the manual phase from \newcommand{\lintphase}{plan|draft|polish|final} in thesis.tex;
--- a check whose phase is not reached yet only reports. The essentials (scripts/lint/essentials.lua)
--- are one check whose level rises with the phase. Chapters are found by their labels (ch:intro,
--- ...), not by file name. "% lint-ignore: <rule> <reason>" silences one finding.
+-- Phase: --phase, else LINT_PHASE, else \newcommand{\lintphase}{plan|draft|polish|final} in
+-- thesis.tex, else plan; any other value stops the lint with exit 2. A check whose phase is not
+-- reached yet only reports. The essentials (scripts/lint/essentials.lua) are one check whose
+-- level rises with the phase. Chapters are found by their labels (ch:intro, ...), not by file
+-- name. "% lint-ignore: <rule> <reason>" silences one finding. Exit: 0 when every gate passes,
+-- 1 when one fails, 2 when the lint could not run.
 -- Needs texlua (TeX Live); the pdf family needs poppler-utils, the tools family what it names.
 
 package.path = "scripts/lint/?.lua;" .. package.path
@@ -25,12 +27,21 @@ do
     if arg[i] == "--dir" then C.opts.dir = arg[i + 1]; i = i + 2
     elseif arg[i] == "--doc" then C.opts.doc = arg[i + 1]; i = i + 2
     elseif arg[i] == "--profile" then C.opts.profile = arg[i + 1]; i = i + 2
-    elseif arg[i] == "--phase" then C.opts.phase = arg[i + 1]; i = i + 2
+    elseif arg[i] == "--phase" then C.opts.phase = arg[i + 1] or ""; i = i + 2
     elseif arg[i] == "--tex" then C.opts.tex = true; i = i + 1
     elseif arg[i] == "--json" then C.opts.json = true; i = i + 1
     elseif arg[i] == "--guide" then guide = true; i = i + 1
     elseif arg[i] == "--tsv" then C.opts.tsv = true; i = i + 1
     else args[#args + 1] = arg[i]; i = i + 1 end
+  end
+end
+-- an unknown phase stops everything: run as plan, a typo for final would pass what final fails
+do
+  local ok, err = C.resolve_phase()
+  if not ok then
+    io.stderr:write("lint: " .. err .. "\n")
+    if C.opts.tex then io.write("\\par\\noindent\\textbf{The lint did not run:} \\detokenize{" .. err .. "}\\par\n") end
+    os.exit(2)
   end
 end
 -- the essentials first: they open the Checks page, the job summary and every list
@@ -51,7 +62,7 @@ if not cmd or cmd == "list" then
     end
     os.exit(0)
   end
-  io.write(string.format("phase: %s (from \\lintphase in thesis.tex)\n", C.phase()))
+  io.write(string.format("phase: %s (from %s)\n", C.phase(), C.opts.phase_source))
   io.write("rules: severity check fails once its phase is reached; advice warns; count reports numbers\n")
   local fam
   for _, n in ipairs(C.ORDER) do
@@ -74,12 +85,12 @@ for _, name in ipairs(todo) do
   if not r then io.stderr:write("unknown rule " .. name .. "; try: texlua scripts/lint.lua list\n"); os.exit(2) end
   -- the essentials write their own section of the job summary; the rules' table follows them
   if not header and r.summary ~= false then C.summary_header("Lint: " .. cmd .. " (phase " .. C.phase() .. ", profile " .. C.opts.profile .. ")"); header = true end
-  C.findings = {}; C.ignored = 0; C.current_rule = name
+  C.findings = {}; C.ignored = 0; C.current_rule = name; C.skipped = nil
   local ok_call, counts = pcall(r.fn)
   if not ok_call then C.fail(nil, nil, "the rule itself failed: " .. tostring(counts)); counts = nil end
   if not C.report(name, r, counts) then allok = false end
 end
 
-if C.opts.json then io.write(R.json())
+if C.opts.json then io.write(R.json(allok))
 elseif C.opts.tex then io.write(R.checks_page(C.results)) end
 os.exit(allok and 0 or 1)
