@@ -35,7 +35,7 @@ function M.count(s, pat) return select(2, s:gsub(pat, "")) end
 -- a role may span several chapters, and a chapter may have two roles. M.ROLES[R] lists the
 -- chapters of R in reading order, M.ROLES_OF[file] is the set of a file's roles, and M.ROLE[R] is
 -- the first chapter of R
-M.CONTENT, M.MAIN, M.ROLE, M.ROLES, M.ROLES_OF, M.FILES, M.BIB = {}, {}, {}, {}, {}, {}, {}
+M.CONTENT, M.MAIN, M.ROLE, M.ROLES, M.ROLES_OF, M.FILES, M.BIB, M.REACHED = {}, {}, {}, {}, {}, {}, {}, {}
 M.ROLE_LABEL = { intro = "ch:intro", background = "ch:background", approach = "ch:approach", implementation = "ch:implementation", evaluation = "ch:evaluation", related = "ch:related", conclusion = "ch:conclusion" }
 M.ROLE_NAME = { intro = "introduction", background = "background chapter", approach = "approach chapter", implementation = "implementation chapter", evaluation = "evaluation chapter", related = "related-work chapter", conclusion = "conclusion" }
 M.MANDATORY = { "intro", "approach", "evaluation", "related", "conclusion" }
@@ -47,6 +47,7 @@ do
     seen[f] = true
     local s = M.readfile(f)
     if not s then return end
+    M.REACHED[#M.REACHED + 1] = f
     if f ~= "thesis.tex" and not under(f, "include/") then M.CONTENT[#M.CONTENT + 1] = f end
     for l in s:gmatch("[^\n]*") do
       for cmd, arg in M.strip_comment(l):gmatch("\\(%a+)%s*(%b{})") do
@@ -85,6 +86,39 @@ do
     if body:match("\\DeclareAcronym") or body:match("\\newabbreviation") or body:match("\\newglossaryentry") then M.FILES.glossary = f end
   end
 end
+-- whether a file thesis.tex reaches, the frame included, loads package p, or defines the macro
+-- \m: a fix that writes \cref or \eg is only offered to a paper that has it, since a paper that
+-- left the template may not load cleveref
+local loads_cache, defines_cache = {}, {}
+function M.loads(p)
+  if loads_cache[p] == nil then
+    loads_cache[p] = false
+    for _, f in ipairs(M.REACHED) do
+      for l in (M.readfile(f) or ""):gmatch("[^\n]*") do
+        for list in M.strip_comment(l):gmatch("\\usepackage%s*%b[]%s*{([^}]*)}") do for q in list:gmatch("[^,%s]+") do if q == p then loads_cache[p] = true end end end
+        for list in M.strip_comment(l):gmatch("\\usepackage%s*{([^}]*)}") do for q in list:gmatch("[^,%s]+") do if q == p then loads_cache[p] = true end end end
+      end
+    end
+  end
+  return loads_cache[p]
+end
+function M.defines(m)
+  if defines_cache[m] == nil then
+    defines_cache[m] = false
+    local name = M.escape(m)
+    for _, f in ipairs(M.REACHED) do
+      for l in (M.readfile(f) or ""):gmatch("[^\n]*") do
+        local c = M.strip_comment(l)
+        for _, cmd in ipairs({ "newcommand", "renewcommand", "providecommand", "DeclareRobustCommand", "NewDocumentCommand" }) do
+          if c:find("\\" .. cmd .. "%*?%s*{?\\" .. name .. "[}%s%[{]") then defines_cache[m] = true end
+        end
+        if c:find("\\def\\" .. name .. "[^%a]") then defines_cache[m] = true end
+      end
+    end
+  end
+  return defines_cache[m]
+end
+
 -- the chapters of a role, in reading order; empty when no chapter has it
 function M.role_files(r) return M.ROLES[r] or {} end
 -- the text of all chapters of a role, joined in reading order
