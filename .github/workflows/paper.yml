@@ -4,6 +4,9 @@
 # on the files, and the job summary ends with one table. Gates fail the run; report rules only
 # report. The paper repository is created by Overleaf per project, so this file travels with the
 # Overleaf project; see "Paper CI" in the guide. The steps below mirror `texlua scripts/lint.lua list`.
+# Every run also uploads the review bundle of the commit it built, kept 14 days: both PDFs, their
+# logs, lint.json, the skim view and manifest.json (scripts/review/README.md). The TeX image is
+# danteev/texlive:latest, resolved to one digest per run so that the manifest can name it.
 name: paper
 on:
   push:
@@ -14,14 +17,30 @@ on:
 env:
   LINT_PROFILE: tdk   # thesis: the faculty's thesis guide instead of the TDK call; the phase comes from \lintphase in thesis.tex
 jobs:
-  paper:
+  image:
     if: github.event_name != 'pull_request' || !github.event.pull_request.draft
     runs-on: ubuntu-latest
-    container: texlive/texlive:latest
+    outputs:
+      digest: ${{ steps.resolve.outputs.digest }}
+    steps:
+      - name: Resolve danteev/texlive:latest to the digest this run builds with
+        id: resolve
+        run: echo "digest=$(docker buildx imagetools inspect danteev/texlive:latest --format '{{.Manifest.Digest}}')" >> "$GITHUB_OUTPUT"
+  paper:
+    needs: image
+    runs-on: ubuntu-latest
+    # TeX Live with Inkscape for SVG figures, poppler for the PDF rules and aspell for spelling
+    container: danteev/texlive@${{ needs.image.outputs.digest }}
+    defaults:
+      run:
+        shell: bash
     steps:
       - uses: actions/checkout@v4
-      - name: Inkscape for SVG figures, poppler for the PDF rules, hunspell for spelling
-        run: apt-get update -qq && apt-get install -y -qq --no-install-recommends inkscape poppler-utils hunspell hunspell-en-gb hunspell-en-us >/dev/null
+        with:
+          # on a pull request the student's commit, not the merge preview: the bundle is that commit's
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+      - name: PyMuPDF for the skim
+        run: pip install --break-system-packages --root-user-action=ignore --quiet pymupdf
       - name: template / the lint's skeleton copy matches content/ (the template's repository only)
         if: github.repository == 'BlackLight54/TDK-template'
         run: for f in content/0[1-7]-*.tex; do cmp "$f" "scripts/lint/skeleton/${f#content/}" || exit 1; done
@@ -32,17 +51,15 @@ jobs:
         if: github.repository == 'BlackLight54/TDK-template'
         run: texlua scripts/lint.lua criteria
       - name: Build the draft
-        run: make all
+        id: draft
+        run: rc=0; make all || rc=$?; echo "rc=$rc" >> "$GITHUB_OUTPUT"; exit $rc
       - name: Build the reviewer PDF
-        run: make reviewer
-      - name: Upload the PDFs
+        id: reviewer
         if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: paper
-          path: |
-            thesis.pdf
-            reviewer.pdf
+        run: rc=0; make reviewer || rc=$?; echo "rc=$rc" >> "$GITHUB_OUTPUT"; exit $rc
+      - name: template / the lint catches each mutation of the skeleton (the template's repository only)
+        if: always() && github.repository == 'BlackLight54/TDK-template' && hashFiles('reviewer.aux') != ''
+        run: python3 scripts/lint/tests/mutations.py
       - name: source / essentials (check)
         if: always()
         run: texlua scripts/lint.lua essentials
@@ -201,3 +218,31 @@ jobs:
         with:
           name: burndown-${{ github.run_number }}
           path: burndown.json
+      # the lint and the skim report into the bundle; their exits go into its manifest and do not
+      # fail the run, which the lint steps above already decide
+      - name: Lint as JSON, for the skim and the review bundle
+        id: lintjson
+        if: always()
+        run: rc=0; texlua scripts/lint.lua all --doc reviewer --json > lint.json || rc=$?; echo "rc=$rc" >> "$GITHUB_OUTPUT"; [ -s lint.json ]
+      - name: Skim view of the reviewer PDF
+        id: skim
+        if: always() && hashFiles('reviewer.pdf') != ''
+        run: rc=0; python3 scripts/skim/skim.py build . -o skim --lint lint.json || rc=$?; echo "rc=$rc" >> "$GITHUB_OUTPUT"
+      - name: Review bundle
+        id: bundle
+        if: always() && hashFiles('reviewer.pdf') != ''
+        run: |
+          sha=${{ github.event.pull_request.head.sha || github.sha }}
+          python3 scripts/review/review.py bundle --built . --lint lint.json --skim skim --out review-bundle --by ci \
+            --sha "$sha" --ref "${{ github.head_ref || github.ref_name }}" \
+            --image-ref danteev/texlive:latest --image-digest "${{ needs.image.outputs.digest }}" \
+            --exit thesis=${{ steps.draft.outputs.rc || 1 }} --exit reviewer=${{ steps.reviewer.outputs.rc || 1 }} \
+            --exit lint=${{ steps.lintjson.outputs.rc || 2 }} --exit skim=${{ steps.skim.outputs.rc || 1 }}
+          echo "name=review-${sha::7}" >> "$GITHUB_OUTPUT"
+      - name: Keep the review bundle for 14 days
+        if: always() && steps.bundle.outcome == 'success'
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ steps.bundle.outputs.name }}
+          path: review-bundle/
+          retention-days: 14

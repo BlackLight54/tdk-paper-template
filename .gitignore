@@ -1,4 +1,9 @@
 lint-checks.tex
+# What CI and scripts/review/review.py bundle write next to the build: the lint's JSON, the skim
+# view and the review bundle
+/lint.json
+/skim/
+/review-bundle/
 # Build output: Overleaf never commits it, and a local build should not either. CI publishes the
 # PDFs as artifacts of every run.
 *.aux
@@ -24,3 +29,5 @@ thesis.pdf
 reviewer.pdf
 # Personal settings of an AI coding agent
 .claude/settings.local.json
+# Python bytecode of scripts/
+__pycache__/
