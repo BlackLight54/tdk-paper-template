@@ -88,6 +88,15 @@ These are the faculty call's requirements, already reflected in the template.
   \item The faculty's templates under \emph{Letöltések} are diploma thesis templates, so they need small changes for the TDK, such as margins and headings. This template has them.
 \end{itemize}
 
+\section{Two papers in one year}\label{app:tdk:companion}
+A topic sometimes yields two TDK papers in the same year: you write both, or you and a fellow student write neighbouring parts of one project, such as a system in one paper and its formal verification in the other. Each paper is then the other's \emph{companion paper}, and three rules hold.
+\begin{itemize}
+  \item \textbf{Never cite or link it.} It gets no bibliography entry and no Overleaf, GitHub or portal link. Citing it is very bad practice. The two papers are reviewed at the same time, each on its own, so the reviewer scores this paper against a source that is not published and that nobody has reviewed yet, and the citation suggests one contribution cut in two.
+  \item \textbf{Call it a companion paper.} Where the reader needs to know where this paper ends, one sentence says what the other one does, without its title: \enquote{A companion paper verifies the registry's revocation protocol in Tamarin; this paper builds the registry and measures it.}
+  \item \textbf{Restate what this paper needs from it.} The core part this paper relies on, such as a system model, its definitions or a protocol, goes into the background chapter (\cref{app:chapters:background}), condensed to what this paper uses, so that the paper reads without the other. It is background here even if you wrote it, so claim each result in only one of the two papers. Only when the page limit leaves no room does it go into an appendix; the background chapter then keeps a paragraph that summarises it and points there.
+\end{itemize}
+The \texttt{companion} rule of the lint (\cref{app:code:paperci}) fails on a citation of a TDK paper of the same year; on a link to an Overleaf project, to a paper of this year's TDK on the portal or to the repository of a TDK paper of this year other than this paper's own, the first repository the implementation chapter cites or links; and on a citation or link attached to the words \enquote{companion paper}.
+
 \section{The review sheet}\label{app:tdk:sheet}
 The review sheet (bírálói lap), saved in \texttt{docs/}, awards 35 points across five criteria. \Cref{app:chapters} explains how to argue relevance, non-triviality, novelty and correctness throughout the paper. Each section quotes the criterion for that chapter so you can assess your work against the reviewer's wording. The top scores are defined as follows:
 \begin{description}[noitemsep]

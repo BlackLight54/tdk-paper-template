@@ -117,6 +117,41 @@ function M.bib_entries()
   end
   return bib_cache
 end
+-- every call of a command whose name passes want(name) in the printed text of the files (no
+-- comments, commented-out environments, code, todo notes or beats: M.printed_lines), with up to
+-- two optional [..] arguments and its first {..} argument, which may each be preceded by spaces
+-- or a line break and may span lines, as TeX reads them: fn(file, line of the command, name, arg)
+function M.each_call(files, want, fn)
+  for _, f in ipairs(files) do
+    local text = table.concat(M.printed_lines(f), "\n")
+    local pos, line, counted = 1, 1, 1
+    while true do
+      local s, e, name = text:find("\\(%a+%*?)", pos)
+      if not s then break end
+      pos = e + 1
+      if want(name) then
+        local i = text:match("^%s*()", pos)
+        for _ = 1, 2 do
+          local _, be = text:find("^%b[]", i)
+          if not be then break end
+          i = text:match("^%s*()", be + 1)
+        end
+        local _, be = text:find("^%b{}", i)
+        if be then
+          line = line + M.count(text:sub(counted, s - 1), "\n"); counted = s
+          fn(f, line, name, text:sub(i + 1, be - 1))
+          pos = be + 1
+        end
+      end
+    end
+  end
+end
+-- every key cited by \cite, \citet, \citep, \citeauthor, \Citet and the rest of the family (not
+-- \nocite, not the \citeneeded marker), as fn(file, line, key)
+local function is_cite(name) return name:match("^[cC]ite%a*%*?$") ~= nil and name ~= "citeneeded" end
+function M.each_cite(files, fn)
+  M.each_call(files, is_cite, function(f, n, _, arg) for k in arg:gmatch("[^,%s]+") do fn(f, n, k) end end)
+end
 -- a rule that needs chapters by role calls this first; it fails with the right message and returns false
 function M.roles_ok(list)
   local ok = true
@@ -126,15 +161,33 @@ function M.roles_ok(list)
   return ok
 end
 
--- the manual phase, from \newcommand{\lintphase}{...} in thesis.tex (or --phase / LINT_PHASE)
+-- a \newcommand in thesis.tex that the lint reads as its setting (\lintphase):
+-- its body, trimmed, or nil when thesis.tex does not define it or defines it only in a comment
+function M.setting(name)
+  for _, l in ipairs(M.lines("thesis.tex")) do
+    local v = M.strip_comment(l):match("\\%a*newcommand%s*{?%s*\\" .. name .. "%s*}?%s*(%b{})")
+    if v then return M.trim(v:sub(2, -2)) end
+  end
+end
+-- the manual phase: --phase, else LINT_PHASE, else \lintphase in thesis.tex, else plan. A value
+-- that is none of the four is an error, never read as plan: lint.lua stops on it before any rule
+function M.resolve_phase()
+  local p, src = M.opts.phase, "--phase"
+  if not p then
+    p, src = os.getenv("LINT_PHASE"), "LINT_PHASE"
+    if p == "" then p = nil end -- an empty variable is an unset one
+  end
+  if not p then p, src = M.setting("lintphase"), "\\lintphase in thesis.tex" end
+  if not p then p, src = "plan", "the default" end
+  M.opts.phase, M.opts.phase_source = p, src
+  if not M.PHASES[p] then return nil, string.format("unknown phase '%s' from %s: use plan, draft, polish or final", p, src) end
+  return p
+end
 function M.phase()
-  if M.opts.phase then return M.opts.phase end
-  local p = os.getenv("LINT_PHASE")
-  if not p then p = (M.readfile("thesis.tex") or ""):match("\\newcommand{\\lintphase}{(%a+)}") end
-  M.opts.phase = p or "plan"
+  if not M.opts.phase_source then M.resolve_phase() end
   return M.opts.phase
 end
-function M.phase_reached(due) if due == "always" then return true end; return (M.PHASES[M.phase()] or 1) >= (M.PHASES[due] or 1) end
+function M.phase_reached(due) if due == "always" then return true end; return M.PHASES[M.phase()] >= M.PHASES[due] end
 
 -- findings and reporting -------------------------------------------------------------
 local gh = os.getenv("GITHUB_ACTIONS") ~= nil
@@ -174,21 +227,27 @@ local function print_finding(f)
   end
 end
 function M.fail(file, line, msg) finding("error", file, line, msg) end
+-- the rule cannot run here (a tool is missing, the profile excludes it): its status is skipped,
+-- not pass, and the reason is its one finding
+M.skipped = nil
+function M.skip(reason) M.skipped = reason; finding("notice", nil, nil, reason .. ": skipped") end
 function M.warn(file, line, msg) finding("warning", file, line, msg) end
 function M.note(file, line, msg) finding("notice", file, line, msg) end
 
 M.results = {}
 -- severity: check (fails on errors once its phase is reached), advice (warns, never fails), count (numbers)
 -- status, in the words the Checks page and the job summary use: pass, fix (a check that fails now),
--- due at <phase> (a check that fails, but not yet), suggestion (advice with findings), count
+-- due at <phase> (a check that fails, but not yet), suggestion (advice with findings), count,
+-- skipped (the rule did not run, M.skip)
 function M.status(r, errors, warnings)
+  if M.skipped then return "skipped" end
   if r.severity == "check" then
     if errors == 0 then return "pass" end
     return M.phase_reached(r.phase) and "fix" or ("due at " .. r.phase)
   elseif r.severity == "advice" then return (errors + warnings == 0) and "pass" or "suggestion" end
   return "count"
 end
-local ICON = { pass = ":white_check_mark:", fix = ":x:", suggestion = ":information_source:", count = ":1234:" }
+local ICON = { pass = ":white_check_mark:", fix = ":x:", suggestion = ":information_source:", count = ":1234:", skipped = ":fast_forward:" }
 function M.report(rule, r, counts)
   -- a stable order: pairs() differs between runs, and the Checks page that lists these findings
   -- is input by the build, so an unstable order kept latexmk recompiling
@@ -203,10 +262,10 @@ function M.report(rule, r, counts)
   for _, f in ipairs(M.findings) do
     if f.level == "error" then errors = errors + 1 elseif f.level == "warning" then warnings = warnings + 1 end
   end
-  local gate = r.severity == "check" and M.phase_reached(r.phase)
+  local gate = r.severity == "check" and M.phase_reached(r.phase) and not M.skipped -- a rule that did not run gates nothing
   local ok = errors == 0
   local status = M.status(r, errors, warnings)
-  M.results[#M.results + 1] = { rule = rule, severity = r.severity, phase = r.phase, status = status, errors = errors, warnings = warnings, counts = counts, findings = M.findings, ignored = M.ignored }
+  M.results[#M.results + 1] = { rule = rule, family = r.family, severity = r.severity, phase = r.phase, status = status, errors = errors, warnings = warnings, counts = counts, findings = M.findings, ignored = M.ignored }
   if not quiet then
     io.write(string.format("%s %-13s %-7s %-18s %d error(s), %d warning(s)%s%s\n", gate and (ok and "ok  " or "FAIL") or "    ", rule, r.severity, status, errors, warnings, counts and (" " .. counts) or "", M.ignored > 0 and (" ignored=" .. M.ignored) or ""))
   end
@@ -259,7 +318,11 @@ end
 -- tikzpicture and axis blocks, and listings removed; line numbers preserved as empty lines
 -- environments that hold no prose: commented-out text, pictures, code and display maths
 M.NONPROSE = { "comment", "tikzpicture", "lstlisting", "minted", "forest", "equation", "equation*", "align", "align*", "gather", "gather*", "multline", "multline*", "displaymath" }
-function M.prose_lines(file)
+-- environments whose text never prints as text: commented-out text and code. M.printed_lines
+-- keeps pictures and maths, where a \cite or \url prints like anywhere else
+M.UNPRINTED = { "comment", "lstlisting", "minted" }
+function M.printed_lines(file) return M.prose_lines(file, M.UNPRINTED) end
+function M.prose_lines(file, skip)
   local out, depth, intodo, inblock = {}, 0, false, nil
   for _, raw in ipairs(M.lines(file)) do
     local l = M.strip_comment(raw)
@@ -270,12 +333,12 @@ function M.prose_lines(file)
         local s, e, name = l:find("\\(%a*todo)%s*%[?", i)
         local bs = l:find("\\beat{", i, true)
         local blk, bstart
-        for _, b in ipairs(M.NONPROSE) do
+        for _, b in ipairs(skip or M.NONPROSE) do
           local p = l:find("\\begin{" .. b .. "}", i, true)
           if p and (not bstart or p < bstart) then blk, bstart = "\\end{" .. b .. "}", p end
         end
         local dm = l:find("\\[", i, true) -- display maths \[ ... \], but not the line break \\[2pt]
-        if dm and l:sub(dm - 1, dm - 1) ~= "\\" and (not bstart or dm < bstart) then blk, bstart = "\\]", dm end
+        if dm and not skip and l:sub(dm - 1, dm - 1) ~= "\\" and (not bstart or dm < bstart) then blk, bstart = "\\]", dm end
         local first = math.min(s or math.huge, bs or math.huge, bstart or math.huge)
         if first == math.huge then keep[#keep + 1] = l:sub(i); break end
         keep[#keep + 1] = l:sub(i, first - 1)

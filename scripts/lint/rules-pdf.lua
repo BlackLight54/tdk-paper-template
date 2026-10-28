@@ -15,11 +15,13 @@ local PROFILES = {
 local function profile() return PROFILES[C.opts.profile] or PROFILES.tdk end
 local function pdf() return C.bpath(C.opts.doc .. ".pdf") end
 
--- parsed pdftohtml XML, cached
+-- parsed pdftohtml XML, cached; nil and the reason when there is nothing to read, so that a rule
+-- is skipped rather than passed on a PDF of no pages
 local parsed
 local function doc()
   if parsed then return parsed end
-  if not C.have("pdftohtml") then return nil end
+  if not C.have("pdftohtml") then return nil, "pdftohtml not installed" end
+  if not C.exists(pdf()) then return nil, "no " .. pdf() .. " (pdf-file fails on it)" end
   local xml = C.run(string.format("pdftohtml -xml -i -q -zoom 1 -stdout %q", pdf())) or ""
   local d = { pages = {}, fonts = {}, outline = {} }
   local page
@@ -58,7 +60,7 @@ local function is_times(fam) fam = fam:lower(); return fam:find("times", 1, true
 
 rule("pdf-file", "pdf", "check", "polish", "the PDF exists, is A4, under the faculty's 15 MB, with title and author metadata, all fonts embedded and none Type 3", function()
   if not C.exists(pdf()) then fail(nil, nil, "no " .. pdf() .. ": build first"); return end
-  if not C.have("pdfinfo") then warn(nil, nil, "pdfinfo not installed (poppler-utils): skipped"); return end
+  if not C.have("pdfinfo") then C.skip("pdfinfo not installed (poppler-utils)"); return end
   local info = C.run(string.format("pdfinfo %q", pdf())) or ""
   local w, h = info:match("Page size:%s+([%d%.]+) x ([%d%.]+) pts")
   w, h = tonumber(w), tonumber(h)
@@ -85,7 +87,7 @@ rule("pdf-file", "pdf", "check", "polish", "the PDF exists, is A4, under the fac
 end)
 
 rule("pdf-font", "pdf", "check", "polish", "the body font is a serif at 12 pt (Times New Roman or another readable serif, the call says)", function()
-  local d = doc(); if not d then warn(nil, nil, "pdftohtml not installed: skipped"); return end
+  local d, why = doc(); if not d then C.skip(why); return end
   local p = profile()
   local bf = body_font(d); if not bf then fail(nil, nil, "no text found in the PDF"); return end
   if not is_serif(bf.family) then fail("include/packages.tex", nil, string.format("body font %s is not a serif; the %s asks for Times New Roman or another readable serif", bf.family, p.name))
@@ -95,7 +97,7 @@ rule("pdf-font", "pdf", "check", "polish", "the body font is a serif at 12 pt (T
 end)
 
 rule("pdf-spacing", "pdf", "check", "polish", "line spacing of the body text is single (the call) or one-and-a-half (a thesis), measured from the line pitch", function()
-  local d = doc(); if not d then warn(nil, nil, "pdftohtml not installed: skipped"); return end
+  local d, why = doc(); if not d then C.skip(why); return end
   local p = profile(); local bf = body_font(d); if not bf then return end
   local deltas = {}
   for _, page in ipairs(d.pages) do
@@ -116,7 +118,7 @@ rule("pdf-spacing", "pdf", "check", "polish", "line spacing of the body text is 
 end)
 
 rule("pdf-margins", "pdf", "check", "polish", "margins on every text page are within the call's 1.5-3.5 cm (a thesis: 2.5 cm plus binding), measured from the text", function()
-  local d = doc(); if not d then warn(nil, nil, "pdftohtml not installed: skipped"); return end
+  local d, why = doc(); if not d then C.skip(why); return end
   local p = profile(); local bf = body_font(d); if not bf then return end
   local worst = { left = 1e9, right = 1e9, top = 1e9, bottom = 1e9 }; local worstpage = {}
   local typical = { left = {}, right = {}, top = {}, bottom = {} }
@@ -153,7 +155,7 @@ end)
 
 -- 8 pt: the call asks for 10 pt in figures and tables, and 8 pt still reads in print; below it does not
 rule("pdf-smalltext", "pdf", "advice", "polish", "text below 8 pt, too small to read in print (the call asks for 10 pt in figures and tables, labels included); listings and footnotes show up here too", function()
-  local d = doc(); if not d then warn(nil, nil, "pdftohtml not installed: skipped"); return end
+  local d, why = doc(); if not d then C.skip(why); return end
   local perpage, total, smallest = {}, 0, 99
   for _, page in ipairs(d.pages) do
     for _, t in ipairs(page.texts) do
@@ -173,7 +175,7 @@ rule("pdf-smalltext", "pdf", "advice", "polish", "text below 8 pt, too small to 
 end)
 
 rule("pdf-pages", "pdf", "check", "final", "main text pages counted from the PDF outline, first chapter to the page before the back matter: 30-35 for the TDK", function()
-  local d = doc(); if not d then warn(nil, nil, "pdftohtml not installed: skipped"); return end
+  local d, why = doc(); if not d then C.skip(why); return end
   local p = profile()
   local start, stop
   for _, it in ipairs(d.outline) do
@@ -192,7 +194,7 @@ rule("pdf-pages", "pdf", "check", "final", "main text pages counted from the PDF
 end)
 
 rule("pdf-parts", "pdf", "check", "final", "the parts the form requires are in the PDF: abstracts in both languages, the AI declaration, the table of contents; and the parts it forbids are not", function()
-  if not C.have("pdftotext") then warn(nil, nil, "pdftotext not installed: skipped"); return end
+  if not C.have("pdftotext") then C.skip("pdftotext not installed"); return end
   local p = profile()
   local text = C.run(string.format("pdftotext -layout %q -", pdf())) or ""
   for _, alt in ipairs(p.needs) do
