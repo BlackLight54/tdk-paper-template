@@ -52,7 +52,9 @@ review-<sha7>/
 
 - `built.by` is `ci` or `local`. A local bundle has no `run_url` and names the host instead. It
   is evidence only when its source tree was clean, so `review.py bundle` refuses a dirty tree
-  unless given `--allow-dirty`, and then writes `"dirty": true`.
+  unless given `--allow-dirty`, and then writes `"dirty": true` into `built`.
+- An exit that was not passed to `review.py bundle` (`--exit lint=N`, `--exit skim=N`) is `null`,
+  never a made-up 0; so are `image.ref` and `image.digest` when not given. CI passes them all.
 - `image.digest` is the digest that actually ran. CI uses `latest` on purpose; the digest is how a
   later reader knows which TeX Live built the PDFs.
 - `builds[].errors` counts `! ` lines in the log, and `undefined` counts undefined references
@@ -142,7 +144,13 @@ pass did not run. `mode` is `premortem` (a spine, no draft) or `draft`.
 
 ## The record
 
-`review.py record findings.json` opens one issue on the paper repository, titled
+`inputs` may be left out of findings.json: `record --inputs inputs.json` takes the hashes from the
+saved output of `review.py inputs`, and an `inputs` field in findings.json wins over it.
+
+`review.py record findings.json --bundle <dir> [--inputs inputs.json]` verifies the bundle again,
+checks that its manifest names the commit findings.json names and that the persona input hashes
+are the bundle's, and opens one issue on the paper repository (the manifest's `repo` unless
+`--repo` says otherwise), titled
 `Review <YYYY-MM-DD> <sha7>`. Its body has the panel, the skim scores, one task-list entry per
 finding (`F1 cryptographer · D/2 · blocker · p. 14 "...": objection. Answer: ...`), the manifest
 and the persona input hashes in collapsed blocks, and a link to the CI run that holds the
