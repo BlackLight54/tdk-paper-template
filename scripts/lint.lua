@@ -6,7 +6,7 @@
 --   texlua scripts/lint.lua list [--tsv]                              the rules, their severity, phase and group
 --   texlua scripts/lint.lua overleaf --tex > lint-checks.tex          the Checks page and the package warnings
 --   texlua scripts/lint.lua essentials --guide > guide/essentials.tex the guide's reference of the essentials
---   texlua scripts/lint.lua essentials --json                         the essentials, for work/essentials-labels.py
+--   texlua scripts/lint.lua <rule>... --json                          every rule's status and findings, and the essentials' rows
 --
 -- Severity: check (fails once its phase is reached), advice (warns, never fails), count (numbers).
 -- Phase: --phase, else LINT_PHASE, else \newcommand{\lintphase}{plan|draft|polish|final} in
@@ -85,12 +85,12 @@ for _, name in ipairs(todo) do
   if not r then io.stderr:write("unknown rule " .. name .. "; try: texlua scripts/lint.lua list\n"); os.exit(2) end
   -- the essentials write their own section of the job summary; the rules' table follows them
   if not header and r.summary ~= false then C.summary_header("Lint: " .. cmd .. " (phase " .. C.phase() .. ", profile " .. C.opts.profile .. ")"); header = true end
-  C.findings = {}; C.ignored = 0; C.current_rule = name
+  C.findings = {}; C.ignored = 0; C.current_rule = name; C.skipped = nil
   local ok_call, counts = pcall(r.fn)
   if not ok_call then C.fail(nil, nil, "the rule itself failed: " .. tostring(counts)); counts = nil end
   if not C.report(name, r, counts) then allok = false end
 end
 
-if C.opts.json then io.write(R.json())
+if C.opts.json then io.write(R.json(allok))
 elseif C.opts.tex then io.write(R.checks_page(C.results)) end
 os.exit(allok and 0 or 1)

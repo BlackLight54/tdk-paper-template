@@ -212,21 +212,27 @@ local function print_finding(f)
   end
 end
 function M.fail(file, line, msg) finding("error", file, line, msg) end
+-- the rule cannot run here (a tool is missing, the profile excludes it): its status is skipped,
+-- not pass, and the reason is its one finding
+M.skipped = nil
+function M.skip(reason) M.skipped = reason; finding("notice", nil, nil, reason .. ": skipped") end
 function M.warn(file, line, msg) finding("warning", file, line, msg) end
 function M.note(file, line, msg) finding("notice", file, line, msg) end
 
 M.results = {}
 -- severity: check (fails on errors once its phase is reached), advice (warns, never fails), count (numbers)
 -- status, in the words the Checks page and the job summary use: pass, fix (a check that fails now),
--- due at <phase> (a check that fails, but not yet), suggestion (advice with findings), count
+-- due at <phase> (a check that fails, but not yet), suggestion (advice with findings), count,
+-- skipped (the rule did not run, M.skip)
 function M.status(r, errors, warnings)
+  if M.skipped then return "skipped" end
   if r.severity == "check" then
     if errors == 0 then return "pass" end
     return M.phase_reached(r.phase) and "fix" or ("due at " .. r.phase)
   elseif r.severity == "advice" then return (errors + warnings == 0) and "pass" or "suggestion" end
   return "count"
 end
-local ICON = { pass = ":white_check_mark:", fix = ":x:", suggestion = ":information_source:", count = ":1234:" }
+local ICON = { pass = ":white_check_mark:", fix = ":x:", suggestion = ":information_source:", count = ":1234:", skipped = ":fast_forward:" }
 function M.report(rule, r, counts)
   -- a stable order: pairs() differs between runs, and the Checks page that lists these findings
   -- is input by the build, so an unstable order kept latexmk recompiling
@@ -241,10 +247,10 @@ function M.report(rule, r, counts)
   for _, f in ipairs(M.findings) do
     if f.level == "error" then errors = errors + 1 elseif f.level == "warning" then warnings = warnings + 1 end
   end
-  local gate = r.severity == "check" and M.phase_reached(r.phase)
+  local gate = r.severity == "check" and M.phase_reached(r.phase) and not M.skipped -- a rule that did not run gates nothing
   local ok = errors == 0
   local status = M.status(r, errors, warnings)
-  M.results[#M.results + 1] = { rule = rule, severity = r.severity, phase = r.phase, status = status, errors = errors, warnings = warnings, counts = counts, findings = M.findings, ignored = M.ignored }
+  M.results[#M.results + 1] = { rule = rule, family = r.family, severity = r.severity, phase = r.phase, status = status, errors = errors, warnings = warnings, counts = counts, findings = M.findings, ignored = M.ignored }
   if not quiet then
     io.write(string.format("%s %-13s %-7s %-18s %d error(s), %d warning(s)%s%s\n", gate and (ok and "ok  " or "FAIL") or "    ", rule, r.severity, status, errors, warnings, counts and (" " .. counts) or "", M.ignored > 0 and (" ignored=" .. M.ignored) or ""))
   end
