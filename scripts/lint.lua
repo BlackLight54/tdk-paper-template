@@ -31,7 +31,7 @@ require("rules-source"); require("rules-pdf"); require("rules-tools")
 
 -- the rules the Overleaf hook runs on every compile: the sources, and the page count from this
 -- compile's aux files; not the log (Overleaf shows it), not the PDF (it does not exist yet)
-local OVERLEAF_SKIP = { build = true, overfull = true, checkcites = true, ["bibtex-log"] = true, links = true, spelling = true, burndown = true }
+local OVERLEAF_SKIP = { build = true, overfull = true, checkcites = true, ["bibtex-log"] = true, links = true, spelling = true, burndown = true, ["repo-hygiene"] = true }
 
 local cmd = args[1]
 if not cmd or cmd == "list" then

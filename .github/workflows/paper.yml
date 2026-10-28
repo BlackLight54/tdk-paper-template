@@ -39,10 +39,13 @@ jobs:
             reviewer.pdf
       - name: Lint header
         if: always()
-        run: printf '\n## Lint (profile %s)\n\n| Rule | Status | Errors | Warnings | Counts |\n|---|---|---|---|---|\n' "$LINT_PROFILE" >> "$GITHUB_STEP_SUMMARY"
+        run: printf '\n## Lint (profile %s)\n\n| Rule | Severity | Due | Status | Errors | Warnings | Counts |\n|---|---|---|---|---|---|---|\n' "$LINT_PROFILE" >> "$GITHUB_STEP_SUMMARY"
       - name: source / structure (check)
         if: always()
         run: texlua scripts/lint.lua structure
+      - name: source / roles (check, draft)
+        if: always()
+        run: texlua scripts/lint.lua roles
       - name: source / chapters (check)
         if: always()
         run: texlua scripts/lint.lua chapters
@@ -174,6 +177,9 @@ jobs:
       - name: tools / links (advice)
         if: always()
         run: texlua scripts/lint.lua links
+      - name: tools / repo-hygiene (check)
+        if: always()
+        run: texlua scripts/lint.lua repo-hygiene
       - name: burn-down record
         if: always()
         run: texlua scripts/lint.lua burndown --doc reviewer | tail -1 | tee burndown.json

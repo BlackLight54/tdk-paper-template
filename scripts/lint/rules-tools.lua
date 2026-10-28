@@ -145,3 +145,20 @@ rule("links", "tools", "advice", "always", "every \\url and \\href answers over 
   end
   return string.format("checked=%d broken=%d", math.min(#urls, 60), bad)
 end)
+
+-- tracked files no paper needs: build output (the CI publishes the PDFs as artifacts) and the
+-- personal settings of an AI coding agent. git exists in CI and in a clone, not on Overleaf
+local BUILD_OUTPUT = { "aux", "bbl", "blg", "fdb_latexmk", "fls", "lof", "lol", "lot", "out", "synctex.gz", "tdo", "thm", "toc", "xdv" }
+rule("repo-hygiene", "tools", "check", "always", "the repository tracks no build output (aux, log, thesis.pdf, reviewer.pdf, minted caches, ...) and no personal agent settings", function()
+  if not C.exists(".git") or not C.have("git") then note(nil, nil, "not a git checkout: skipped"); return end
+  if not (C.run("git rev-parse --is-inside-work-tree 2>/dev/null") or ""):match("true") then note(nil, nil, "git cannot read this checkout: skipped"); return end
+  local n = 0
+  for f in (C.run_quiet("git ls-files") or ""):gmatch("[^\n]+") do
+    local why
+    for _, ext in ipairs(BUILD_OUTPUT) do if f:sub(-#ext - 1) == "." .. ext and f ~= "guide/guide.bbl" then why = "build output" end end
+    if f:match("%.log$") or f == "thesis.pdf" or f == "reviewer.pdf" or f == "lint-checks.tex" or f:match("^_minted") or f:match("^svg%-inkscape/") then why = "build output" end
+    if f:match("^%.claude/settings%.local%.json$") then why = "personal settings of an AI coding agent" end
+    if why then n = n + 1; fail(f, nil, why .. " is tracked: git rm --cached it (the .gitignore keeps it out afterwards)") end
+  end
+  return string.format("tracked=%d", n)
+end)
