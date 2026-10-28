@@ -20,7 +20,7 @@ rule("frame", "source", "check", "always", "the template's frame is still there:
     end
   end
   if not C.roles_ok({ "approach", "conclusion", "evaluation", "intro", "related" }) then return end
-  for _, f in ipairs({ "thesis.tex", "reviewer.tex", "include/packages.tex", "include/preamble.tex", "include/thesis-en.tex", "include/titlepage-tdk.tex", "include/macros.tex", C.FILES.glossary or "content/glossary.tex", C.FILES.abstract, C.FILES.aidecl, "scripts/lint.lua", "docs/TDK2025_biralati_pontozolap_hallgatoi.pdf" }) do
+  for _, f in ipairs({ "thesis.tex", "reviewer.tex", "include/packages.tex", "include/preamble.tex", "include/thesis-en.tex", "include/titlepage-tdk.tex", "include/macros.tex", C.FILES.glossary or "content/glossary.tex", "include/glossary-common.tex", C.FILES.abstract, C.FILES.aidecl, "scripts/lint.lua", "docs/TDK2025_biralati_pontozolap_hallgatoi.pdf" }) do
     if not C.exists(f) then fail(nil, nil, "missing from the template: " .. f) end
   end
   for _, b in ipairs(C.BIB) do if not C.exists(b) then fail("thesis.tex", nil, "\\bibliography names " .. b .. ", which does not exist") end end
@@ -397,19 +397,44 @@ rule("crefs", "source", "check", "always", "references go through \\cref: no 'Fi
   end)
 end)
 
-rule("acronyms", "source", "check", "polish", "glossary entries: every \\gls key is declared in content/glossary.tex, every abbreviation declared is used, none is typed by hand, every all-caps word is declared, and every symbol of a definition has a notation entry", function()
+rule("acronyms", "source", "check", "polish", "glossary entries: every \\gls key is declared in content/glossary.tex or the common glossary, every abbreviation the paper declares is used, none is typed by hand (common ones included), every all-caps word is declared, and every symbol of a definition has a notation entry", function()
   local G = C.FILES.glossary or "content/glossary.tex"
+  local CG = C.FILES.common_glossary
   local declared, short, used, kind = {}, {}, {}, {}
-  C.each_line({ G }, function(f, n, l)
-    local k, sh = l:match("\\newabbreviation%b[]{([^}]*)}{([^}]*)}")
-    if not k then k, sh = l:match("\\newabbreviation{([^}]*)}{([^}]*)}") end
-    if k then declared[k] = { file = f, line = n }; kind[k] = "abbreviation"; short[sh] = k end
-    local s1 = l:match("\\glsxtrnewsymbol%b[]{([^}]*)}") or l:match("\\glsxtrnewsymbol{([^}]*)}")
-    if s1 then declared[s1] = { file = f, line = n }; kind[s1] = "symbol" end
-    local t1 = l:match("\\newglossaryentry{([^}]*)}")
-    if t1 then declared[t1] = { file = f, line = n }; kind[t1] = "term" end
-  end)
-  if next(declared) == nil then fail(G, nil, "no glossary entries: content/glossary.tex is missing or empty") end
+  -- the entries of one glossary file, in file order: key, short form (abbreviations), kind, line
+  local function entries(file)
+    local t = {}
+    C.each_line({ file }, function(f, n, l)
+      local k, sh = l:match("\\newabbreviation%b[]{([^}]*)}{([^}]*)}")
+      if not k then k, sh = l:match("\\newabbreviation{([^}]*)}{([^}]*)}") end
+      if k then t[#t + 1] = { key = k, short = sh, kind = "abbreviation", file = f, line = n } end
+      local s1 = l:match("\\glsxtrnewsymbol%b[]{([^}]*)}") or l:match("\\glsxtrnewsymbol{([^}]*)}")
+      if s1 then t[#t + 1] = { key = s1, kind = "symbol", file = f, line = n } end
+      local t1 = l:match("\\newglossaryentry{([^}]*)}")
+      if t1 then t[#t + 1] = { key = t1, kind = "term", file = f, line = n } end
+    end)
+    return t
+  end
+  for _, e in ipairs(entries(G)) do
+    declared[e.key] = { file = e.file, line = e.line }; kind[e.key] = e.kind
+    if e.short then short[e.short] = e.key end
+  end
+  -- the common glossary fills in what the paper has not declared; its entries need not be used
+  local cshort = {}
+  for _, e in ipairs(CG and entries(CG) or {}) do
+    if e.short then cshort[e.short] = e.key end
+    if not declared[e.key] then
+      declared[e.key] = { file = e.file, line = e.line, common = true }; kind[e.key] = e.kind
+      if e.short and not short[e.short] then short[e.short] = e.key end
+    end
+  end
+  -- a paper entry with a common short form under another key prints the abbreviation twice
+  -- once a chapter uses the common key
+  for _, e in ipairs(entries(G)) do
+    local ck = e.short and cshort[e.short]
+    if ck and ck ~= e.key then warn(e.file, e.line, string.format("%s is also the common glossary's %s: use \\gls{%s}, or declare your entry under the key %s to replace the common one", e.short, ck, ck, ck)) end
+  end
+  if next(declared) == nil then fail(G, nil, "no glossary entries: content/glossary.tex and the common glossary are missing or empty") end
   -- every declared short form as a word, and its plural: VC, VCs and VC-based, not VCS
   local forms = {}
   for sh, k in pairs(short) do
@@ -424,7 +449,7 @@ rule("acronyms", "source", "check", "polish", "glossary entries: every \\gls key
   C.each_prose_line(MAIN, function(f, n, l)
     for k in l:gmatch("\\[Gg]ls[%a]*%*?{([^}]*)}") do
       used[k] = true
-      if not declared[k] then fail(f, n, "glossary key " .. k .. " is not declared in " .. G) end
+      if not declared[k] then fail(f, n, "glossary key " .. k .. " is not declared in " .. G .. " or the common glossary") end
     end
     local p = C.prose(l)
     for _, fm in ipairs(forms) do
@@ -432,8 +457,10 @@ rule("acronyms", "source", "check", "polish", "glossary entries: every \\gls key
     end
   end)
   for k, at in pairs(declared) do
-    if not used[k] and kind[k] == "abbreviation" then warn(at.file, at.line, "abbreviation " .. k .. " is declared but never used: remove it") end
-    if not used[k] and kind[k] ~= "abbreviation" then note(at.file, at.line, kind[k] .. " " .. k .. " is declared but never used with \\gls, so it will not print") end
+    if not used[k] and not at.common then
+      if kind[k] == "abbreviation" then warn(at.file, at.line, "abbreviation " .. k .. " is declared but never used: remove it")
+      else note(at.file, at.line, kind[k] .. " " .. k .. " is declared but never used with \\gls, so it will not print") end
+    end
   end
   -- a definition that introduces a symbol should have a notation entry: look for $...$ in definition environments
   for _, f in ipairs(MAIN) do

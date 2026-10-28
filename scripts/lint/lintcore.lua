@@ -55,6 +55,10 @@ do
           for b in arg:gmatch("[^,%s]+") do M.BIB[#M.BIB + 1] = b:match("%.bib$") and b or b .. ".bib" end
         elseif (cmd == "include" or cmd == "input" or cmd == "loadglsentries") and arg ~= "" and not arg:find("\\", 1, true) then
           local p = arg:match("%.tex$") and arg or arg .. ".tex"
+          -- the paper's glossary is the one it loads, even with every entry deleted; the one
+          -- under include/ is the template's common glossary
+          if cmd == "loadglsentries" and under(p, "include/") then M.FILES.common_glossary = p
+          elseif cmd == "loadglsentries" and not under(p, "guide/") then M.FILES.glossary = M.FILES.glossary or p end
           if not under(p, "guide/") then follow(p) end
         end
       end
