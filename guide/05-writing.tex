@@ -2,13 +2,13 @@
 \chapter{Writing}\label{app:writing}
 %----------------------------------------------------------------------------
 \section{Plan before you write: problem to skeleton}\label{app:writing:spine}
-Write the argument before the prose. We plan papers in this order, and each step builds on the previous one: problem; context and literature review; gap analysis; research questions; contributions; threat analysis; leading figure; examples; validation plan; spine; figures; skeleton; beats.
+Plan the argument before writing prose. Work in this order, building on each previous step: problem; context and literature review; gap analysis; research questions; contributions; threat analysis; leading figure; examples; validation plan; spine; figures; skeleton; beats.
 \begin{description}
-  \item[Problem] The entry point, and the only step you need to start. One paragraph: who has what problem, what goes wrong for them today, and one concrete scenario in which it goes wrong. The scenario becomes the running example, and the paragraph becomes the first page of \tplref{ch:intro}. If you can write it, you can start the literature review; if you cannot, bring what you have to the next consultation and we write it together.
-  \item[Spine] One page that fixes the claims, the terminology and the notation of the whole paper. Every chapter, figure and review is checked against it. Its worst enemy is drift: terms, symbols and claims quietly changing between chapters.
-  \item[Skeleton mind map] The argument made explicit before any prose: each chapter broken into paragraphs, each paragraph reduced to its topic sentence and a pointer to the evidence that backs it. Drafting then means filling in sentences around a skeleton already known to be sound. A mind map, on paper or in a tool, is the quickest way to draw it; \cref{fig:mindmap} shows one for the guide's running example, a made-up paper, at the level of detail we expect. \Cref{fig:template-skeleton} is the same picture for this template's own beats: the generic argument every chapter file starts from. Your skeleton is built per topic and will not look like either; what carries over is the shape.
-  \item[Running example] One concrete scenario that every chapter returns to. Name it once with \texttt{\textbackslash exname} in \texttt{thesis.tex}, introduce it in \tplref{ch:intro}, and revisit it in every chapter in a \texttt{runningexample} box: what each concept, component, measurement or competitor does with it. A reader who follows only the boxes should understand the paper.
-  \item[Beats] The moves inside each paragraph of the skeleton: what it establishes, which evidence it uses, what the running example shows there, and how it leads to the next one. \Cref{app:chapters} gives every heading of the template the generic beat of its paragraph. Write your own, specific to your topic, at the top of each paragraph you plan: \texttt{\textbackslash beat\{establishes\}\{evidence\}\{running example\}\{leads to\}}. It prints as a todo, so it disappears from the final version.
+  \item[Problem] Start with one paragraph: who has the problem, what goes wrong today, and a concrete scenario showing it. This scenario becomes the running example; the paragraph becomes the first page of \tplref{ch:intro}. Then start the literature review. If you cannot yet write the paragraph, bring your notes to the next consultation and we will write it together.
+  \item[Spine] One page fixing the paper's claims, terms and notation. Check every chapter, figure and review against it to catch drift: terms, symbols or claims changing between chapters.
+  \item[Skeleton mind map] Plan each chapter as paragraph topic sentences with pointers to supporting evidence. Check the argument before expanding those sentences into prose. A mind map on paper or in a tool is a quick way to do this. \Cref{fig:mindmap} shows the expected detail for the guide's fictional paper. \Cref{fig:template-skeleton} shows the template's generic beats in the same form. Use this structure to build a skeleton for your own topic.
+  \item[Running example] Choose one scenario to revisit in every chapter. Name it with \texttt{\textbackslash exname} in \texttt{thesis.tex} and introduce it in \tplref{ch:intro}. Use a \texttt{runningexample} box in each chapter to show what its concepts, components, measurements or competitors do with the scenario. The boxes alone should explain the paper.
+  \item[Beats] Plan what each paragraph establishes, its evidence, what the example shows and how it leads to the next paragraph. \Cref{app:chapters} gives generic beats for every template heading. Replace them with topic-specific beats at the start of each planned paragraph: \texttt{\textbackslash beat\{establishes\}\{evidence\}\{running example\}\{leads to\}}. These print as todos and disappear from the final version.
 \end{description}
 
 \begin{figure}[p]
@@ -77,7 +77,7 @@ Write the argument before the prose. We plan papers in this order, and each step
       ]
     ]
   \end{forest}
-  \caption{A skeleton mind map for the guide's running example, the credential revocation registry, whose items \cref{app:chapters} renders chapter by chapter, so one paper can be followed from skeleton to items. Every leaf is one paragraph's topic sentence, and the bracketed italics name the evidence behind it: a theorem, a model, a table, a figure or a citation. A skeleton at this level of detail shows whether the argument holds before a sentence of prose exists, and it is what the spine anchor of \cref{tab:lifecycle} is checked against. Copy the shape, not the topic: one leaf per paragraph, evidence on every leaf that makes a claim, and the running example visible in every chapter.}\label{fig:mindmap}
+  \caption{A skeleton for the fictional credential revocation paper developed in \cref{app:chapters}. Each leaf is a paragraph's topic sentence; bracketed italics identify its evidence, such as a theorem, model, table, figure or citation. Use this detail to check the argument and the spine anchor (\cref{tab:lifecycle}) before drafting prose. Build your own map with one leaf per paragraph, evidence for each claim and the running example in every chapter.}\label{fig:mindmap}
 \end{figure}
 
 
@@ -132,49 +132,53 @@ Write the argument before the prose. We plan papers in this order, and each step
       ]
     ]
   \end{forest}
-  \caption{The template's own beats drawn as a skeleton: one leaf per beat of \cref{app:chapters}, the topic it establishes first and its evidence in brackets. This is the generic argument the template starts you from, not a skeleton to copy: \cref{fig:mindmap} shows what a topic's own skeleton looks like once the claims, examples and evidence are specific, and yours will have more leaves where your contribution is and fewer elsewhere.}\label{fig:template-skeleton}
+  \caption{The template's generic beats from \cref{app:chapters}: one leaf per beat, with its topic followed by evidence in brackets. Develop these for your topic, as in \cref{fig:mindmap}. Add more leaves where the contribution needs them and fewer elsewhere.}\label{fig:template-skeleton}
 \end{figure}
 
 \section{The essentials}\label{app:writing:essentials}
-Every paper of this kind contains the same two dozen elements, whatever its topic: a problem statement, requirements, a leading figure, a threat model, research questions, a gap matrix, a summary with its evidence, and the rest of the list below. They are the leaves of \cref{fig:template-skeleton} that a reviewer looks for by name, and the review sheet scores each of them somewhere; the letter after each row names the criterion. The lint calls them the \emph{essentials} and measures every paper against the same list, so the Checks page at the front of the draft shows where yours stands, and the job summary of your repository's CI opens with the same marks in one line. The list lives in \texttt{scripts/lint/essentials.lua}, and this section is printed from it by \texttt{make essentials}: delete the template's skeleton chapters and the list still holds. Each row links to the same item in action in \cref{app:chapters}.
+The list below defines the two dozen elements expected in every paper of this kind, including the problem, requirements, leading figure, threat model, research questions, gap matrix and summary with evidence. These are the named items in \cref{fig:template-skeleton} that reviewers look for. Each row gives the review-sheet criterion that scores it.
+
+The lint calls these items the \emph{essentials}. Their status appears on the draft's Checks page and at the start of the CI job summary. The list is defined in \texttt{scripts/lint/essentials.lua}; \texttt{make essentials} generates this section from it. The requirements still apply if you delete the skeleton chapters. Each row links to a worked example in \cref{app:chapters}.
 
 \input{guide/essentials}
 
 \section{The leading figure (vezérábra)}\label{app:writing:figure}
-The leading figure (\tplref{fig:overview}) explains the central idea in one picture: the problem, the contributions, and the result. Decide what a reader should take away from it, draw that, and write the caption so that the figure stands without the text. Make what is yours visible at a glance. The template's figures use one colour for everything that is yours, blue, through the \texttt{ours} TikZ style; the problem is red, the result green, and reused or external parts are grey (\texttt{prior}). Every work has at least two components, and all of them get the same blue, so the reader sees the extent of your contribution in one look; the caption says which colour is which. A reviewer who cannot tell your contribution from the surrounding system in the first figure will assume the smaller part is yours. Draft it early, in the research phase, and treat it as exploratory until the spine is agreed: many papers find their argument while drawing it. \Cref{fig:collage} shows the leading figures of four papers from our group.
+The leading figure (\tplref{fig:overview}) shows the problem, your contributions and the result in one picture. Decide what the reader should learn, then draw it and write a caption that makes it understandable on its own. Use the \texttt{ours} TikZ style to colour all your components blue. The problem is red, the result green, and reused or external parts grey (\texttt{prior}). Every work has at least two components; give all of yours the same blue and explain the colours in the caption. If ownership is unclear, a reviewer may attribute only the smallest part to you.
+
+Draft the figure during research and keep exploring it until the spine is agreed. Drawing often helps clarify the argument. \Cref{fig:collage} shows four examples from our group.
 
 \begin{figure}[!ht]
   \centering
   \begin{subfigure}[t]{0.48\linewidth}
     \centering
     \includegraphics[width=\linewidth,height=5.2cm,keepaspectratio]{guide/figures/collage/eurocybersec2024}
-    \caption{A policy is evaluated by its own subject and proven in zero knowledge: the actors and the flows between them, nothing else.}\label{fig:collage:ecs}
+    \caption{A subject evaluates its own policy and proves the result in zero knowledge. The figure shows actors and flows.}\label{fig:collage:ecs}
   \end{subfigure}\hfill
   \begin{subfigure}[t]{0.48\linewidth}
     \centering
     \includegraphics[width=\linewidth,height=5.2cm,keepaspectratio]{guide/figures/collage/tdk2023}
-    \caption{The toolchain of the same idea as a TDK paper: every stage from policy to proof, so the reader sees where the contribution sits.}\label{fig:collage:tdk}
+    \caption{The same idea in a TDK paper. The toolchain shows each stage from policy to proof and locates the contribution.}\label{fig:collage:tdk}
   \end{subfigure}
 
   \medskip
   \begin{subfigure}[t]{0.48\linewidth}
     \centering
     \includegraphics[width=\linewidth,height=5.2cm,keepaspectratio]{guide/figures/collage/bpm2025}
-    \caption{Self-orchestrated business collaborations: the architecture with the data model folded in, one picture for both.}\label{fig:collage:bpm25}
+    \caption{Self-orchestrated business collaborations, with architecture and data model in one figure.}\label{fig:collage:bpm25}
   \end{subfigure}\hfill
   \begin{subfigure}[t]{0.48\linewidth}
     \centering
     \includegraphics[width=\linewidth,height=5.2cm,keepaspectratio]{guide/figures/collage/bpm2026}
     \caption{From a BPMN collaboration to a security analysis: inputs on the left, the method in the middle, the verdicts on the right.}\label{fig:collage:bpm26}
   \end{subfigure}
-  \caption{Leading figures of four papers from the group: (a) the EuroCyberSec 2024 workshop paper on self-evaluated policies~\cite{guide:farkas2024selfevaluated}, (b) the 2023 TDK paper it grew out of~\cite{guide:farkas2023tdk}, (c) the self-orchestration model for business collaborations~\cite{guide:farkas2025selforchestration}, and (d) the formal security analysis of BPMN collaborations~\cite{guide:farkas2026trustnopool}. Each one shows the problem, the contribution and the result in a single picture, and each was drawn before the paper was written.}\label{fig:collage}
+  \caption{Leading figures drawn before their papers: (a) self-evaluated policies at EuroCyberSec 2024~\cite{guide:farkas2024selfevaluated}, (b) the 2023 TDK paper behind it~\cite{guide:farkas2023tdk}, (c) self-orchestrated business collaborations~\cite{guide:farkas2025selforchestration}, and (d) formal security analysis of BPMN collaborations~\cite{guide:farkas2026trustnopool}. Each combines the problem, contribution and result.}\label{fig:collage}
 \end{figure}
 
 \section{Figures}\label{app:writing:figures}
-Every figure is vector. Draw the final version in TikZ, in the paper repository, so that it uses the paper's fonts, scales without loss, and can be fixed by anyone in the last week; \cref{app:latex} shows the TikZ and pgfplots setup of this template. Sketch in \href{https://www.drawio.com/}{draw.io} while the figure is still changing, then redraw it in TikZ once the spine is agreed. An exported PDF is the last resort, for a figure from another paper or a screenshot. Plots come from pgfplots reading the CSV that \texttt{just reproduce} writes, so a changed measurement changes the figure without anyone redrawing it. Every axis has a label with a unit, and nothing in a figure is smaller than 10\,pt in print.
+Use vector figures. Draw final versions in TikZ in the paper repository to match its fonts, scale cleanly and allow late edits; \cref{app:latex} covers the template's TikZ and pgfplots setup. Sketch in \href{https://www.drawio.com/}{draw.io} while exploring, then redraw in TikZ after agreeing the spine. Use an exported PDF only as a last resort, for example for a figure from another paper or a screenshot. Generate plots with pgfplots from the CSV written by \texttt{just reproduce}, so measurements update the figures automatically. Label every axis with its unit. Figure text must be at least 10\,pt in print.
 
 \section{Captions}\label{app:writing:captions}
-A caption is the figure's own paragraph, and a reader who reads only figures and captions should follow the paper. A caption explains the figure; it does not describe it. Its first sentence states what the figure shows as a claim. Then it puts that claim in context: which question it answers, what a reader needs to know to understand it, and why the result is what it is. Anything the reader could get from the axes and the legend does not belong in the caption; anything they could not, does: the concept being measured, the assumption behind the setup, the reason one curve bends. A diagram gets two or three sentences; a result figure gets as many as the explanation needs. Nature's captions are the model, for example those of \citet{guide:gulyas2015navigable}; \cref{fig:caption-example} is one in this template's style.
+Figures and captions alone should let a reader follow the paper. Start each caption with the claim the figure supports. Then give the context needed to understand it: the question answered, the concept measured, assumptions in the setup, or why a curve bends. Avoid repeating information already clear from the axes and legend. Use two or three sentences for a diagram and as many as needed to explain a result. For examples, read the Nature captions in \citet{guide:gulyas2015navigable}; \cref{fig:caption-example} applies this style in the template.
 
 \begin{figure}[!ht]
   \centering
@@ -191,52 +195,52 @@ A caption is the figure's own paragraph, and a reader who reads only figures and
         \addplot+[mark=square*, gray] coordinates {(10,1) (100,3) (1000,21) (10000,190)};
     \end{groupplot}
   \end{tikzpicture}
-  \caption{\textbf{Revocation checks stay within one network round trip up to 10\,000 issuers, while the list-based baseline grows linearly.} This is the scalability question, RQ2: a registry that serves a national ecosystem must answer a check without the verifier noticing. Our registry stays flat because a check reads one accumulator witness whatever the number of issuers, whereas the baseline scans the issuer's list. The price is the storage in panel (b), which grows with the number of credentials ever issued; the robustness analysis shows this stays under what a single server holds today. Medians over 10 runs with fresh issuer sets, on one 8-core VM in the BME cloud. (Illustrative numbers for the guide's running example.)}\label{fig:caption-example}
+  \caption{\textbf{Revocation checks stay within one network round trip up to 10\,000 issuers, while the list-based baseline grows linearly.} This answers RQ2: can a national-scale registry check a credential without noticeable delay? Each check reads one accumulator witness regardless of issuer count; the baseline scans the issuer's list. Storage in panel (b) grows with all credentials ever issued, but the robustness analysis shows it fits on a single server. Medians of 10 runs with fresh issuer sets on one 8-core BME cloud VM. (Illustrative numbers for the guide's running example.)}\label{fig:caption-example}
 \end{figure}
 
 \section{The abstract}\label{app:writing:abstract}
-The abstract has a job before it has a structure: it must convince two readers that the paper is worth their time. The first is us, when you register the summary on the portal; the second is the committee that assigns the reviewers and, later, the reviewers themselves, who read it before anything else. Both have to come away believing that the topic is \textbf{relevant}, that solving it is \textbf{non-trivial}, that what you did is \textbf{novel}, and that it is \textbf{correct}: the same four things the review sheet scores (\cref{app:tdk:sheet}). Then follow \weblink{https://www.nature.com/documents/nature-summary-paragraph.pdf}{Nature's summary paragraph guide}; the abstract in this template already has its seven steps as placeholders.
+The abstract must explain why the work is worth reading. We read it at registration, then the committee uses it to assign reviewers, who read it first too. Show that the topic is \textbf{relevant}, solving it is \textbf{non-trivial}, the contribution is \textbf{novel} and the result is \textbf{correct}, as required by the review sheet (\cref{app:tdk:sheet}). Follow \weblink{https://www.nature.com/documents/nature-summary-paragraph.pdf}{Nature's summary paragraph guide}. The template abstract has placeholders for its seven steps.
 
 \section{The reference list}\label{app:writing:refs}
-The reference list shows whether you know the field, and the review sheet reads it twice (\cref{app:tdk:sheet}). B/1 wants the references accurate, \enquote{a szakirodalmi hivatkozások pontosak}; B/2 ranks the literature on a scale whose step 1 is a paper that learned its field from web pages: \enquote{1: ismert ipari gyakorlat (a dolgozat feldolgozta a weblapokról, technikai dokumentációkból közismert ipari megoldásokat)}. Below is the reference list we like to see, and the repair pass that gets a draft's list there.
+The reference list demonstrates your knowledge of the field and affects two review-sheet criteria (\cref{app:tdk:sheet}). B/1 requires accurate references: \enquote{a szakirodalmi hivatkozások pontosak}. B/2 gives only step 1 to literature drawn from web pages: \enquote{1: ismert ipari gyakorlat (a dolgozat feldolgozta a weblapokról, technikai dokumentációkból közismert ipari megoldásokat)}. Use the guidance below to select sources and repair the draft's bibliography.
 
 \paragraph{What we like.}
 \begin{itemize}
-  \item \textbf{Strong papers from strong venues, typically recent.} Peer-reviewed journal and conference papers from venues the field respects: the classics a result rests on, and the current state of the art. When you are unsure whether a venue is strong, ask us; the \href{https://portal.core.edu.au/conf-ranks/}{CORE ranking} for conferences and the \href{https://www.scimagojr.com/}{SJR quartiles} for journals are a first hint, not a verdict.
+  \item \textbf{Strong papers from strong venues, typically recent.} Use peer-reviewed journal and conference papers respected in the field, including both the foundations of your work and current research. Ask us if you are unsure about a venue. The \href{https://portal.core.edu.au/conf-ranks/}{CORE ranking} for conferences and \href{https://www.scimagojr.com/}{SJR quartiles} for journals offer initial guidance, not a verdict.
   \item \textbf{arXiv only with a reason.} The usual reason is that the work is too recent to have been published yet. Otherwise cite the published version.
-  \item \textbf{No weak sources.} An encyclopedia article, a tutorial, a vendor's marketing page or a post nobody reviewed is not evidence. Find the paper, the standard or the documentation it took its claim from, and cite that.
-  \item \textbf{URLs, strictly selected.} In a technical topic, a specification, a standard, a project's official documentation or its repository can be the primary source, and then it is the right citation. Select them hard: the official documentation, not the 222nd blog post that explains it.
-  \item \textbf{Never URLs only.} A reference list of web pages alone is the sheet's step 1 above, however good the text is.
-  \item \textbf{Footnotes when the URLs pile up.} A URL that only points to a thing you name, such as a tool, a library, a repository or a product, goes in a footnote, \texttt{\textbackslash footnote\{\textbackslash url\{\dots\}\}}, and the reference list keeps the sources that back a claim. The web sources that stay in the list follow the faculty's rule: owner, title, URL and access date (\cref{app:latex:cite}).
-  \item \textbf{Fifty is plenty.} A TDK paper typically needs no more than 50 references. If yours has more, the last step of the repair pass cuts it.
+  \item \textbf{No weak sources.} Do not use encyclopedias, tutorials, vendor marketing or unreviewed posts as evidence. Find and cite the paper, standard or documentation behind the claim.
+  \item \textbf{URLs, strictly selected.} Specifications, standards, official documentation and repositories can be primary sources for technical claims. Cite them when they are; prefer the original source to a blog explaining it.
+  \item \textbf{Never URLs only.} A bibliography made entirely of web pages remains at the sheet's step 1, regardless of the prose's quality.
+  \item \textbf{Footnotes when the URLs pile up.} Put links that merely identify a tool, library, repository or product in footnotes with \texttt{\textbackslash footnote\{\textbackslash url\{\dots\}\}}. Reserve bibliography entries for sources supporting claims. Web sources in the bibliography need the faculty's required owner, title, URL and access date (\cref{app:latex:cite}).
+  \item \textbf{Fifty is plenty.} We expect a TDK paper to need at most 50 references in most cases. If yours exceeds this, reduce it in the repair pass.
 \end{itemize}
 
-\paragraph{The repair pass.} Run it once when the draft is full and again in the last week (\cref{tab:polish}). Fix each entry in the Zotero group library, not in \texttt{bib/zotero.bib}: a refresh overwrites the file, and the next student inherits the fixed entry.
+\paragraph{The repair pass.} Check the references when the draft is complete and again in the last week (\cref{tab:polish}). Correct entries in the Zotero group library so others benefit too. Do not edit \texttt{bib/zotero.bib}; refreshing it would overwrite the fixes.
 \begin{enumerate}
-  \item \textbf{Read what you cite.} Open every source and check that it says what your sentence claims. A citation suggested by an AI tool or copied from another paper's reference list counts only once you have read the source.
-  \item \textbf{Preprints.} Search \href{https://dblp.org/}{dblp} for the title of every arXiv entry; it lists the preprint and the published version as separate entries. If a published version exists, cite it instead.
-  \item \textbf{Web pages.} For every URL entry, ask whether it backs a claim. If it does not, it becomes a footnote. If it does, and a paper, a standard or official documentation says the same, cite that instead.
-  \item \textbf{Complete entries.} Authors, title, venue and year on every entry; volume, number and pages on journal articles; the DOI wherever one exists. Given a DOI, Zotero's \emph{Add Item by Identifier} fetches clean metadata, and dblp's BibTeX export is a good model for computer-science venues.
-  \item \textbf{One entry per work.} A preprint and its published version are one work, a venue has one name throughout, and titles stay in their original language, as the faculty's guideline asks.
+  \item \textbf{Read what you cite.} Open every source and verify that it supports your claim. This also applies to citations suggested by AI or copied from another bibliography.
+  \item \textbf{Preprints.} Search \href{https://dblp.org/}{dblp} for each arXiv title. It lists preprints and published versions separately. Cite the published version where one exists.
+  \item \textbf{Web pages.} Move links that support no claim to footnotes. For those that do, prefer a paper, standard or official documentation if it supports the same claim.
+  \item \textbf{Complete entries.} Include authors, title, venue and year; add volume, number and pages for journal articles, and a DOI wherever available. Zotero's \emph{Add Item by Identifier} fetches metadata from a DOI. Use dblp's BibTeX exports as a model for computer-science venues.
+  \item \textbf{One entry per work.} Treat a preprint and its published version as one work. Use one name per venue and retain titles in their original language, as the faculty requires.
   \item \textbf{Cut to size.} Above 50 entries, drop the weakest sources first, starting with those another entry already covers.
 \end{enumerate}
-The \texttt{bib} lint rule checks the mechanical part: a title, a year and an author on every entry, an access date on web sources, bare DOIs (\cref{app:code:paperci}). The judgement is yours.
+The \texttt{bib} lint rule checks titles, years and authors, access dates for web sources, and bare DOIs (\cref{app:code:paperci}). You must judge whether each source is suitable and supports the claim.
 
 \section{Style}
 \begin{itemize}
   \item The Chicago School of Writing lectures: \href{https://www.youtube.com/watch?v=vtIzMaLkCaM}{part I}, \href{https://www.youtube.com/watch?v=aFwVf5a3pZM}{part II}, \href{https://www.youtube.com/watch?v=gphdfSwYMWU}{part III}.
   \item \href{https://www.youtube.com/watch?v=Unzc731iCUY}{MIT: How to Speak}, for the conference talk.
   \item Good examples: Leslie Lamport's papers, the Raft paper, and the figures and captions of \citet{guide:gulyas2015navigable}.
-  \item For contrast, read the original Paxos and PBFT papers next to the Raft paper: all three carry great ideas, and the Raft paper was written so that its idea is the easy part.
+  \item Compare the original Paxos and PBFT papers with Raft. All three introduce strong ideas; Raft is particularly useful for studying how to explain one clearly.
 \end{itemize}
 
 \section{Disclose AI use}\label{app:writing:ai}
-The faculty's \href{https://vik.bme.hu/page/1346/}{guidelines on the use of AI} set these rules, and this template follows them:
+This template follows the faculty's \href{https://vik.bme.hu/page/1346/}{guidelines on the use of AI}:
 \begin{itemize}
-  \item \textbf{Declare every use} in the faculty's declaration (\tplref{aidecl}, after the bibliography): which tool, for what, which parts of the paper, and how large a share. It is required for every thesis and cannot be waived; we require it for the TDK too.
-  \item \textbf{Cite facts and conclusions from an AI answer} that were not in your prompt, like any other source, in the faculty's required MLA form: a one-sentence summary of the prompt, the model with its version, the company, the date, and a link to the conversation if possible. The faculty's example: \enquote{Examples of harm-reduction initiatives} prompt. ChatGPT-4o, OpenAI, February 10, 2025. \texttt{bib/references.bib} has a commented entry in this form.
+  \item \textbf{Declare every use} in the faculty declaration (\tplref{aidecl}, after the bibliography). State the tool, purpose, affected parts of the paper and share of the work. The declaration is mandatory for every thesis, and we require it for TDK papers too.
+  \item \textbf{Cite facts and conclusions from an AI answer} if they were absent from your prompt. Use the faculty's required MLA form: a one-sentence prompt summary, model and version, company, date and, if possible, conversation link. The faculty's example is \enquote{Examples of harm-reduction initiatives} prompt. ChatGPT-4o, OpenAI, February 10, 2025. See the commented entry in \texttt{bib/references.bib}.
 \end{itemize}
 \begin{itemize}
-  \item \textbf{Keep the essential work your own.} The supervisor decides whether enough of the results are clearly yours, and a submission is not approved if AI use is disproportionately large or touches the essential parts. In the faculty's words: \enquote{If the task was to develop software and most of it was produced with generative AI, this is not acceptable}, while AI-supported software that serves your own algorithm, procedure or analysis is acceptable.
+  \item \textbf{Keep the essential work your own.} The supervisor decides whether enough of the results are yours. A submission will not be approved if AI use is disproportionately large or touches the essential parts of the work. The faculty states: \enquote{If the task was to develop software and most of it was produced with generative AI, this is not acceptable}. AI-supported software serving your own algorithm, procedure or analysis is acceptable.
 \end{itemize}
-Verifying an AI answer is always your responsibility; an answer can never be a reference by itself. \Cref{app:code:ai} covers the tools.
+You are responsible for verifying every AI answer; it cannot stand as a reference by itself. \Cref{app:code:ai} covers the tools.
