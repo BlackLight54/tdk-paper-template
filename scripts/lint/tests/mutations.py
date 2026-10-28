@@ -123,6 +123,44 @@ def both(*edits):
     return f
 
 
+def tag_line(rel, n, comment):
+    """Line n of the file gets a comment, for a lint-ignore where the build log points."""
+    def f(d):
+        p = d / rel
+        lines = p.read_text().splitlines(keepends=True)
+        lines[n - 1] = lines[n - 1].rstrip("\n") + " % " + comment + "\n"
+        p.write_text("".join(lines))
+    return f
+
+
+def pdf_with(rel, lines):
+    """A one-page PDF of the given (y, text) lines in 12 pt Helvetica, for the PDF rules, which
+    read what pdftotext and pdftohtml see: a built PDF cannot be mutated in place."""
+    def f(d):
+        body = "".join(f"BT /F1 12 Tf 72 {y} Td ({t.replace('(', '').replace(')', '')}) Tj ET\n" for y, t in lines)
+        objs = ["<< /Type /Catalog /Pages 2 0 R >>", "<< /Type /Pages /Kids [3 0 R] /Count 1 >>",
+                "<< /Type /Page /Parent 2 0 R /MediaBox [0 0 595 842] /Contents 4 0 R /Resources << /Font << /F1 5 0 R >> >> >>",
+                f"<< /Length {len(body)} >>\nstream\n{body}endstream", "<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica >>"]
+        out, offsets = "%PDF-1.4\n", []
+        for i, o in enumerate(objs, 1):
+            offsets.append(len(out))
+            out += f"{i} 0 obj\n{o}\nendobj\n"
+        xref = len(out)
+        out += f"xref\n0 {len(objs) + 1}\n0000000000 65535 f \n" + "".join(f"{o:010d} 00000 n \n" for o in offsets)
+        out += f"trailer\n<< /Size {len(objs) + 1} /Root 1 0 R >>\nstartxref\n{xref}\n%%EOF\n"
+        (d / rel).write_bytes(out.encode("latin-1"))
+    return f
+
+
+def pitched(deltas):
+    """Full-width lines down one page, each the given distance below the last."""
+    lines, y = [], 780
+    for dt in [0] + deltas:
+        y -= dt
+        lines.append((y, "The holder presents the credential and the verifier checks the status."))
+    return lines
+
+
 GAP = r"""\begin{table}[!ht]
   \centering
   \caption{The closest approaches against the requirements: only this work meets all three, each backed by an evaluation result.}
@@ -132,8 +170,8 @@ GAP = r"""\begin{table}[!ht]
     & \textbf{Requirement} & \makecell{\textbf{Ledger audit}\\\cite{lamport1978time}} & \makecell{\textbf{Status lists}\\\cite{w3c2025vcdm}} & \textbf{This work} \\
     \midrule
     \ref{req:first}  & Fast revocation & \gapyes & \gappartial & \gapyes\,(\cref{rq:correct}) \\
-    \ref{req:second} & Unlinkable checks & \gapno & \gapyes & \gapyes\,(\cref{rq:scale}) \\
-    \ref{req:third}  & Auditable history & \gappartial & \gapno & \gapyes\,(\cref{rq:robust}) \\
+    \ref{req:second} & Unlinkable checks & \gapno & \gapyes & \gapyes\,(\cref{sec:scalability}) \\
+    \ref{req:third}  & Auditable history & \gappartial & \gapno & \gapyes\,(\cref{sec:robustness}) \\
     \bottomrule
   \end{tabularx}
 \end{table}"""
@@ -188,14 +226,14 @@ MUTATIONS = [
     # (name, rule, edit, text the rule must print)
     ("gap matrix rows short", "essentials", both(filled_gap, drop_line("content/06-related-work.tex", "\\ref{req:third}  & Auditable")), "req:third has no row in the gap matrix"),
     ("a gap matrix row twice", "essentials", both(filled_gap, sub("content/06-related-work.tex", "\\ref{req:second} & Unlinkable", "\\ref{req:first} & Unlinkable")), "req:first has two rows"),
-    ("this work without a result pointer", "essentials", both(filled_gap, sub("content/06-related-work.tex", "\\gapyes\\,(\\cref{rq:scale})", "\\gapyes")), "points at no evaluation result"),
+    ("this work without a result pointer", "essentials", both(filled_gap, sub("content/06-related-work.tex", "\\gapyes\\,(\\cref{sec:scalability})", "\\gapyes")), "points at no evaluation result"),
     ("guarantee not in the correctness table", "essentials", both(own_items("content/03-approach.tex", "g"), drop_line("content/05-evaluation.tex", "\\ref{g:example} &")), "g:example is not checked in the evaluation"),
     ("contribution not restated", "essentials", own_items("content/01-introduction.tex", "c"), "c:method is not restated"),
     ("a restated contribution", "essentials", both(own_items("content/01-introduction.tex", "c"), append("content/07-conclusion.tex", "\\Cref{c:method} holds in every run.")), "!c:method is not restated"),
     ("this work misses a requirement", "essentials", both(filled_gap, sub("content/06-related-work.tex", "\\gapyes\\,(\\cref{rq:correct})", "\\gapno")), "this work does not meet"),
     ("another approach meets everything", "essentials", both(filled_gap, sub("content/06-related-work.tex", "Unlinkable checks & \\gapno", "Unlinkable checks & \\gapyes"),
         sub("content/06-related-work.tex", "Auditable history & \\gappartial", "Auditable history & \\gapyes")), "meets every requirement"),
-    ("a filled gap matrix is used", "essentials", filled_gap, "!Gap matrix\n    help:"),
+    ("a filled gap matrix is used", "essentials", filled_gap, "related ◔●◔"),
     ("a float without its label is missing", "essentials", drop_line("content/06-related-work.tex", "\\label{fig:positioning}"), "○ Positioning figure"),
     ("text below the threshold is started", "essentials", replace_line("content/01-introduction.tex", CONTEXT, words(15)), "◑ Context\n    help: 14 own words"),
     ("text above the threshold is written and enough", "essentials", replace_line("content/01-introduction.tex", CONTEXT, words(50)), "intro ●◔◔◔◔◔◔"),
@@ -204,7 +242,7 @@ MUTATIONS = [
         "  \\begin{tikzpicture}\\node[draw] (h) {Holder}; \\node[draw, right=of h] {Registry};\\end{tikzpicture}"), "◑ Architecture figure\n    help: the caption is still a TODO"),
     ("a section found by its heading", "essentials", sub("content/05-evaluation.tex", "\\section{Threats to validity}\\label{sec:validity}", "\\section{Threats to validity}"), "add \\label{sec:validity}"),
     ("a written setup without the artifact's DOI", "essentials", replace_line(EVAL, SETUP, words(120)), "◕ Setup and artifact\n    help: cite the archived artifact"),
-    ("a written setup with the artifact's DOI", "essentials", both(replace_line(EVAL, SETUP, words(120) + " The code is archived~\\cite{artifact}."), ZENODO), "!Setup and artifact\n    help:"),
+    ("a written setup with the artifact's DOI", "essentials", both(replace_line(EVAL, SETUP, words(120) + " The code is archived~\\cite{artifact}."), ZENODO), "evaluation ◔●◔◔◔◔"),
     ("a paper's DOI is not the artifact", "essentials", both(replace_line(EVAL, SETUP, words(120) + " Clocks follow~\\cite{lamport1978time}."), ZENODO), "◕ Setup and artifact\n    help: cite the archived artifact"),
     ("both abstracts written", "essentials", both(replace_line("content/00-abstract.tex", "[1 Field", words(120)), sub("content/00-abstract.tex", "TODO\n\n\\vfill\n\\selectenglish", words(120) + "\n\n\\vfill\n\\selectenglish")), "front ●"),
     ("a paragraph label is par:", "labels", append(BG, "\\paragraph{Extra.}\\label{par:extra} Some text."), "!par:extra"),
@@ -236,12 +274,12 @@ MUTATIONS = [
     ("running example missing from a chapter", "essentials", both(NAMED, OWN_BOX, lambda d: (d / BG).write_text(re.sub(r"\\begin\{runningexample\}.*?\\end\{runningexample\}", "", (d / BG).read_text(), flags=re.S))), "no example box in 02-background"),
     ("own example box not used", "essentials", sub("thesis.tex", "\\newcommand{\\lintexamplebox}{runningexample}", "\\newcommand{\\lintexamplebox}{cvd}"), "○ Running example"),
     ("own example box counts", "essentials", both(NAMED, OWN_BOX, sub("thesis.tex", "\\newcommand{\\lintexamplebox}{runningexample}", "\\newcommand{\\lintexamplebox}{cvd}"),
-        lambda d: [(f).write_text(f.read_text().replace("{runningexample}", "{cvd}")) for f in (d / "content").glob("0[1-7]-*.tex")]), "!Running example\n    help:"),
+        lambda d: [(f).write_text(f.read_text().replace("{runningexample}", "{cvd}")) for f in (d / "content").glob("0[1-7]-*.tex")]), "intro ◔◔●◔◔◔◔"),
     ("hyphen range", "typography", append(BG, "This holds for pages 12-18 of the book."), "with a hyphen"),
     ("a name is not a range", "typography", append(BG, "The curve BLS12-381 on an i7-9750H."), "!range 12-381"),
     ("two chapters in one file", "chapters", append(BG, "\\chapter{Second}\nMore text."), "a second chapter in one file"),
     ("a file nothing includes", "orphans", lambda d: (d / "content/notes.tex").write_text("Some notes the author forgot to include in a chapter.\n"), "included nowhere"),
-    ("own prose ends a stub", "stubs", append(BG, " ".join(["Own words of the author, written for this chapter."] * 25)), "!content/02-background.tex:1: FAIL"),
+    ("own prose ends a stub", "stubs", append(BG, " ".join(["Own words of the author, written for this chapter."] * 25)), "!content/02-background.tex"),
     ("faculty placeholder text", "stock", append(BG, "A bevezető tartalmazza a diplomaterv-kiírás elemzését."), "placeholder text is still here"),
     ("a chapter after the conclusion", "spine", lambda d: ((d / "content/08-extra.tex").write_text("\\chapter{Future Work}\nText.\n"),
         sub("thesis.tex", "\\include{content/07-conclusion}\n", "\\include{content/07-conclusion}\n\\include{content/08-extra}\n")(d)), "after the conclusion"),
@@ -257,7 +295,7 @@ MUTATIONS = [
     ("tracked build output", "repo-hygiene", track("reviewer.pdf"), "reviewer.pdf: FAIL build output is tracked"),
     ("a typed TBD", "markers", append(BG, "The proving time is TBD for now."), "a typed TBD"),
     ("a typed citation marker", "markers", append(BG, "This is well known [CITE: the survey]."), "a typed [CITE"),
-    ("a gap marker left at the final phase", "markers", append(BG, "Proving takes \\tbd{the proving time}."), "is still here"),
+    ("a gap marker left at the submit phase", "markers", append(BG, "Proving takes \\tbd{the proving time}."), "is still here"),
     ("a TBD inside a todo is not typed into the text", "markers", append(BG, "Text.\\todo{TBD later}"), "!a typed TBD"),
     # a TDK paper of the same year is a companion paper: never cited or linked
     ("a TDK paper of this year cited", "companion", tdk_entry(YEAR), "is a TDK paper of"),
@@ -276,7 +314,7 @@ MUTATIONS = [
     ("this paper's own repository, cited in the implementation chapter", "companion", both(append("bib/references.bib", f"@misc{{owncode, title = {{The Code}}, year = {{{YEAR}}}, url = {{https://github.com/someone/tdk{YEAR % 100:02d}-code}}}}"),
         sub("content/04-implementation.tex", "\\url{https://github.com/TODO}", "\\cite{owncode}")), "!companion paper"),
     ("another same-year repository next to this paper's own", "companion", both(OWN_REPO, append(BG, f"The model is at \\url{{https://github.com/someone/tdk{YEAR % 100:02d}-model}}.")), "links the repository of a"),
-    ("the thesis profile skips the companion rule", "companion", tdk_entry(YEAR), "skipped", {"args": "--doc reviewer --phase final --profile thesis", "exit": 0, "fresh": True}),
+    ("the thesis profile skips the companion rule", "companion", tdk_entry(YEAR), "skipped", {"args": "--doc reviewer --phase submit --profile thesis", "exit": 0, "fresh": True}),
     ("a companion paper cited", "companion", append(BG, "A companion paper~\\cite{lamport1978time} verifies the protocol."), "attached to a companion paper"),
     ("a companion paper linked", "companion", append(BG, "The protocol is verified in \\href{https://example.org/paper.pdf}{a companion paper}."), "attached to a companion paper"),
     ("a companion paper named, its tool cited", "companion", append(BG, "A companion paper verifies the protocol in Tamarin~\\cite{lamport1978time}."), "!attached to a companion paper"),
@@ -288,28 +326,103 @@ MUTATIONS = [
     ("a citation in a comment environment is not read", "bib", append(BG, "\\begin{comment}\nSee~\\cite{nosuchref}.\n\\end{comment}"), "!nosuchref"),
     ("a citation in a picture is read", "bib", append(BG, "\\begin{tikzpicture}\\node {Prior work~\\cite{nosuchref}};\\end{tikzpicture}"), "nosuchref is in no .bib file"),
     ("a citation in a code listing is not read", "bib", append(BG, "\\begin{lstlisting}\n\\cite{nosuchref}\n\\end{lstlisting}"), "!nosuchref"),
-    # the phase is one of four, wherever it comes from
+    # the phase is one of the lifecycle's seven, wherever it comes from; final is no alias of submit
+    ("an old phase name is no alias", "markers", append(BG, "Proving takes \\tbd{the proving time}."), "unknown phase 'final'", {"args": "--doc reviewer --phase final", "exit": 2, "fresh": True}),
+    ("the first four phases share a level", "markers", append(BG, "Proving takes \\tbd{the proving time}."), "!is still here", {"args": "--doc reviewer --phase research", "fresh": True}),
     ("an unknown phase stops the lint", "markers", append(BG, "Proving takes \\tbd{the proving time}."), "unknown phase 'fnial'", {"args": "--doc reviewer --phase fnial", "exit": 2, "fresh": True}),
     ("an unknown phase in thesis.tex stops the lint", "markers", sub("thesis.tex", "\\newcommand{\\lintphase}{plan}", "\\newcommand{\\lintphase}{fnial}"), "from \\lintphase in thesis.tex", {"args": "--doc reviewer", "exit": 2}),
     ("an unknown phase on the Checks page", "markers", sub("thesis.tex", "\\newcommand{\\lintphase}{plan}", "\\newcommand{\\lintphase}{fnial}"), "The lint did not run", {"args": "overleaf --tex", "exit": 2}),
     # a rule that cannot run says skipped, and --json carries every rule's result
     ("an offline link check is skipped, not passed", "links", lambda d: None, "links         advice  skipped", {"fresh": True}),
-    ("a PDF rule without a PDF is skipped", "pdf-margins", lambda d: None, "skipped", {"args": "--doc nosuchdoc --phase final", "fresh": True}),
-    ("json carries the findings of every rule", "bib", append(BG, "See~\\cite{nosuchref}."), '"msg":"cited key nosuchref is in no .bib file","rule":"bib"', {"args": "all --doc reviewer --phase final --json", "exit": 1}),
+    ("a PDF rule without a PDF is skipped", "pdf-margins", lambda d: None, "skipped", {"args": "--doc nosuchdoc --phase submit", "fresh": True}),
+    ("json carries the findings of every rule", "bib", append(BG, "See~\\cite{nosuchref}."), '"msg":"cited key nosuchref is in no .bib file","rule":"bib"', {"args": "all --doc reviewer --phase submit --json", "exit": 1}),
+    # fixes never edit literal text: code listings, inline verbatim, links, maths
+    ("a code listing's Figure~\\ref is the program's text", "crefs", append(BG, "\\begin{lstlisting}\nFigure~\\ref{fig:overview}\n\\end{lstlisting}"), "!typed reference"),
+    ("inline verbatim is the program's text", "crefs", append(BG, "The macro \\verb|Figure~\\ref{fig:overview}| is typed as text."), "!typed reference"),
+    ("a quote inside verbatim is not rewritten", "typography", append(BG, 'The string \\verb|"abc"| is a literal; "quoted" text follows.'), '!\\verb|\\enquote{abc}|'),
+    ("a quote outside verbatim is rewritten", "typography", append(BG, 'The string \\verb|"abc"| is a literal; "quoted" text follows.'), '\\enquote{quoted} text follows'),
+    ("a range inside maths is a formula", "typography", append(BG, "The bound $12-18$ holds."), "!with a hyphen"),
+    ("that that is grammar, not a doubled word", "typography", append(BG, "The protocol that that process uses is sound."), "!doubled word"),
+    ("a doubled word", "typography", append(BG, "The protocol the the process uses is sound."), "doubled word: the the"),
+    # the phase declaration is read as TeX reads it
+    ("a phase declared across two lines is read", "markers", both(append(BG, "Proving takes \\tbd{the proving time}."), sub("thesis.tex", "\\newcommand{\\lintphase}{plan}", "\\newcommand{\\lintphase}\n  {submit}")), "is still here", {"args": "--doc reviewer"}),
+    ("a starred declaration is read", "markers", both(append(BG, "Proving takes \\tbd{the proving time}."), sub("thesis.tex", "\\newcommand{\\lintphase}{plan}", "\\newcommand*{\\lintphase}{submit}")), "is still here", {"args": "--doc reviewer"}),
+    ("a typo across two lines stops the lint", "markers", sub("thesis.tex", "\\newcommand{\\lintphase}{plan}", "\\newcommand{\\lintphase}\n  {fnial}"), "unknown phase 'fnial'", {"args": "--doc reviewer", "exit": 2}),
+    # links are read as citations are: across line breaks, in the printed text only
+    ("an Overleaf link across a line break", "companion", append(BG, "The draft is at \\url\n{https://www.overleaf.com/read/abcdefghijkl}."), "links an Overleaf project"),
+    ("an Overleaf link in a comment environment is not read", "companion", append(BG, "\\begin{comment}\n\\url{https://www.overleaf.com/read/abcdefghijkl}\n\\end{comment}"), "!Overleaf"),
+    ("an Overleaf link in a todo note is not read", "companion", append(BG, "Text.\\todo{Read \\url{https://www.overleaf.com/read/abcdefghijkl}.}"), "!Overleaf"),
+    ("a companion paper in emphasis, cited", "companion", append(BG, "A \\emph{companion paper}~\\cite{lamport1978time} verifies it."), "attached to a companion paper"),
+    ("a citation in a todo whose text follows a space", "companion", both(tdk_entry(YEAR), sub(BG, CITED, f"Text.\\todo[inline] {{Read~\\cite{{student{YEAR}companion}} again.}}")), "!is a TDK paper of"),
+    # the artifact is an artifact's entry with the DOI in its doi or url field
+    ("a publication's Zenodo DOI is not the artifact", "essentials", both(replace_line(EVAL, SETUP, words(120) + " A survey discusses clocks~\\cite{unrelated}."),
+        append("bib/references.bib", "@article{unrelated,\n  author = {Other, Author},\n  title = {A survey},\n  journal = {Reports},\n  year = {2025},\n  doi = {10.5281/zenodo.1234567}\n}")), "◕ Setup and artifact\n    help: unrelated is an @article entry with a Zenodo DOI"),
+    ("a Zenodo DOI only in a note is not the artifact", "essentials", both(replace_line(EVAL, SETUP, words(120) + " We discuss~\\cite{unrelated}."),
+        append("bib/references.bib", "@misc{unrelated,\n  author = {Other, Author},\n  title = {A survey},\n  year = {2025},\n  note = {The archive was once 10.5281/zenodo.1234567}\n}")), "◕ Setup and artifact\n    help: cite the archived artifact"),
+    # the gap matrix: every row is a declared requirement, and this work's cells point at results that exist
+    ("a gap matrix row that names no requirement", "essentials", both(filled_gap, sub("content/06-related-work.tex", "\\ref{req:third}  & Auditable", "\\ref{req:fourth} & Extra & \\gapno & \\gapno & \\gapyes\\,(\\cref{rq:correct}) \\\\\n    \\ref{req:third}  & Auditable")), "req:fourth is a row of the gap matrix but no requirement carries that label"),
+    ("this work points at a chapter, not a result", "essentials", both(filled_gap, sub("content/06-related-work.tex", "\\gapyes\\,(\\cref{sec:scalability})", "\\gapyes\\,(\\cref{ch:background})")), "ch:background is not an evaluation result"),
+    ("this work points at a label that does not exist", "essentials", both(filled_gap, sub("content/06-related-work.tex", "\\gapyes\\,(\\cref{sec:scalability})", "\\gapyes\\,(\\cref{fig:does-not-exist})")), "fig:does-not-exist, which no label defines"),
+    ("a pointer with a space after \\cref counts", "essentials", both(filled_gap, sub("content/06-related-work.tex", "\\gapyes\\,(\\cref{sec:scalability})", "\\gapyes\\,(\\cref {sec:scalability})")), "related ◔●◔"),
+    # a rule whose own code fails did not run: exit 2, status error, never ok
+    ("a crashed rule stops the lint with exit 2", "sources", sub("scripts/lint/rules-source.lua", 'local bbl = C.readfile(C.bpath(C.opts.doc .. ".bbl"))', 'error("injected by the mutation suite") local bbl = C.readfile(C.bpath(C.opts.doc .. ".bbl"))'), "the rule itself failed", {"args": "--doc reviewer --phase submit", "exit": 2}),
+    ("a crashed rule is not ok in the JSON", "sources", sub("scripts/lint/rules-source.lua", 'local bbl = C.readfile(C.bpath(C.opts.doc .. ".bbl"))', 'error("injected by the mutation suite") local bbl = C.readfile(C.bpath(C.opts.doc .. ".bbl"))'), '"ok":false', {"args": "--doc reviewer --phase submit --json", "exit": 2}),
     ("a misspelt title", "spelling", sub("thesis.tex", "\\newcommand{\\vikcim}{TODO Title of the paper}", "\\newcommand{\\vikcim}{Revocation and revovation of credentials}"), "revovation"),
+    # code is the program's text: no typography slip in \texttt, \lstinline or a verbatim block, and no
+    # marker or abbreviation in a verbatim block, an \iffalse region or \verb
+    ("a space before a colon in \\texttt is code", "typography", append(BG, "The kernel \\texttt{x : Nat} is typed."), "!space before punctuation"),
+    ("a space before a colon in \\lstinline is code", "typography", append(BG, "The signature \\lstinline{f : A -> B} is typed."), "!space before punctuation"),
+    ("a range in a verbatim block is the program's text", "typography", append(BG, "\\begin{verbatim}\npages 3-4\n\\end{verbatim}"), "!with a hyphen"),
+    ("a space before the full stop that ends the line", "typography", append(BG, "The kernel ."), "space before punctuation"),
+    ("a TBD in a verbatim block is the program's text", "markers", append(BG, "\\begin{verbatim}\nTBD\n\\end{verbatim}"), "!a typed TBD"),
+    ("a TBD in a fancyvrb Verbatim block is the program's text", "markers", append(BG, "\\begin{Verbatim}\nTBD\n\\end{Verbatim}"), "!a typed TBD"),
+    ("an XXX under \\iffalse never prints", "markers", append(BG, "\\iffalse\nXXX hidden\n\\fi"), "!a typed XXX"),
+    ("a TBD in inline verbatim is the program's text", "markers", append(BG, "The value \\verb|TBD| is literal."), "!a typed TBD"),
+    ("an abbreviation in a verbatim block is the program's text", "acronyms", append(BG, "\\begin{verbatim}\nZKP\n\\end{verbatim}"), "!ZKP typed by hand"),
+    ("an abbreviation under \\iffalse never prints", "acronyms", append(BG, "\\iffalse\nEvery ZKP is short.\n\\fi"), "!ZKP typed by hand"),
+    # glossaries-extra accepts \newacronym next to \newabbreviation
+    ("an entry declared with \\newacronym", "acronyms", both(append("content/glossary.tex", "\\newacronym{mpc}{MPC}{multi-party computation}"), append(BG, "We use \\gls{mpc} here.")), "!mpc is not declared"),
+    ("a \\newacronym short form typed by hand", "acronyms", both(append("content/glossary.tex", "\\newacronym{mpc}{MPC}{multi-party computation}"), append(BG, "Every MPC run ends.")), "MPC typed by hand"),
+    # the job summary: the plain run writes it; --tex (every XeLaTeX pass) and --json do not
+    ("the plain run writes the job summary", "markers", lambda d: None, "| Group | Status | Check | Rule | Findings |", {"args": "all --doc reviewer --phase submit", "env": {"GITHUB_STEP_SUMMARY": "/dev/stdout"}, "fresh": True}),
+    ("the Checks page run leaves the job summary alone", "markers", lambda d: None, "!| Group | Status |", {"args": "overleaf --tex --doc reviewer", "env": {"GITHUB_STEP_SUMMARY": "/dev/stdout"}, "fresh": True}),
+    ("the JSON run leaves the job summary alone", "markers", lambda d: None, "!| Group | Status |", {"args": "all --doc reviewer --phase submit --json", "env": {"GITHUB_STEP_SUMMARY": "/dev/stdout"}, "exit": 1, "fresh": True}),
+    # the main text's first page comes from the .toc's first numbered chapter, whatever its title;
+    # without a .toc the outline's titles still find it
+    ("the main text is counted without a .toc", "pdf-pages", lambda d: (d / "reviewer.toc").unlink(), "main text is", {"fresh": True}),
+    # the PDF rules on a PDF of known text (pdf_with): a placeholder is a whole word, and no PDF is a skip
+    ("a placeholder word printed in the PDF", "pdf-parts", pdf_with("tiny.pdf", [(700, "The proving time is TBD for now.")]), "TBD is printed in the PDF", {"args": "--doc tiny --phase submit"}),
+    ("a roman numeral is not the XXX placeholder", "pdf-parts", pdf_with("tiny.pdf", [(700, "XXXVI. OTDK, Vol. TBDX")]), "!is printed in the PDF", {"args": "--doc tiny --phase submit"}),
+    ("pdf-parts without a PDF is skipped", "pdf-parts", lambda d: None, "skipped", {"args": "--doc nosuchdoc --phase submit", "fresh": True}),
+    # the line pitch is the most common one (14 here: 8 of 14, 7 of 20, 6 of 26, whose median is 20), and too few lines are a warning
+    ("the line pitch is the most common pitch, not the median", "pdf-spacing", pdf_with("tiny.pdf", pitched([14, 14, 20, 26, 14, 20, 26, 14, 14, 20, 26, 14, 20, 26, 14, 20, 26, 14, 20, 26, 20])), "pitch=14.0pt", {"args": "--doc tiny --phase submit", "exit": 0}),
+    ("too few lines to measure the pitch is a warning", "pdf-spacing", pdf_with("tiny.pdf", pitched([20, 20, 20, 20, 20])), "only 5 line pitches to measure", {"args": "--doc tiny --phase submit", "exit": 0}),
+    # an overfull box is placed at the source lines the log names, so a lint-ignore there silences it; under a point it is invisible
+    ("an overfull box at its source lines", "overfull", append("reviewer.log", "(./content/02-background.tex\nOverfull \\hbox (12.5pt too wide) in paragraph at lines 7--9\n[]\\TU/TeXGyreTermes(0)/m/n/12 Some text\n)"), "content/02-background.tex:7: FAIL overfull by 12.5pt at lines 7-9"),
+    ("an overfull box silenced where it is", "overfull", both(append("reviewer.log", "(./content/02-background.tex\nOverfull \\hbox (12.5pt too wide) in paragraph at lines 7--9\n[]\\TU/TeXGyreTermes(0)/m/n/12 Some text\n)"),
+        tag_line(BG, 7, "lint-ignore: overfull the long identifier stays")), "!overfull by"),
+    ("an overfull box under a point is invisible", "overfull", append("reviewer.log", "(./content/02-background.tex\nOverfull \\hbox (0.4pt too wide) in paragraph at lines 7--9\n[]\\TU/TeXGyreTermes(0)/m/n/12 Some text\n)"), "!overfull by"),
+    # the phase declaration is trimmed wherever it is read
+    ("a phase with spaces around it is the phase", "markers", both(append(BG, "Proving takes \\tbd{the proving time}."), sub("thesis.tex", "\\newcommand{\\lintphase}{plan}", "\\newcommand{\\lintphase}{ submit }")), "is still here", {"args": "--doc reviewer"}),
+    ("a phase with spaces around it keeps the frame", "frame", sub("thesis.tex", "\\newcommand{\\lintphase}{plan}", "\\newcommand{\\lintphase}{ draft }"), "!no \\lintphase", {"args": "--doc reviewer"}),
 ]
 
 
-ARGS = "--doc reviewer --phase final"
+ARGS = "--doc reviewer --phase submit"
 
 
-def lint(d, rule, args=ARGS):
-    """The rule's output and exit. args starting with a subcommand (overleaf, all) replace the rule."""
+def lint(d, rule, args=ARGS, env=None):
+    """The rule's output and exit. args starting with a subcommand (overleaf, all) replace the rule.
+    The cases read the lint's plain output, so GitHub's variables are kept from it: under
+    GITHUB_ACTIONS the lint prints workflow commands instead, with the help on the annotation."""
     cmd = args if args.split()[0] in ("overleaf", "all", "source") else f"{rule} {args}"
+    plain = {k: v for k, v in os.environ.items() if not k.startswith("GITHUB_")}
+    plain.update(env or {})
     if shutil.which("texlua"):
-        r = subprocess.run(["sh", "-c", f"LINT_OFFLINE=1 texlua scripts/lint.lua {cmd} 2>&1"], cwd=d, text=True, capture_output=True)
+        r = subprocess.run(["sh", "-c", f"LINT_OFFLINE=1 texlua scripts/lint.lua {cmd} 2>&1"], cwd=d, text=True, capture_output=True, env=plain)
     else:
-        r = subprocess.run(["docker", "run", "--rm", "-u", f"{os.getuid()}:{os.getgid()}", "-e", "HOME=/tmp", "-v", f"{d}:/w", "-w", "/w", IMAGE,
+        envargs = [x for k, v in (env or {}).items() for x in ("-e", f"{k}={v}")]
+        r = subprocess.run(["docker", "run", "--rm", "-u", f"{os.getuid()}:{os.getgid()}", "-e", "HOME=/tmp", *envargs, "-v", f"{d}:/w", "-w", "/w", IMAGE,
                             "sh", "-c", f"LINT_OFFLINE=1 texlua scripts/lint.lua {cmd} 2>&1"],
                            text=True, capture_output=True)
     return r.stdout, r.returncode
@@ -360,7 +473,7 @@ def main():
         negate = expect.startswith("!")
         if not opts.get("fresh"):
             if (rule, args) not in baseline:
-                baseline[rule, args] = lint(base, rule, args)
+                baseline[rule, args] = lint(base, rule, args, opts.get("env"))
             out, code = baseline[rule, args]
             why = ran(out, code, rule, {k: v for k, v in opts.items() if k != "exit"}) if opts.get("exit") != 2 else None
             if why:
@@ -379,7 +492,7 @@ def main():
             print(f"STALE {rule:13s} {name}: {e}")
             shutil.rmtree(d)
             continue
-        out, code = lint(d, rule, args)
+        out, code = lint(d, rule, args, opts.get("env"))
         why = ran(out, code, rule, opts)
         ok = why is None and ((expect[1:] not in out) if negate else (expect in out))
         missed += not ok

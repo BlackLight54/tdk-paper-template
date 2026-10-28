@@ -3,9 +3,10 @@
 --   texlua scripts/lint.lua fix [<rule>...] [--dry-run] [--review] [--allow-dirty]
 --
 -- It writes the safe fixes, and with --review the review fixes too; placeholders are never written,
--- the author fills their holes. Without rules it runs the source family. A file with uncommitted
--- changes is left alone unless --allow-dirty is given, so `git diff` shows exactly what the fixes
--- did. Two fixes on the same text cannot both be written in one pass, so after writing it runs
+-- the author fills their holes. Without rules it runs the source family. When a file the fixes
+-- would change has uncommitted changes, nothing is written and the run exits 1, unless
+-- --allow-dirty is given: the fixes are then a diff of their own, so `git diff` shows exactly what
+-- they did. Two fixes on the same text cannot both be written in one pass, so after writing it runs
 -- the lint again, up to three passes; a fix that is offered again after it was written did not
 -- clear its finding, which is a bug in the lint, and stops the run with exit code 2.
 local C = require("lintcore")

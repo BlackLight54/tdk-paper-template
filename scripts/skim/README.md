@@ -38,7 +38,7 @@ repository:
 
 | input | default | option |
 |---|---|---|
-| the review sheet's criteria | `guide/02-tdk-essentials.tex`, section "The review sheet" | `--guide` |
+| the review sheet's criteria | `guide/06-tdk-rules-and-dates.tex`, section "The review sheet" | `--guide` |
 | every band of the sheet | `docs/TDK2025_biralati_pontozolap_hallgatoi.pdf` | `--sheet` |
 | chapter roles and tag lists | `lint.json`, else `texlua scripts/lint.lua chapters --json` | `--lint` |
 
@@ -72,7 +72,7 @@ Every piece of evidence in the rubric map has one of four states:
 |---|---|
 | `detected` | The structure is in the PDF. This says nothing about whether it is good. |
 | `placeholder` | Detected, but it shows template text. |
-| `unsure` | The `.aux` or the sources declare it, but the skim could not read it from the PDF. |
+| `unsure` | The `.aux` or the sources declare it, but the skim could not read it from the PDF; or the build file that would say is missing (no `.bbl`: the bibliography's size is unknown, not zero). |
 | `missing` | Neither the PDF nor the sources have it. |
 
 Nothing is shown in green, because the skim checks nothing. Colour marks only `placeholder`

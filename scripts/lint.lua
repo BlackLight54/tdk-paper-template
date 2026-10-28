@@ -11,9 +11,10 @@
 --   texlua scripts/lint.lua fix [<rule>...] [--dry-run] [--review]    write the fixes the rules suggest (fixes.lua)
 --
 -- Severity: check (fails once its phase is reached), advice (warns, never fails), count (numbers).
--- Phase: --phase, else LINT_PHASE, else \newcommand{\lintphase}{plan|draft|polish|final} in
--- thesis.tex, else plan; any other value stops the lint with exit 2. A check whose phase is not
--- reached yet only reports. The essentials (scripts/lint/essentials.lua) are one check whose
+-- Phase: --phase, else LINT_PHASE, else \newcommand{\lintphase}{...} in thesis.tex, else plan: the
+-- lifecycle phase, one of topic, setup, research, plan, draft, polish, submit; the first four
+-- share the checks' first level, and any other value (final included) stops the lint with exit 2.
+-- A check whose phase is not reached yet only reports. The essentials (scripts/lint/essentials.lua) are one check whose
 -- level rises with the phase. Chapters are found by their labels (ch:intro, ...), not by file
 -- name. "% lint-ignore: <rule> <reason>" silences one finding. A finding may carry a fix, printed
 -- under it: safe, review or placeholder (lintcore.lua says what each means). Exit: 0 when every
@@ -44,7 +45,7 @@ do
     else args[#args + 1] = arg[i]; i = i + 1 end
   end
 end
--- an unknown phase stops everything: run as plan, a typo for final would pass what final fails
+-- an unknown phase stops everything: run as plan, a typo for submit would pass what submit fails
 do
   local ok, err = C.resolve_phase()
   if not ok then
@@ -53,8 +54,12 @@ do
     os.exit(2)
   end
 end
--- the essentials first: they open the Checks page, the job summary and every list
-require("rules-essentials"); require("rules-source"); require("rules-pdf"); require("rules-tools")
+-- the essentials first: they open the Checks page, the job summary and every list. A rule file that
+-- does not load is the lint not running, exit 2, not a pass
+for _, m in ipairs({ "rules-essentials", "rules-source", "rules-pdf", "rules-tools" }) do
+  local ok, err = pcall(require, m)
+  if not ok then io.stderr:write("lint: could not load " .. m .. ": " .. tostring(err) .. "\n"); os.exit(2) end
+end
 local P = require("pagemap")
 local R = require("render")
 
@@ -83,10 +88,10 @@ if not cmd or cmd == "list" then
 end
 if guide then io.write(R.guide()); os.exit(0) end
 -- the template's own check, not a rule: the criteria each role carries (lintcore.lua) are the ones
--- its section of guide/chapter-by-chapter.tex names, since the skim reports them as the guide's
+-- its section of guide/05-chapter-by-chapter.tex names, since the skim reports them as the guide's
 if cmd == "criteria" then
   local g = C.guide_criteria()
-  if not g then io.stderr:write("lint: no guide/chapter-by-chapter.tex\n"); os.exit(2) end
+  if not g then io.stderr:write("lint: no guide/05-chapter-by-chapter.tex\n"); os.exit(2) end
   local bad = 0
   for _, role in ipairs(C.ROLE_SEQ) do
     local want, have, missing, extra = {}, g[role] or {}, {}, {}
@@ -117,20 +122,26 @@ if cmd == "all" then for _, n in ipairs(C.ORDER) do todo[#todo + 1] = n end
 elseif cmd == "overleaf" then for _, n in ipairs(C.ORDER) do if C.RULES[n].family ~= "pdf" and not OVERLEAF_SKIP[n] then todo[#todo + 1] = n end end
 elseif cmd == "source" or cmd == "pdf" or cmd == "tools" then for _, n in ipairs(C.ORDER) do if C.RULES[n].family == cmd then todo[#todo + 1] = n end end
 else for _, n in ipairs(args) do todo[#todo + 1] = n end end
-local allok = true
+local allok, crashed = true, false
 local header = #todo <= 1
 for _, name in ipairs(todo) do
   local r = C.RULES[name]
   if not r then io.stderr:write("unknown rule " .. name .. "; try: texlua scripts/lint.lua list\n"); os.exit(2) end
   -- the essentials write their own section of the job summary; the rules' table follows them
   if not header and r.summary ~= false and not fixing then C.summary_header("Lint: " .. cmd .. " (phase " .. C.phase() .. ", profile " .. C.opts.profile .. ")"); header = true end
-  C.findings = {}; C.ignored = 0; C.current_rule = name; C.skipped = nil
+  C.findings = {}; C.ignored = 0; C.current_rule = name; C.skipped = nil; C.crashed = nil
   local ok_call, counts = pcall(r.fn)
-  if not ok_call then C.fail(nil, nil, "the rule itself failed: " .. tostring(counts)); counts = nil end
+  if not ok_call then
+    -- the rule's code failed: not a finding about the paper, and not a pass; the run exits 2
+    C.crashed = tostring(counts); crashed = true
+    C.fail(nil, nil, "the rule itself failed", "a bug in the lint, not in the paper: " .. tostring(counts)); counts = nil
+  end
   if not C.report(name, r, counts) then allok = false end
 end
 
-if fixing then os.exit(require("fixes").main(C.results, fixrules, passthrough)) end
-if C.opts.json then io.write(R.json(allok))
+-- a crashed rule: no fix is written, the JSON says ok false, and the exit is 2, "could not run"
+if crashed then io.stderr:write("lint: a rule failed; the run established nothing it reports as passed\n") end
+if fixing then os.exit(crashed and 2 or require("fixes").main(C.results, fixrules, passthrough)) end
+if C.opts.json then io.write(R.json(allok and not crashed))
 elseif C.opts.tex then io.write(R.checks_page(C.results)) end
-os.exit(allok and 0 or 1)
+os.exit(crashed and 2 or (allok and 0 or 1))

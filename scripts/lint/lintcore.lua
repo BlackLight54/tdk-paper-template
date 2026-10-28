@@ -3,7 +3,9 @@ local lfs = require("lfs")
 local M = {}
 
 M.opts = { dir = ".", doc = "thesis", profile = os.getenv("LINT_PROFILE") or "tdk", tex = false, json = false }
-M.PHASES = { plan = 1, draft = 2, polish = 3, final = 4 } -- the order of the manual phase in thesis.tex
+-- the manual phase in thesis.tex is the lifecycle phase; the four before draft share the checks' first level
+M.PHASE_ORDER = { "topic", "setup", "research", "plan", "draft", "polish", "submit" }
+M.PHASES = { topic = 1, setup = 1, research = 1, plan = 1, draft = 2, polish = 3, submit = 4 }
 
 function M.readfile(p) local h = io.open(p, "r"); if not h then return nil end; local s = h:read("a"); h:close(); return s end
 function M.lines(p)
@@ -22,7 +24,6 @@ function M.run_quiet(cmd) local h = io.popen(cmd .. " 2>/dev/null"); if not h th
 function M.have(tool) local s = M.run("command -v " .. tool); return s ~= nil and s:match("%S") ~= nil end
 function M.escape(s) return (s:gsub("%p", "%%%0")) end
 function M.trim(s) return (s:gsub("^%s+", ""):gsub("%s+$", "")) end
-function M.median(t) if #t == 0 then return nil end; table.sort(t); return t[math.ceil(#t / 2)] end
 function M.count(s, pat) return select(2, s:gsub(pat, "")) end
 
 -- the content files are the ones thesis.tex reaches through \include, \input and
@@ -40,7 +41,7 @@ M.ROLE_LABEL = { intro = "ch:intro", background = "ch:background", approach = "c
 M.ROLE_NAME = { intro = "introduction", background = "background chapter", approach = "approach chapter", implementation = "implementation chapter", evaluation = "evaluation chapter", related = "related-work chapter", conclusion = "conclusion" }
 M.MANDATORY = { "intro", "approach", "evaluation", "related", "conclusion" }
 -- the roles in reading order, and the review-sheet criteria each role's chapters carry, as the
--- head of the role's section in guide/chapter-by-chapter.tex (app:chapters:<role>) names them;
+-- head of the role's section in guide/05-chapter-by-chapter.tex (app:chapters:<role>) names them;
 -- criterion A is scored on the whole paper and belongs to no role. The skim reads them from
 -- --json; `lint.lua criteria` fails when the guide names other criteria
 M.ROLE_SEQ = { "intro", "background", "approach", "implementation", "evaluation", "related", "conclusion" }
@@ -94,7 +95,7 @@ do
     end
     if body:match("\\chapter%*{Abstract}") then M.FILES.abstract = f end
     if body:find("\\label{aidecl}", 1, true) then M.FILES.aidecl = f end
-    if body:match("\\DeclareAcronym") or body:match("\\newabbreviation") or body:match("\\newglossaryentry") then M.FILES.glossary = f end
+    if body:match("\\DeclareAcronym") or body:match("\\newabbreviation") or body:match("\\newacronym") or body:match("\\newglossaryentry") then M.FILES.glossary = f end
   end
 end
 -- whether a file thesis.tex reaches, the frame included, loads package p, or defines the macro
@@ -144,10 +145,10 @@ function M.tag_lists()
   return t
 end
 
--- the criteria each role's section of guide/chapter-by-chapter.tex names in its bold
+-- the criteria each role's section of guide/05-chapter-by-chapter.tex names in its bold
 -- \textbf{Criterion ...} or \textbf{Criteria ...} heads, as { approach = { ["D/1"] = true, ... } }
 function M.guide_criteria(file)
-  local s = M.readfile(file or "guide/chapter-by-chapter.tex")
+  local s = M.readfile(file or "guide/05-chapter-by-chapter.tex")
   if not s then return nil end
   local out, cuts = {}, {}
   -- a role's section runs to the next \section; its subsections carry app:chapters:<name> labels too
@@ -244,16 +245,18 @@ function M.roles_ok(list)
   return ok
 end
 
--- a \newcommand in thesis.tex that the lint reads as its setting (\lintphase):
--- its body, trimmed, or nil when thesis.tex does not define it or defines it only in a comment
+-- a \newcommand in thesis.tex that the lint reads as its setting (\lintphase): its body, trimmed,
+-- or nil when thesis.tex does not define it or defines it only in a comment. Read as TeX reads it:
+-- \newcommand* counts, and the body may start on the next line
 function M.setting(name)
-  for _, l in ipairs(M.lines("thesis.tex")) do
-    local v = M.strip_comment(l):match("\\%a*newcommand%s*{?%s*\\" .. name .. "%s*}?%s*(%b{})")
-    if v then return M.trim(v:sub(2, -2)) end
-  end
+  local t = {}
+  for _, l in ipairs(M.lines("thesis.tex")) do t[#t + 1] = M.strip_comment(l) end
+  local v = table.concat(t, "\n"):match("\\%a*newcommand%*?%s*{?%s*\\" .. name .. "%s*}?%s*(%b{})")
+  if v then return M.trim(v:sub(2, -2)) end
 end
 -- the manual phase: --phase, else LINT_PHASE, else \lintphase in thesis.tex, else plan. A value
--- that is none of the four is an error, never read as plan: lint.lua stops on it before any rule
+-- that is none of the seven (final included: the lint has no aliases) is an error, never read as
+-- plan: lint.lua stops on it before any rule
 function M.resolve_phase()
   local p, src = M.opts.phase, "--phase"
   if not p then
@@ -263,18 +266,23 @@ function M.resolve_phase()
   if not p then p, src = M.setting("lintphase"), "\\lintphase in thesis.tex" end
   if not p then p, src = "plan", "the default" end
   M.opts.phase, M.opts.phase_source = p, src
-  if not M.PHASES[p] then return nil, string.format("unknown phase '%s' from %s: use plan, draft, polish or final", p, src) end
+  if not M.PHASES[p] then return nil, string.format("unknown phase '%s' from %s: use one of %s", p, src, table.concat(M.PHASE_ORDER, ", ")) end
   return p
 end
 function M.phase()
   if not M.opts.phase_source then M.resolve_phase() end
   return M.opts.phase
 end
-function M.phase_reached(due) if due == "always" then return true end; return M.PHASES[M.phase()] >= M.PHASES[due] end
+-- the level of the checks the phase asks for: 1 for topic to plan, then 2, 3, 4
+function M.level() return M.PHASES[M.phase()] end
+function M.phase_reached(due) if due == "always" then return true end; return M.level() >= M.PHASES[due] end
 
 -- findings and reporting -------------------------------------------------------------
 local gh = os.getenv("GITHUB_ACTIONS") ~= nil
 local summary = os.getenv("GITHUB_STEP_SUMMARY")
+-- a run that prints the Checks page (--tex, which write18 runs on every XeLaTeX pass), the JSON or
+-- the fixes: the findings, the counts and the job summary stay out, since the plain run writes them
+function M.quiet() return M.opts.tex or M.opts.json or M.opts.quiet or false end
 M.findings = {}
 M.ignored = 0
 M.current_rule = nil
@@ -341,14 +349,16 @@ function M.apply_edit(l, e)
   return code:sub(1, s - 1) .. e.new .. code:sub(t + 1) .. rest
 end
 -- one edit per match of pattern in the code part of line l, right to left, so each column still
--- holds when its edit comes; fn(match, column, code, captures...) gives the new text, nil skips it
+-- holds when its edit comes; fn(match, column, code, captures...) gives the new text, nil skips it.
+-- A match inside a literal span (M.literal_spans) is never an edit
 function M.matches(l, pattern, fn)
   local code, found, init = M.strip_comment(l), {}, 1
+  local literal = M.literal_spans(code)
   while init <= #code + 1 do
     local r = { code:find(pattern, init) }
     if not r[1] then break end
     local s, e = r[1], r[2]
-    local new = fn(code:sub(s, e), s, code, table.unpack(r, 3))
+    local new = not M.in_literal(literal, s, e) and fn(code:sub(s, e), s, code, table.unpack(r, 3)) or nil
     if new then found[#found + 1] = { at = s, old = code:sub(s, e), new = new } end
     if pattern:sub(1, 1) == "^" then break end
     init = e >= s and e + 1 or s + 1
@@ -359,6 +369,58 @@ function M.matches(l, pattern, fn)
 end
 -- the number of matches of pattern in s
 function M.nmatch(s, pattern) local n = 0; for _ in s:gmatch(pattern) do n = n + 1 end; return n end
+-- the spans of a line's code that are literal text, never prose: inline verbatim (\verb|..|,
+-- \lstinline{..} or \lstinline|..|, \mintinline{lang}{..}), typewriter text (\texttt{..}), paths
+-- and links (\path, \url and the address of \href) and maths ($..$ and $$..$$). "abc" in
+-- \verb|"abc"| is the program's own text and 10-20 in $10-20$ is a formula, so M.matches skips a
+-- match that touches one of them, M.unliteral blanks them for a rule's pattern, and M.prose
+-- starts by blanking them
+function M.literal_spans(code)
+  local spans, init = {}, 1
+  while true do
+    local s, e, d = code:find("\\verb%*?(%p)", init)
+    if not s then break end
+    local close = code:find(d, e + 1, true)
+    spans[#spans + 1] = { s, close or #code }
+    init = (close or #code) + 1
+  end
+  for _, name in ipairs({ "lstinline", "mintinline", "texttt", "path", "url", "href" }) do
+    init = 1
+    while true do
+      local s, e = code:find("\\" .. name .. "%f[%A]", init)
+      if not s then break end
+      local i, stop = e + 1, nil
+      local _, oe = code:find("^%s*%b[]", i); if oe then i = oe + 1 end
+      if name == "mintinline" then local _, le = code:find("^%s*%b{}", i); if le then i = le + 1 end end
+      local _, be = code:find("^%s*%b{}", i)
+      if be then stop = be
+      elseif name == "lstinline" and code:sub(i, i):match("%p") then stop = code:find(code:sub(i, i), i + 1, true) or #code end
+      spans[#spans + 1] = { s, stop or e }
+      init = (stop or e) + 1
+    end
+  end
+  local masked = code:gsub("\\%$", "##")
+  init = 1
+  while true do
+    local s = masked:find("$", init, true)
+    if not s then break end
+    local d = masked:sub(s, s + 1) == "$$" and "$$" or "$"
+    local _, e = masked:find(d, s + #d, true)
+    spans[#spans + 1] = { s, e or #masked }
+    init = (e or #masked) + 1
+  end
+  return spans
+end
+function M.in_literal(spans, s, e)
+  for _, sp in ipairs(spans) do if s <= sp[2] and e >= sp[1] then return true end end
+  return false
+end
+-- the code of a line with its literal spans blanked to "#", column for column, for a rule's own
+-- patterns: not to spaces, which would make "is \url{...}." a space before punctuation
+function M.unliteral(code)
+  for _, sp in ipairs(M.literal_spans(code)) do code = code:sub(1, sp[1] - 1) .. ("#"):rep(sp[2] - sp[1] + 1) .. code:sub(sp[2] + 1) end
+  return code
+end
 -- the fix bound to the finding's place and checked against the file; nil when it does not apply
 local function bind(fx, file, line)
   if not fx or #fx.edits == 0 then return nil end
@@ -450,6 +512,9 @@ function M.fail(file, line, msg, help, fx) finding("error", file, line, msg, hel
 -- not pass, and the reason is its one finding
 M.skipped = nil
 function M.skip(reason) M.skipped = reason; finding("notice", nil, nil, reason .. ": skipped") end
+-- the rule's own code failed (lint.lua sets it): its status is error, whatever its severity and
+-- phase, the run exits 2, and nothing it would have found or fixed is established
+M.crashed = nil
 function M.warn(file, line, msg, help, fx) finding("warning", file, line, msg, help, fx) end
 function M.note(file, line, msg, help, fx) finding("notice", file, line, msg, help, fx) end
 
@@ -459,6 +524,7 @@ M.results = {}
 -- due at <phase> (a check that fails, but not yet), suggestion (advice with findings), count,
 -- skipped (the rule did not run, M.skip)
 function M.status(r, errors, warnings)
+  if M.crashed then return "error" end
   if M.skipped then return "skipped" end
   if r.severity == "check" then
     if errors == 0 then return "pass" end
@@ -466,7 +532,7 @@ function M.status(r, errors, warnings)
   elseif r.severity == "advice" then return (errors + warnings == 0) and "pass" or "suggestion" end
   return "count"
 end
-local ICON = { pass = ":white_check_mark:", fix = ":x:", suggestion = ":information_source:", count = ":1234:", skipped = ":fast_forward:" }
+local ICON = { pass = ":white_check_mark:", fix = ":x:", suggestion = ":information_source:", count = ":1234:", skipped = ":fast_forward:", error = ":bangbang:" }
 function M.report(rule, r, counts)
   -- a stable order: pairs() differs between runs, and the Checks page that lists these findings
   -- is input by the build, so an unstable order kept latexmk recompiling
@@ -475,20 +541,22 @@ function M.report(rule, r, counts)
     if (a.line or 0) ~= (b.line or 0) then return (a.line or 0) < (b.line or 0) end
     return a.msg < b.msg
   end)
-  local quiet = M.opts.tex or M.opts.json or M.opts.quiet
+  -- quiet: nothing on stdout but the page or the JSON, and nothing in the job summary, which the
+  -- plain run of the same rules writes
+  local quiet = M.quiet()
   if not quiet then for _, f in ipairs(M.findings) do print_finding(f) end end
   local errors, warnings = 0, 0
   for _, f in ipairs(M.findings) do
     if f.level == "error" then errors = errors + 1 elseif f.level == "warning" then warnings = warnings + 1 end
   end
   local gate = r.severity == "check" and M.phase_reached(r.phase) and not M.skipped -- a rule that did not run gates nothing
-  local ok = errors == 0
+  local ok = errors == 0 and not M.crashed
   local status = M.status(r, errors, warnings)
-  M.results[#M.results + 1] = { rule = rule, family = r.family, severity = r.severity, phase = r.phase, status = status, errors = errors, warnings = warnings, counts = counts, findings = M.findings, ignored = M.ignored }
+  M.results[#M.results + 1] = { rule = rule, family = r.family, severity = r.severity, phase = r.phase, status = status, errors = errors, warnings = warnings, counts = counts, findings = M.findings, ignored = M.ignored, crashed = M.crashed }
   if not quiet then
     io.write(string.format("%s %-13s %-7s %-18s %d error(s), %d warning(s)%s%s\n", gate and (ok and "ok  " or "FAIL") or "    ", rule, r.severity, status, errors, warnings, counts and (" " .. counts) or "", M.ignored > 0 and (" ignored=" .. M.ignored) or ""))
   end
-  if summary and r.summary ~= false and not M.opts.quiet then
+  if summary and r.summary ~= false and not quiet then
     local h = io.open(summary, "a")
     if h then
       local P = require("pagemap")
@@ -500,11 +568,12 @@ function M.report(rule, r, counts)
       h:close()
     end
   end
+  if M.crashed then return false end -- a crash fails the run whatever the rule's severity or phase
   return not gate or ok
 end
 M.SUMMARY_HEADER = "| Group | Status | Check | Rule | Findings |\n|---|---|---|---|---|\n"
 function M.summary_header(title)
-  if not summary or M.opts.quiet then return end
+  if not summary or M.quiet() then return end
   local h = io.open(summary, "a"); if h then h:write("\n## " .. title .. "\n\n" .. M.SUMMARY_HEADER); h:close() end
 end
 
@@ -537,12 +606,17 @@ function M.refs_in(file, pattern)
 end
 
 -- the prose lines of a file: comments, todo/beat/advisor notes (brace-balanced, across lines),
--- tikzpicture and axis blocks, and listings removed; line numbers preserved as empty lines
--- environments that hold no prose: commented-out text, pictures, code and display maths
-M.NONPROSE = { "comment", "tikzpicture", "lstlisting", "minted", "forest", "equation", "equation*", "align", "align*", "gather", "gather*", "multline", "multline*", "displaymath" }
+-- \iffalse ... \fi regions, tikzpicture and axis blocks, and listings removed; line numbers
+-- preserved as empty lines
+-- environments whose text is a program's or a listing's: verbatim and its fancyvrb and alltt kin,
+-- lstlisting and minted
+M.CODE = { "verbatim", "verbatim*", "Verbatim", "BVerbatim", "LVerbatim", "alltt", "lstlisting", "minted" }
+-- environments that hold no prose: commented-out text, code, pictures and display maths
+M.NONPROSE = { "comment", "tikzpicture", "forest", "equation", "equation*", "align", "align*", "gather", "gather*", "multline", "multline*", "displaymath" }
 -- environments whose text never prints as text: commented-out text and code. M.printed_lines
 -- keeps pictures and maths, where a \cite or \url prints like anywhere else
-M.UNPRINTED = { "comment", "lstlisting", "minted" }
+M.UNPRINTED = { "comment" }
+for _, e in ipairs(M.CODE) do M.NONPROSE[#M.NONPROSE + 1] = e; M.UNPRINTED[#M.UNPRINTED + 1] = e end
 function M.printed_lines(file) return M.prose_lines(file, M.UNPRINTED) end
 function M.prose_lines(file, skip)
   local out, depth, intodo, inblock = {}, 0, false, nil
@@ -555,26 +629,30 @@ function M.prose_lines(file, skip)
         local s, e, name = l:find("\\(%a*todo)%s*%[?", i)
         local bs = l:find("\\beat{", i, true)
         local blk, bstart
+        -- blk is the pattern that closes the block
         for _, b in ipairs(skip or M.NONPROSE) do
           local p = l:find("\\begin{" .. b .. "}", i, true)
-          if p and (not bstart or p < bstart) then blk, bstart = "\\end{" .. b .. "}", p end
+          if p and (not bstart or p < bstart) then blk, bstart = M.escape("\\end{" .. b .. "}"), p end
         end
         local dm = l:find("\\[", i, true) -- display maths \[ ... \], but not the line break \\[2pt]
-        if dm and not skip and l:sub(dm - 1, dm - 1) ~= "\\" and (not bstart or dm < bstart) then blk, bstart = "\\]", dm end
+        if dm and not skip and l:sub(dm - 1, dm - 1) ~= "\\" and (not bstart or dm < bstart) then blk, bstart = "\\%]", dm end
+        -- \iffalse ... \fi, TeX's own way to comment a region out; the first \fi closes it
+        local ff = l:find("\\iffalse%f[%A]", i)
+        if ff and (not bstart or ff < bstart) then blk, bstart = "\\fi%f[%A]", ff end
         local first = math.min(s or math.huge, bs or math.huge, bstart or math.huge)
         if first == math.huge then keep[#keep + 1] = l:sub(i); break end
         keep[#keep + 1] = l:sub(i, first - 1)
         if first == bstart then inblock = blk; i = first + 1
         else intodo = true; depth = 0; i = first + 1 end
       elseif inblock then
-        local e = l:find(inblock, i, true)
-        if e then i = e + #inblock; inblock = nil else break end
+        local _, e = l:find(inblock, i)
+        if e then i = e + 1; inblock = nil else break end
       else -- inside a todo or beat: skip until its braces close (the optional [..] and 1-4 {..} groups)
         local c = l:sub(i, i)
         if c == "{" or c == "[" then depth = depth + 1 elseif c == "}" or c == "]" then depth = depth - 1 end
         i = i + 1
         if depth == 0 and (c == "}" or c == "]") then
-          local nxt = l:sub(i, i)
+          local nxt = l:match("^%s*(.)", i) -- the next group may follow spaces: \todo[inline] {...}
           if nxt ~= "{" and nxt ~= "[" then intodo = false end
         end
       end
@@ -584,9 +662,13 @@ function M.prose_lines(file, skip)
   return out
 end
 function M.each_prose_line(files, fn) for _, f in ipairs(files) do for n, l in ipairs(M.prose_lines(f)) do if l:match("%S") then fn(f, n, l) end end end end
+-- the printed lines (M.printed_lines: no comments, commented-out environments or code listings)
+function M.each_printed_line(files, fn) for _, f in ipairs(files) do for n, l in ipairs(M.printed_lines(f)) do if l:match("%S") then fn(f, n, l) end end end end
 
--- prose of a line: macros, math, labels, citations and urls removed, for word-level rules
+-- prose of a line: literal text (M.literal_spans), macros, math, labels, citations and urls
+-- removed, for word-level rules
 function M.prose(l)
+  l = M.unliteral(l)
   l = l:gsub("%$[^$]*%$", " ")
   l = l:gsub("\\url%b{}", " "):gsub("\\href%b{}", " "):gsub("\\path%b{}", " ")
   l = l:gsub("\\[cC]?ref%b{}", " "):gsub("\\[aA]utoref%b{}", " "):gsub("\\pageref%b{}", " "):gsub("\\nameref%b{}", " "):gsub("\\label%b{}", " ")
