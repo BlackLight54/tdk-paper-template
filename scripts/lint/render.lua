@@ -399,6 +399,14 @@ end
 -- the exit status: true when every gate passed
 function M.json(ok)
   local out = { ok = ok, phase = C.phase(), phase_source = C.opts.phase_source, profile = C.opts.profile, doc = C.opts.doc, rules = {}, findings = {} }
+  -- what a reader of the PDF needs from the sources: each chapter role with its criteria and its
+  -- chapters, and the paper's tag lists (scripts/review/README.md, "What the lint exports")
+  out.chapter_roles = {}
+  for _, role in ipairs(C.ROLE_SEQ) do
+    out.chapter_roles[role] = { label = C.ROLE_LABEL[role], name = C.ROLE_NAME[role], criteria = C.ROLE_CRITERIA[role],
+      guide = "app:chapters:" .. role, files = C.role_files(role) }
+  end
+  out.tag_lists = C.tag_lists()
   for _, res in ipairs(C.results) do
     out.rules[#out.rules + 1] = { rule = res.rule, family = res.family, severity = res.severity, phase = res.phase, status = res.status,
       errors = res.errors, warnings = res.warnings, ignored = res.ignored, counts = res.counts }

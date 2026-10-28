@@ -6,7 +6,8 @@
 --   texlua scripts/lint.lua list [--tsv]                              the rules, their severity, phase and group
 --   texlua scripts/lint.lua overleaf --tex > lint-checks.tex          the Checks page and the package warnings
 --   texlua scripts/lint.lua essentials --guide > guide/essentials.tex the guide's reference of the essentials
---   texlua scripts/lint.lua <rule>... --json                          every rule's status and findings, and the essentials' rows
+--   texlua scripts/lint.lua <rule>... --json                          every rule's status and findings, the chapter roles with their criteria, the tag lists, and the essentials' rows
+--   texlua scripts/lint.lua criteria                                  the template's check that the guide names each role's criteria as lintcore.lua does
 --   texlua scripts/lint.lua fix [<rule>...] [--dry-run] [--review]    write the fixes the rules suggest (fixes.lua)
 --
 -- Severity: check (fails once its phase is reached), advice (warns, never fails), count (numbers).
@@ -81,6 +82,27 @@ if not cmd or cmd == "list" then
   os.exit(0)
 end
 if guide then io.write(R.guide()); os.exit(0) end
+-- the template's own check, not a rule: the criteria each role carries (lintcore.lua) are the ones
+-- its section of guide/chapter-by-chapter.tex names, since the skim reports them as the guide's
+if cmd == "criteria" then
+  local g = C.guide_criteria()
+  if not g then io.stderr:write("lint: no guide/chapter-by-chapter.tex\n"); os.exit(2) end
+  local bad = 0
+  for _, role in ipairs(C.ROLE_SEQ) do
+    local want, have, missing, extra = {}, g[role] or {}, {}, {}
+    for _, c in ipairs(C.ROLE_CRITERIA[role]) do want[c] = true end
+    for c in pairs(want) do if not have[c] then missing[#missing + 1] = c end end
+    for c in pairs(have) do if not want[c] then extra[#extra + 1] = c end end
+    table.sort(missing); table.sort(extra)
+    if #missing + #extra > 0 then
+      bad = bad + 1
+      io.write(string.format("%s: lintcore.lua says %s; app:chapters:%s names %s\n", role, table.concat(C.ROLE_CRITERIA[role], ", "), role,
+        next(have) and table.concat((function() local t = {}; for c in pairs(have) do t[#t + 1] = c end; table.sort(t); return t end)(), ", ") or "none"))
+    end
+  end
+  if bad == 0 then io.write("criteria: the guide names the criteria of all " .. #C.ROLE_SEQ .. " roles as lintcore.lua does\n") end
+  os.exit(bad == 0 and 0 or 1)
+end
 local todo = {}
 local fixing = cmd == "fix"
 local fixrules = {}

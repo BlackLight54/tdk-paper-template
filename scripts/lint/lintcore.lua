@@ -39,6 +39,13 @@ M.CONTENT, M.MAIN, M.ROLE, M.ROLES, M.ROLES_OF, M.FILES, M.BIB, M.REACHED = {}, 
 M.ROLE_LABEL = { intro = "ch:intro", background = "ch:background", approach = "ch:approach", implementation = "ch:implementation", evaluation = "ch:evaluation", related = "ch:related", conclusion = "ch:conclusion" }
 M.ROLE_NAME = { intro = "introduction", background = "background chapter", approach = "approach chapter", implementation = "implementation chapter", evaluation = "evaluation chapter", related = "related-work chapter", conclusion = "conclusion" }
 M.MANDATORY = { "intro", "approach", "evaluation", "related", "conclusion" }
+-- the roles in reading order, and the review-sheet criteria each role's chapters carry, as the
+-- head of the role's section in guide/chapter-by-chapter.tex (app:chapters:<role>) names them;
+-- criterion A is scored on the whole paper and belongs to no role. The skim reads them from
+-- --json; `lint.lua criteria` fails when the guide names other criteria
+M.ROLE_SEQ = { "intro", "background", "approach", "implementation", "evaluation", "related", "conclusion" }
+M.ROLE_CRITERIA = { intro = { "B/1", "C", "E" }, background = { "B/2" }, approach = { "D/1", "D/2" }, implementation = { "D/1", "D/2" },
+  evaluation = { "D/2", "E" }, related = { "B/2", "D/1" }, conclusion = { "E" } }
 do
   local seen = {}
   local function under(p, dir) return p:sub(1, #dir) == dir end
@@ -121,6 +128,44 @@ function M.defines(m)
     end
   end
   return defines_cache[m]
+end
+
+-- the tag lists the paper declares, the template's and any of its own: every
+-- \NewTagList{<environment>}{<tag>}{<Name>}{<Names>} in a file thesis.tex reaches, as
+-- { assumptions = { tag = "AS", name = "Assumption" }, ... }
+function M.tag_lists()
+  local t = {}
+  for _, f in ipairs(M.REACHED) do
+    for l in (M.readfile(f) or ""):gmatch("[^\n]*") do
+      local env, tag, name = M.strip_comment(l):match("\\NewTagList%s*{([^}]*)}%s*{([^}]*)}%s*{([^}]*)}")
+      if env then t[M.trim(env)] = { tag = M.trim(tag), name = M.trim(name) } end
+    end
+  end
+  return t
+end
+
+-- the criteria each role's section of guide/chapter-by-chapter.tex names in its bold
+-- \textbf{Criterion ...} or \textbf{Criteria ...} heads, as { approach = { ["D/1"] = true, ... } }
+function M.guide_criteria(file)
+  local s = M.readfile(file or "guide/chapter-by-chapter.tex")
+  if not s then return nil end
+  local out, cuts = {}, {}
+  -- a role's section runs to the next \section; its subsections carry app:chapters:<name> labels too
+  for pos, role in s:gmatch("()\\section%b{}%s*\\label{app:chapters:(%a+)}") do cuts[#cuts + 1] = { pos = pos, role = role } end
+  for i, c in ipairs(cuts) do
+    local body = s:sub(c.pos, cuts[i + 1] and cuts[i + 1].pos - 1 or #s)
+    for arg in body:gmatch("\\textbf(%b{})") do
+      local head = arg:sub(2, -2)
+      if head:match("^Criteri%a+") then
+        head = head:gsub("^Criteri%a+", ""):gsub("%b()", "")
+        for crit in head:gmatch("%f[%w]([A-E]/?%d?)%f[^%w/]") do
+          out[c.role] = out[c.role] or {}
+          out[c.role][crit] = true
+        end
+      end
+    end
+  end
+  return out
 end
 
 -- the chapters of a role, in reading order; empty when no chapter has it

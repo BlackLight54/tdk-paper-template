@@ -28,6 +28,9 @@ jobs:
       - name: template / the guide's essentials page matches scripts/lint/essentials.lua (the template's repository only)
         if: github.repository == 'BlackLight54/TDK-template'
         run: texlua scripts/lint.lua essentials --guide | cmp - guide/essentials.tex
+      - name: template / each chapter role's criteria are the ones its guide section names (the template's repository only)
+        if: github.repository == 'BlackLight54/TDK-template'
+        run: texlua scripts/lint.lua criteria
       - name: Build the draft
         run: make all
       - name: Build the reviewer PDF
