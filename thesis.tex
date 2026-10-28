@@ -27,7 +27,7 @@
 
 \newcommand{\exname}{TODO name of the running example} % used in every chapter, e.g. "the flat reservation"
 \newcommand{\lintexamplebox}{runningexample} % the environment of the running example's boxes; name your own if include/macros.tex defines one
-\newcommand{\lintphase}{plan} % plan | draft | polish | final: where you are in the lifecycle; the lint's checks come due by phase
+\newcommand{\lintphase}{plan} % topic | setup | research | plan | draft | polish | submit: your phase in the lifecycle; the lint's checks come due by phase
 \newcommand{\vikcim}{TODO Title of the paper} % Cím
 \newcommand{\viktanszek}{\bmemit} % Tanszék
 \newcommand{\vikdoktipus}{\tdk} % Dokumentum típusa 
@@ -67,6 +67,9 @@
 
 \selectthesislanguage
 
+% The todo list and Checks open the draft. The reviewer PDF starts with its title page.
+\ifdefined\reviewermode\else\listoftodos\lintchecks\fi
+
 %TODO Titlepage -- choose one from below
 %~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 %\include{include/titlepage}		   % Szakdolgozat/Diplomaterv címlap
@@ -77,14 +80,13 @@
 % Table of Contents
 %~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 \tableofcontents\vfill
-\ifdefined\reviewermode\else\listoftodos\lintchecks\fi % the list of todos and the Checks page; reviewer.tex leaves both out
 
 
 % Declaration and Abstract
 %~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 %\include{include/declaration} %TODO Hallgatói nyilatkozat -- TDK és OTDK esetén törlendő!
 \clearpage\pagenumbering{roman}\hypersetup{pageanchor=true} % from the abstract on, pages are numbered and anchored
-\include{content/00-abstract}    %TODO Összefoglaló -- TDK és OTDK esetén nem kötelező
+\include{content/00-abstract}    %TODO Összefoglaló -- the faculty does not require it for the TDK or OTDK; we, the advisors, do
 
 
 % The main part of the thesis
@@ -114,11 +116,10 @@
 
 % Bibliography
 %~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-\addcontentsline{toc}{chapter}{\bibname}
 \bibliography{bib/references,bib/zotero} % zotero.bib: linked to the Zotero group by Overleaf; the guide has its own list
 
 
-% Declaration on generative AI use (required by the faculty)
+% Declaration on generative AI use (the faculty requires it for theses; we require it for the TDK)
 %~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 \include{content/09-ai-declaration}
 
@@ -131,21 +132,9 @@
 % The guide: how we work, the TDK lifecycle, and how to use this template
 %~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 % Nothing to delete before submission: reviewer.tex builds the paper without the guide and
-% the notes. The part heading is in guide/01-getting-started.tex, so that its contents line
-% lands in that file's .aux before the chapter's.
+% the notes. guide/guide.tex lists the guide's chapters; a template update replaces it.
 \ifdefined\reviewermode\else
-\renewcommand{\exname}{the credential revocation registry} % the guide's own running example
-\include{guide/01-getting-started}
-\include{guide/02-tdk-essentials}
-\include{guide/03-weekly-consultations}
-\include{guide/04-lifecycle}
-\include{guide/05-writing}
-\include{guide/chapter-by-chapter}
-\include{guide/06-code-tools-ai}
-\include{guide/07-zenodo}
-\include{guide/08-glossary}
-\include{guide/09-latex-template}
-\include{guide/10-references}
+\input{guide/guide}
 \fi
 
 %\label{page:last}

@@ -1,20 +1,20 @@
 %----------------------------------------------------------------------------
 \chapter{The paper, chapter by chapter}\label{app:chapters}
 %----------------------------------------------------------------------------
-The chapter files contain headings, orange notes linking here, running-example boxes, one item per tagged list, and the figure and table stubs needed by the lint. This chapter explains each heading: what reviewers score, the paragraph's beat (\cref{app:writing:spine}) and worked examples using \exname. Read the matching section before drafting. Copy examples from \texttt{guide/chapter-by-chapter.tex}, removing \texttt{guide:} from copied labels: \texttt{req:guide:offline} becomes \texttt{req:offline}.
+The chapter files contain headings, orange notes linking here, running-example boxes, one item per tagged list, and the figure and table stubs needed by the lint. This chapter explains each heading: what reviewers score, the paragraph's beat (\cref{app:writing:spine}) and worked examples using \exname. Read the matching section before drafting. Copy examples from \texttt{guide/05-chapter-by-chapter.tex}, removing \texttt{guide:} from copied labels: \texttt{req:guide:offline} becomes \texttt{req:offline}.
 
 This is the fictional paper from the mind map in \cref{fig:mindmap}. Approaches A to D, measurements and results illustrate completed items; they do not describe a real system.
 
-\paragraph{What the reviewer scores.} The review sheet (\cref{app:tdk:sheet}) awards 35 points: A form and style, 0--5; B figures and literature, 0--4; C topic, 0--8; D originality and soundness, 0--10; E introduction and evaluation, 0--8. A requires 30--35 pages, with about 1 point deducted per 3 pages outside that range. Support four claims throughout the paper, as explained below. Each section quotes the relevant criterion.
+\paragraph{What the reviewer scores.} The review sheet scores five criteria, A to E; \cref{app:tdk:sheet} names them and quotes their top steps. For A, the sheet sets a 30--35 page limit and recommends that reviewers deduct 1 point per 3 pages outside it. Argue four things throughout the paper, as explained below. Each section also quotes the sheet's lower steps, the ones a weak chapter lands on, so you can read your draft in the reviewer's words.
 \begin{description}[noitemsep]
   \item[Relevance (C)] The topic matters now.
   \item[Non-triviality (C and D/1)] Solving the problem requires deep or scientific knowledge beyond a textbook recipe or reuse of known solutions.
   \item[Novelty (D/1)] Full marks for a solution that is new at least in Hungary or does not exist yet; an incremental improvement earns 3--4 of 5.
   \item[Correctness (D/2)] Every result is backed and checkable.
 \end{description}
-Criterion A is scored on the whole paper: \enquote{4--5: kiváló (ha a dolgozat közel hibamentes, jól tagolt, követhető, gördülékeny stílusú)}, and \enquote{Terjedelmi korlát 30--35 oldal. Ettől eltérés esetén 3 oldalanként 1 pont levonás javasolt.}
+Criterion A is scored on the whole paper.
 
-\paragraph{What a skimming reviewer reads.} A busy reviewer may read only headings, the abstract, tagged items (C1, REQ1, AS1, SG1, \dots), theorems, running-example boxes, figures, tables and captions. They may register prose only by its length. Headings marked \skimmark{} contain items visible in this reading. If a section is unmarked, also express its claim in a marked item, a caption or the heading.
+\paragraph{What a skimming reviewer reads.} A busy reviewer may read only what the skim view keeps (\cref{app:lifecycle:reviewers}), such as tagged items (C1, REQ1, AS1, SG1, \dots), and register prose only by its length. Headings marked \skimmark{} contain items visible in this reading. If a section is unmarked, also express its claim in a marked item, a caption or the heading.
 
 %----------------------------------------------------------------------------
 \section{Introduction}\label{app:chapters:intro}
@@ -24,7 +24,7 @@ Criterion A is scored on the whole paper: \enquote{4--5: kiváló (ha a dolgozat
 \textbf{Non-triviality:} show why the obvious solutions fail.
 \textbf{Novelty:} state the contributions as checkable claims.
 
-\textbf{In the sheet's words.} The top of C: \enquote{7--8: tudományos vizsgálat szükséges (ha a dolgozat témája korszerű, nem lezárt, vizsgálata magas szintű, tudományos, elmélyült tudást igényel)}. The bottom of E names what this chapter must contain: \enquote{0: teljesen hiányzik -- ha a dolgozat bevezetése hiányos (tématerület áttekintése, problémafelvetés, fő kontribúció kimondása)}.
+\textbf{In the sheet's words.} The bottom of E (\cref{app:tdk:sheet}) names what this chapter must contain, together with the evaluation: \enquote{0: teljesen hiányzik -- ha a dolgozat bevezetése hiányos (tématerület áttekintése, problémafelvetés, fő kontribúció kimondása) ÉS az eredmények gyakorlati validálása, értékelése is hiányzik ill. hibás}.
 
 \subsection{Context}\label{app:chapters:context}
 \guidebeat{why the field matters now}{a trend, a regulation or an incident, cited}{not yet introduced}{the problem}
@@ -51,9 +51,9 @@ State each requirement as a checkable property needed by the example. Usually, e
 Name the closest approaches and the requirements each sacrifices. Here, asking the issuer at every check is timely but neither offline nor private; offline lists are private but a day stale.
 
 \subsection[Leading figure]{Leading figure\skimmark}\label{app:chapters:leading-figure}
-\textbf{Criterion B/1} assesses figures like this. Give the reader one clear takeaway, explain it in the caption (\cref{app:writing:captions}) and use vector graphics (\cref{app:writing:figures}). Make the figure understandable on its own and identify your contribution at a glance (\cref{app:writing:figure}).
+\textbf{Criterion B/1} assesses figures like this. \Cref{app:writing:figure} says what it shows; \cref{app:writing:captions,app:writing:figures} cover its caption and drawing.
 
-\textbf{In the sheet's words.} \enquote{4: kiváló (a dolgozat megfelelő számú és jól átgondolt ábrát, táblázatot tartalmaz, és a szakirodalmi hivatkozások pontosak)}; the step below is \enquote{2: átlagos (a dolgozat megfelelő számú ábrát és táblázatot tartalmaz, ám azok több esetben nem jól átgondoltak vagy rossz minőségűek)}.
+\textbf{In the sheet's words.} The step below the top of B/1 (\cref{app:tdk:sheet}) is \enquote{2: átlagos (a dolgozat megfelelő számú ábrát és táblázatot tartalmaz, ám azok több esetben nem jól átgondoltak vagy rossz minőségűek)}.
 
 \begin{figure}[!ht]
   \centering
@@ -98,7 +98,7 @@ Describe each chapter in one sentence, in reading order. The introduction alread
 \textbf{Nothing of yours here.} Limit the background to prior knowledge and cite every statement. The chapter boundary should clearly separate prior work from your contribution.
 \textbf{A companion paper.} When a TDK paper of the same year supplies what your approach builds on, restate the part this paper needs here, condensed, and introduce it as the companion paper's work without a citation (\cref{app:tdk:companion}). It is the only part of this chapter without a reference.
 
-\textbf{In the sheet's words.} The scale for B/2 starts at \enquote{0: egyetemi tananyag (a dolgozat kizárólag egyetemi tankönyveket idéz kapcsolódó szakirodalomként)} and \enquote{1: ismert ipari gyakorlat (a dolgozat feldolgozta a weblapokról, technikai dokumentációkból közismert ipari megoldásokat)}; this chapter must already cite above that.
+\textbf{In the sheet's words.} The scale for B/2 starts at \enquote{0: egyetemi tananyag (a dolgozat kizárólag egyetemi tankönyveket idéz kapcsolódó szakirodalomként)}, and its step 1 is well-known industrial practice from web pages (\cref{app:writing:refs}); this chapter must already cite above that.
 
 \subsection[First concept]{First concept\skimmark}\label{app:chapters:first-concept}
 \guidebeat{the first concept the approach relies on; notation is defined once, here}{a definition and a citation}{the example expressed with this concept}{the second concept}
@@ -122,8 +122,6 @@ For the registry, explain the permissioned ledger used to store revocations: its
 \textbf{Novelty:} separate what is new from what you adopted from the literature.
 \textbf{Non-triviality:} name the hard part and explain why the simple design does not work.
 \textbf{Describe here, evaluate later.} Explain the approach and its guarantees objectively. Assess how well it works in the evaluation, where you can support that assessment with evidence.
-
-\textbf{In the sheet's words.} The top of D/1: \enquote{5: újszerű (legalább hazánkban újszerű, vagy eddig még nem létező megoldás)}; the top of D/2: \enquote{5: kiváló (kimagasló színvonalú kidolgozás, a közölt eredmények helyessége kétségkívül megalapozott)}.
 
 \subsection[Overview]{Overview\skimmark}\label{app:chapters:overview}
 \guidebeat{how the approach works end to end}{the architecture figure}{the example walked through the figure, component by component}{the model}
@@ -156,7 +154,7 @@ Replace the approach chapter's figure stub with your architecture (\cref{fig:gui
 
 \subsection{Model or design}\label{app:chapters:model}
 \guidebeat{the formal model or the design decisions}{each decision with the alternative rejected and why}{the example as an instance of the model}{the threat model}
-Name this section after the model. For the registry, describe the revoked credentials as an accumulator, its signed and timed ledger values, the holder's witness that a credential is still in it, and the diploma removed by revocation.
+Name this section after the model. For the registry, describe the valid credentials as an accumulator, its signed and timed ledger values, the holder's witness that a credential is still in it, and the diploma removed by revocation.
 
 \subsection{Threat model and guarantees}\label{app:chapters:threat-model}
 \guidebeat{who the adversary is and what it can do, who is trusted, which cryptographic assumptions hold, what is out of scope, and what the approach guarantees under all that}{a proof, a mechanised proof, or a measurement in the evaluation for every guarantee}{the attack on the example that the threat describes}{the implementation}
@@ -164,11 +162,11 @@ Name this section after the model. For the registry, describe the revoked creden
 \textbf{Adversary:} state what it controls (network, participants, keys), its capabilities (reading, replaying, reordering, dropping, forging with its keys) and its limits. Use a standard model where appropriate: Dolev--Yao for a protocol, honest-but-curious or malicious participants, or a computational adversary with a security parameter for a cryptographic construction.
 \textbf{Trust:} which parties are assumed honest, and what happens if one is not.
 \textbf{Cryptographic assumptions:} list the primitives and required properties as assumptions that proofs can reference.
-\textbf{Out of scope:} state here which attacks you do not address, so reviewers can distinguish exclusions from omissions.
+\textbf{Out of scope:} state here which attacks you do not address, and why, so reviewers can distinguish exclusions from omissions.
 State guarantees as \enquote{under these assumptions, against this adversary, the following holds}. The evaluation's correctness table (\cref{tab:guide:correctness}) records how each was checked.
 
 \subsection[Adversary]{Adversary\skimmark}\label{app:chapters:adversary}
-Describe the adversary's control, capabilities and standard model. In the example box, show each threat and the guarantee that stops it.
+In the example box, show each adversary and the guarantee that stops it.
 \begin{threats}
   \item\label{thr:guide:holder} \textbf{Malicious holder.} A holder who keeps a witness from before the revocation and presents it again.
   \item\label{thr:guide:network} \textbf{Network adversary.} Controls the network between the registry and the verifiers, in the Dolev--Yao model: reads, replays, delays and drops messages.
@@ -197,7 +195,6 @@ If you name concrete attacks, give each a row in \cref{tab:guide:attacks}: the a
 \end{table}
 
 \subsection[Trust and cryptographic assumptions]{Trust and cryptographic assumptions\skimmark}\label{app:chapters:assumptions}
-Name trusted parties and the primitives and properties required by the guarantees.
 \begin{assumptions}
   \item\label{asm:guide:sig} \textbf{Sound signatures and accumulator.} The registry's signature scheme is existentially unforgeable under chosen-message attack, and no witness exists for a credential removed from the accumulator.
   \item\label{asm:guide:clock} \textbf{Bounded drift.} The clocks of the registry and the verifiers differ by less than $\delta$.
@@ -205,10 +202,10 @@ Name trusted parties and the primitives and properties required by the guarantee
 \end{assumptions}
 
 \subsection{Out of scope}\label{app:chapters:out-of-scope}
-List excluded attacks and justify each exclusion. For the registry, these are denial of service, side channels and compromised holder devices.
+For the registry, the excluded attacks are denial of service and compromised holder devices.
 
 \subsection[Guarantees]{Guarantees\skimmark}\label{app:chapters:guarantees}
-For each guarantee, name the assumptions and threats it covers. Prove it here or check it in the evaluation.
+Prove each guarantee here or check it in the evaluation.
 \begin{guarantees}
   \item\label{g:guide:stale} \textbf{Bounded staleness.} Under \cref{asm:guide:sig,asm:guide:clock,asm:guide:operator}, against \cref{thr:guide:holder,thr:guide:network}, a verifier rejects every credential revoked more than $\delta$ before the check.
 \end{guarantees}
@@ -231,7 +228,7 @@ By \cref{lem:guide:fresh}, the accepted value is at most $\delta$ old, and by \c
 %----------------------------------------------------------------------------
 \section{Implementation}\label{app:chapters:implementation}
 %----------------------------------------------------------------------------
-\textbf{Criteria D/1 and D/2.} Explain your technical contributions; \cref{ch:approach} covers the theoretical ones. Avoid a class-by-class description. Rename this chapter after what you built if helpful. If the implementation is not a contribution itself, make it a section of \cref{ch:approach} and use the saved pages for evaluation.
+\textbf{Criteria D/1 and D/2.} Explain your technical contributions. Avoid a class-by-class description. Rename this chapter after what you built if helpful. If the implementation is not a contribution itself, make it a section of \cref{ch:approach} and use the saved pages for evaluation.
 \textbf{Novelty:} identify what you built, whether a tool, system, prototype, integration or dataset. Distinguish it from reused libraries, frameworks and tools.
 \textbf{Non-triviality:} explain design decisions and obstacles to a straightforward implementation.
 \textbf{Correctness:} give readers enough detail to assess and reproduce the evaluation. Include architecture, reasons for technology choices and the Zenodo code archive. Cite its concept DOI and name the results tag beside it (\cref{app:zenodo}).
@@ -267,9 +264,9 @@ fun accept(cred, witness, acc, now):
 \textbf{Novelty:} compare against the closest existing approach named in the introduction; the related-work chapter then places the results in the wider literature.
 \textbf{Beyond small examples:} E awards 7--8 points only for scalability and robustness measurements beyond small examples that support use in an industrial setting. \Cref{tab:guide:eval-tracks} applies this to formal and analysis topics.
 
-\textbf{In the sheet's words.} D/2 gives \enquote{3--4: jó (színvonalas kidolgozás, de esetleg egyes eredmények helyessége nincs kellőképpen alátámasztva)} when a result is reported without the setup that supports it, and E gives \enquote{3--4: pontatlan -- ha a dolgozat bevezetése megfelelő és a dolgozatban szerepel az eredmények kis mintapéldákon túlmenő értékelése is, de az utóbbi hiányos, pontatlan} or \enquote{5--6: pontos, de hiányos} when the evaluation stops at small examples.
+\textbf{In the sheet's words.} D/2 gives \enquote{3--4: jó (színvonalas kidolgozás, de esetleg egyes eredmények helyessége nincs kellőképpen alátámasztva)} when a result is reported without the setup that supports it, and E gives \enquote{1--2: nagyon hiányos -- ha a dolgozat bevezetése hiányos (tématerület áttekintése, bemutatása, problémafelvetés, fő kontribúció kimondása) VAGY az eredmények értékelése hiányzik ill. aránytalanul kis méretű vagy hibás} when the evaluation stops at small examples. An evaluation that goes beyond them but is incomplete or imprecise earns \enquote{3--4: pontatlan -- ha a dolgozat bevezetése megfelelő és a dolgozatban szerepel az eredmények kis mintapéldákon túlmenő értékelése is, de az utóbbi hiányos, pontatlan} or \enquote{5--6: pontos, de hiányos}.
 
-\textbf{Three kinds of work, one chapter.} The examples below primarily describe a measured system (track S). Formal work (track F: Tamarin or ProVerif models, Lean or Coq proofs, model checking) and benchmarked analysis tools (track T: detectors, static analysers, generators) answer the same three questions with different evidence. Use \cref{tab:guide:eval-tracks}, the alternative figures and tables, and the track F and T research questions in the source to adapt the chapter.
+\textbf{Three kinds of work, one chapter.} The examples below primarily describe a measured system (track S). Formal work (track F: Tamarin or ProVerif models, Lean or Coq proofs, model checking) and benchmarked analysis tools (track T: detectors, static analysers, generators) answer the same three questions with different evidence. Use \cref{tab:guide:eval-tracks}, which also words the research questions for tracks F and T, and the alternative figures and tables to adapt the chapter.
 
 \begin{table}[!ht]
   \centering
@@ -280,6 +277,8 @@ fun accept(cred, witness, acc, now):
     \toprule
     & \textbf{S: system} & \textbf{F: formal} & \textbf{T: analysis tool} \\
     \midrule
+    Research questions & \Cref{rq:guide:correct,rq:guide:scale,rq:guide:robust} below & RQ1: does the model satisfy every property of the threat model, and does it find the known attacks? RQ2: how do verification time and memory grow with the size of the model, and where does the prover stop? RQ3: which properties survive a stronger adversary and each dropped assumption, and how do the others break? & RQ1: does the tool find the real instances in the benchmark, and only those? RQ2: how does analysis time grow with input size, and what is the largest real instance it handles? RQ3: how do the results change under parameter changes, mutated inputs, and a benchmark from another source? \\
+    \addlinespace
     Setup & Hardware, software versions, workloads, repetitions, the rerun command & Prover and version, heuristics and oracles, time limit, machine; which parts of the model are hand-written and which generated & Benchmark origin and size, how the ground truth was built, tool versions, the rerun command \\
     \addlinespace
     Correctness (\cref{rq:guide:correct}) & Test suite and model-checked properties per requirement; the running example before and after (\cref{tab:guide:correctness}, \cref{fig:guide:example-trace}) & Every property of the threat model proved, or an attack found: per lemma, proved, falsified with the trace, or timed out; the attack on the running example reconstructed (\cref{tab:guide:correctness}, one row per lemma) & Precision and recall against the ground truth, every false positive and false negative explained (\cref{tab:guide:precision}); the running example's verdict (\cref{fig:guide:example-trace}) \\
@@ -293,17 +292,11 @@ fun accept(cred, witness, acc, now):
 \end{table}
 
 \subsection[Research questions]{Research questions\skimmark}\label{app:chapters:research-questions}
-Use three research questions, one for each evaluation section below. The source includes track F and T versions.
+Use three research questions, one for each evaluation section below. These are track S's; the first row of \cref{tab:guide:eval-tracks} words the same three for tracks F and T.
 \begin{rqlist}
   \item\label{rq:guide:correct} \textbf{Correctness.} Does the registry reject every revoked credential, in the scenario and in the model, against both adversaries?
-    % Track F: Does the model satisfy every property of the threat model, and does it find the known attacks?
-    % Track T: Does the tool find the real instances in the benchmark, and only those?
   \item\label{rq:guide:scale} \textbf{Scale.} How do the latency of a check and the registry's throughput grow with the number of issuers?
-    % Track F: How do verification time and memory grow with the size of the model, and where does the prover stop?
-    % Track T: How does analysis time grow with input size, and what is the largest real instance it handles?
   \item\label{rq:guide:robust} \textbf{Robustness.} How does the registry behave when a ledger node fails, under a burst of checks, and as $\delta$ varies?
-    % Track F: Which properties survive a stronger adversary and each dropped assumption, and how do the others break?
-    % Track T: How do the results change under parameter changes, mutated inputs, and a benchmark from another source?
 \end{rqlist}
 
 \subsection{Setup}\label{app:chapters:setup}
@@ -311,7 +304,7 @@ Use three research questions, one for each evaluation section below. The source 
 For the registry: one 8-core virtual machine, four ledger nodes, synthetic issuer sets of 10 to 10\,000 issuers with 100 credentials each, 10 runs per point with fresh sets, and the command that reruns them.
 
 \subsection{Artifact availability}\label{app:chapters:artifact-availability}
-Archive code, models and measurement scripts on Zenodo. All numbers in the chapter must come from one tagged version, such as \texttt{v1.0.0}. \texttt{just reproduce} must regenerate its figures and tables (\cref{app:zenodo}).
+Archive code, models and measurement scripts on Zenodo. We require that all numbers in the chapter come from one tagged version, such as \texttt{v1.0.0}, and that \texttt{just reproduce} regenerates its figures and tables (\cref{app:zenodo}).
 
 \subsection[Correctness (RQ1)]{Correctness (RQ1)\skimmark}\label{app:chapters:correctness}
 \guidebeat{that the approach is correct on the example and on every requirement case}{test, proof or model-checking results}{the scenario's outcome, before and after}{scalability}
@@ -325,7 +318,7 @@ The employer's check now rejects the diploma 2\,s after the university revokes i
   \caption{Checks of each guarantee and requirement against the introduction's list-based baseline. \gapyes{} means proved or passed, \gappartial{} partial, and \gapno{} a counterexample or failure.}
   \label{tab:guide:correctness}
   {\small
-  \begin{tabularx}{\linewidth}{l >{\raggedright\arraybackslash}X l c c r}
+  \begin{tabularx}{\linewidth}{>{\raggedright\arraybackslash}p{3.2em} >{\raggedright\arraybackslash}X >{\raggedright\arraybackslash}p{6em} c c r}
     \toprule
     & \textbf{Property} & \textbf{Checked by} & \textbf{This work} & \textbf{Baseline} & \textbf{Time} \\
     \midrule
@@ -357,19 +350,19 @@ The employer's check now rejects the diploma 2\,s after the university revokes i
 
 \begin{figure}[!ht]
   \centering
-  \tikzset{lifeline/.style={dashed, gray}, role/.style={draw, rounded corners, fill=blue!8, minimum width=12mm, inner sep=2pt, font=\scriptsize}, msg/.style={-Stealth, font=\scriptsize}}
+  \tikzset{lifeline/.style={dashed, gray}, role/.style={draw, rounded corners, fill=blue!8, minimum width=12mm, inner sep=2pt, font=\footnotesize}, msg/.style={-Stealth, font=\footnotesize}}
   \newcommand{\lifelines}{%
-    \foreach \x/\n in {0/Issuer, 2.1/Holder, 4.2/Verifier, 6.3/Registry} {%
+    \foreach \x/\n in {0/Issuer, 2.3/Holder, 4.6/Verifier, 6.9/Registry} {%
       \node[role] at (\x, 0) {\n}; \draw[lifeline] (\x, -0.3) -- (\x, -3.4);}%
-    \draw[msg] (0, -0.8) -- node[above] {issue $c$} (2.1, -0.8);
-    \draw[msg] (0, -1.4) -- node[above, pos=0.82] {revoke $c$} (6.3, -1.4);
-    \draw[msg] (2.1, -2.0) -- node[above] {present $c$} (4.2, -2.0);}
+    \draw[msg] (0, -0.8) -- node[above] {issue $c$} (2.3, -0.8);
+    \draw[msg] (0, -1.4) -- node[above, pos=0.82] {revoke $c$} (6.9, -1.4);
+    \draw[msg] (2.3, -2.0) -- node[above] {present $c$} (4.6, -2.0);}
   \begin{subfigure}[b]{0.49\linewidth}
     \centering
     \begin{tikzpicture}
       \lifelines
-      \draw[msg] (4.2, -2.6) -- node[above] {check (stale)} (6.3, -2.6);
-      \node[font=\footnotesize\bfseries, text=red!70!black] at (4.2, -3.7) {accepts $c$};
+      \draw[msg] (4.6, -2.6) -- node[above] {check (stale)} (6.9, -2.6);
+      \node[font=\footnotesize\bfseries, text=red!70!black] at (4.6, -3.7) {accepts $c$};
     \end{tikzpicture}
     \caption{Baseline: the revoked credential is accepted.}\label{fig:guide:example-trace-baseline}
   \end{subfigure}\hfill
@@ -377,8 +370,8 @@ The employer's check now rejects the diploma 2\,s after the university revokes i
     \centering
     \begin{tikzpicture}
       \lifelines
-      \draw[msg] (4.2, -2.6) -- node[above] {check (current)} (6.3, -2.6);
-      \node[font=\footnotesize\bfseries, text=green!45!black] at (4.2, -3.7) {rejects $c$};
+      \draw[msg] (4.6, -2.6) -- node[above] {check (current)} (6.9, -2.6);
+      \node[font=\footnotesize\bfseries, text=green!45!black] at (4.6, -3.7) {rejects $c$};
     \end{tikzpicture}
     \caption{This work: the verifier sees the revocation and rejects the credential.}\label{fig:guide:example-trace-ours}
   \end{subfigure}
@@ -429,12 +422,12 @@ Explain what grows, how fast and where the limit lies. Put the better result hig
   \centering
   \begin{tikzpicture}
     \begin{axis}[width=0.7\linewidth, height=55mm, xlabel={Sessions in the model}, ylabel={Verification time [s]}, ymode=log, ymajorgrids, legend style={font=\footnotesize}, legend pos=north west, xmin=0.5, xmax=6.5, xtick={1,...,6}, ymax=20000]
-      \draw[dashed, red!70!black] (axis cs:0.5,3600) -- (axis cs:6.5,3600) node[pos=0.85, above, font=\scriptsize] {time limit};
+      \draw[dashed, red!70!black] (axis cs:0.5,3600) -- (axis cs:6.5,3600) node[pos=0.85, above, font=\footnotesize] {time limit};
       \addplot+[mark=*] coordinates {(1,4) (2,21) (3,140) (4,1100)};
       \addlegendentry{all lemmas}
       \addplot+[mark=square*, dashed] coordinates {(1,3) (2,9) (3,30) (4,95) (5,310) (6,1200)};
       \addlegendentry{with helper lemmas}
-      \node[font=\scriptsize, text=red!70!black, anchor=west] at (axis cs:4.12,1100) {timeout at 5};
+      \node[font=\footnotesize, text=red!70!black, anchor=west] at (axis cs:4.12,1100) {timeout at 5};
     \end{axis}
   \end{tikzpicture}
   \caption{Track F alternative to \cref{fig:guide:scalability}: verification time as the model grows, including the time limit and where the prover stops. Use your model's size parameter: sessions, agents, a bounded-check limit or lemma count.}
@@ -443,7 +436,7 @@ Explain what grows, how fast and where the limit lies. Put the better result hig
 
 \subsection[Robustness analysis (RQ3)]{Robustness analysis (RQ3)\skimmark}\label{app:chapters:robustness}
 \guidebeat{how the system behaves when its assumptions are stressed: faults, attacks, load spikes, parameter changes}{the robustness table, with the setup of each perturbation}{the example under attack}{the threats to validity}
-\textbf{Robustness is scored separately from scalability.} The review sheet gives 7--8 points on criterion E only if \enquote{a szerző skálázhatósági, robosztussági vizsgálatokat is elvégzett, mellyel igazolta, hogy rendszere ipari környezetben is megállja a helyét}: scalability \emph{and} robustness studies showing the system holds up in an industrial setting. Scalability alone does not earn it.
+\textbf{Robustness is required in addition to scalability} for the top of criterion E (\cref{app:chapters:evaluation}, \cref{app:tdk:sheet}).
 \textbf{Track S:} deliberately perturb the system. Report each perturbation and outcome in \cref{tab:guide:robustness}. Use \cref{fig:guide:robustness} to show degradation and recovery during faults, and sensitivity to the main parameter.
 \textbf{Track F:} use \cref{tab:guide:robustness-formal} to report each property under a stronger adversary and with each assumption dropped. Show which properties hold, which fail and the attacks that break them.
 \textbf{Track T:} adapt \cref{tab:guide:robustness} to the tool. Vary thresholds and parameters around their defaults. Test mutated or adversarial inputs, including deliberately injected bugs, and use benchmark instances from a source other than the development data.
@@ -489,7 +482,7 @@ Explain what grows, how fast and where the limit lies. Put the better result hig
     \begin{tikzpicture}
       \begin{axis}[width=0.88\linewidth, height=50mm, xlabel={Time [s]}, ylabel={Throughput [checks/s]}, ymin=0, ymax=6000, xmin=0, xmax=100, ymajorgrids, font=\footnotesize]
         \fill[red!12] (axis cs:30,0) rectangle (axis cs:40,6000);
-        \node[font=\scriptsize, text=red!60!black] at (axis cs:35,5600) {fault};
+        \node[font=\footnotesize, text=red!60!black] at (axis cs:35,5600) {fault};
         \addplot[mark=none, thick, blue] coordinates {(0,5000) (10,5050) (20,4980) (30,5000) (31,1600) (35,1500) (40,1550) (45,3900) (50,4900) (60,5000) (80,4980) (100,5020)};
       \end{axis}
     \end{tikzpicture}
@@ -499,7 +492,7 @@ Explain what grows, how fast and where the limit lies. Put the better result hig
     \centering
     \begin{tikzpicture}
       \begin{axis}[width=0.88\linewidth, height=50mm, xlabel={Ledger timeout [ms]}, ylabel={Successful checks [\%]}, xmode=log, log basis x=2, xtick={50,100,200,400,800}, xticklabels={50,100,200,400,800}, ymin=50, ymax=100, ymajorgrids, font=\footnotesize]
-        \draw[dashed, gray] (axis cs:200,50) -- (axis cs:200,100) node[pos=0.1, right, font=\scriptsize] {default};
+        \draw[dashed, gray] (axis cs:200,50) -- (axis cs:200,100) node[pos=0.1, right, font=\footnotesize] {default};
         \addplot[mark=*, blue] coordinates {(50,62) (100,91) (200,99) (400,99.5) (800,99.6)};
       \end{axis}
     \end{tikzpicture}
@@ -520,7 +513,7 @@ For the registry, the issuer sets are synthetic and all measurements used one ma
 \textbf{Novelty:} plot related work in a positioning figure, compare the closest approaches against requirements in a gap matrix, and state the gap only your work fills.
 \textbf{Relevance:} include current industrial solutions and recent research to show that the gap remains open.
 
-\textbf{In the sheet's words.} The top of B/2: \enquote{3--4: újszerű ipari megoldások és kutatási eredmények (a dolgozat -- az újszerű ipari megoldásokon túl -- bemutatja a dolgozat témakörében releváns kutatási eredményeket a szakterületen)}; the step below, \enquote{2: újszerű ipari megoldások vagy közismert kutatási eredmények}, is where a chapter without recent research lands. D/1 falls to \enquote{1--2: ismert (a kutatási terület szakirodalomban számos megoldás ismert a tárgyalt problémára, és ezek „másolás jellegű” alkalmazására került sor a dolgozatban)} or \enquote{3--4: inkrementális (értékes inkrementális kontribúció, létező megoldások apró továbbfejlesztése)} when the gap matrix shows a close neighbour; argue the difference here.
+\textbf{In the sheet's words.} One step below the top of B/2 (\cref{app:tdk:sheet}), \enquote{2: újszerű ipari megoldások vagy közismert kutatási eredmények} is where a chapter without recent research lands. D/1 falls to \enquote{1--2: ismert (a kutatási terület szakirodalomban számos megoldás ismert a tárgyalt problémára, és ezek „másolás jellegű” alkalmazására került sor a dolgozatban)}, or to the incremental step quoted in \cref{app:tdk:sheet}, when the gap matrix shows a close neighbour; argue the difference here.
 
 \subsection{Comparison criteria}\label{app:chapters:comparison-criteria}
 Compare approaches against the introduction's requirements, here \cref{req:guide:timely,req:guide:offline,req:guide:private}. Add other criteria, such as maturity or license, only when readers need them.
@@ -539,13 +532,13 @@ With Approach C, the closest one, the employer checks offline against a list fet
   \begin{tikzpicture}[
       work/.style={circle, fill=gray!60!black, draw=white, line width=0.5pt, inner sep=0pt, minimum size=2.3mm},
       wlbl/.style={anchor=west, font=\footnotesize, inner sep=1pt, fill=white},
-      wnote/.style={anchor=north west, font=\scriptsize\itshape, text=gray!70!black, inner sep=1pt, fill=white},
+      wnote/.style={anchor=north west, font=\footnotesize\itshape, text=gray!70!black, inner sep=1pt, fill=white},
       tick/.style={font=\footnotesize\bfseries, align=center},
-      sub/.style={font=\scriptsize\itshape, text=gray!80!black, align=center}]
+      sub/.style={font=\footnotesize\itshape, text=gray!80!black, align=center}]
     \def\cA{1.8}\def\cB{6.0}\def\cC{10.2} % columns: the levels of the second property
-    \def\rA{0.9}\def\rB{2.6}\def\rC{4.7}  % rows: the levels of the first property
-    \def\xmax{14.6}\def\ymax{5.8}
-    \fill[blue!8, rounded corners=4pt] ({(\cB+\cC)/2},3.95) rectangle (\xmax,\ymax-0.15); % the gap
+    \def\rA{0.9}\def\rB{2.6}\def\rC{5.0}  % rows: the levels of the first property
+    \def\xmax{14.6}\def\ymax{6.1}
+    \fill[blue!8, rounded corners=4pt] ({(\cB+\cC)/2},\rC-0.75) rectangle (\xmax,\ymax-0.15); % the gap
     \foreach \y in {\rA,\rB,\rC} \draw[gray!30, dashed] (0,\y) -- (\xmax,\y);
     \foreach \x in {\cA,\cB,\cC} \draw[gray!30] (\x,0) -- (\x,\ymax-0.15);
     \draw[line width=0.9pt, -{Stealth[length=2.6mm]}] (0,0) -- (\xmax+0.3,0);
@@ -553,8 +546,8 @@ With Approach C, the closest one, the employer checks offline against a list fet
     \node[anchor=south west, inner sep=0pt, font=\footnotesize] at (0.15,\ymax+0.05)
       {\textbf{How soon a revocation is seen} $\uparrow$\enspace\textit{how far an approach meets \cref{req:guide:timely}}};
     \node[anchor=north east, align=right, font=\footnotesize] at (\xmax+0.3,-0.85)
-      {\textbf{What a check needs} $\rightarrow$\\\textit{\scriptsize how far it meets \cref{req:guide:offline}}};
-    \foreach \y/\name/\what in {\rC/within $\delta$/bounded by the clocks, \rB/minutes/a cache's lifetime, \rA/days/the next list} {%
+      {\textbf{What a check needs} $\rightarrow$\\\textit{how far it meets \cref{req:guide:offline}}};
+    \foreach \y/\name/\what in {\rC/within $\delta$/bounded by\\the clocks, \rB/minutes/a cache's\\lifetime, \rA/days/the next list} {%
       \draw (-0.08,\y) -- (0.08,\y);
       \node[tick, anchor=south east] at (-0.15,\y+0.02) {\name};
       \node[sub, anchor=north east] at (-0.15,\y+0.02) {\what};
@@ -579,7 +572,7 @@ With Approach C, the closest one, the employer checks offline against a list fet
     \node[star, star points=5, star point ratio=2.3, minimum size=6.5mm, inner sep=0pt,
           fill=blue!60!black, draw=white, line width=0.6pt] (tw) at (\cC,\rC) {};
     \node[anchor=west, font=\normalsize\bfseries, text=blue!60!black, inner sep=1pt] at ([xshift=2pt]tw.east) {This work};
-    \node[anchor=north west, font=\scriptsize\itshape, text=blue!60!black, inner sep=1pt] at (\cC+0.38,\rC-0.22) {a registry with bounded staleness};
+    \node[anchor=north west, font=\footnotesize\itshape, text=blue!60!black, inner sep=1pt, align=left] at (\cC+0.38,\rC-0.22) {a registry with\\bounded staleness};
     \node[anchor=west, font=\footnotesize, text=blue!60!black, align=left, inner sep=1pt] at (\cC+0.2,3.35)
       {+ values fresh within $\delta$\\+ checked without the issuer};
   \end{tikzpicture}
@@ -592,7 +585,9 @@ With Approach C, the closest one, the employer checks offline against a list fet
   \caption{Gap matrix: each requirement against the closest approaches. \gaplegend. Cells for this work point to the evaluation result that backs them.}
   \label{tab:guide:related}
   \renewcommand{\arraystretch}{1.3}
-  \begin{tabularx}{\linewidth}{l X c c c c}
+  % Every column but the requirement's has a fixed width and wraps, so a long cell grows downwards
+  % instead of squeezing the requirement column under its heading.
+  \begin{tabularx}{\linewidth}{>{\raggedright\arraybackslash}p{3.2em} >{\raggedright\arraybackslash}X *{3}{>{\centering\arraybackslash}p{5.5em}} >{\centering\arraybackslash}p{6.5em}}
     \toprule
     & \textbf{Requirement} & \textbf{Approach A} & \textbf{Approach B} & \textbf{Approach C} & \textbf{This work} \\
     \midrule
@@ -613,8 +608,6 @@ State the gap in one sentence, supported by the positioning figure and matrix. I
 \textbf{Criterion E.} Show that you delivered and evaluated the contributions promised in the introduction. Readers often open the conclusion just after the abstract, so start with the achievements. End with limitations and concrete future work.
 \textbf{Novelty:} restate each contribution from the introduction with the gap it closes.
 \textbf{Correctness:} restate each with the proof or measurement behind it.
-
-\textbf{In the sheet's words.} The top of E: \enquote{7--8: teljeskörű -- A bevezetés megfelelő és az elért eredmények pontosak és teljesek, az értékelés megalapozott}.
 
 \subsection[Summary]{Summary\skimmark}\label{app:chapters:summary}
 \guidebeat{each contribution and its evidence}{the chapters behind C1--C3}{the example, now solved}{the limitations}

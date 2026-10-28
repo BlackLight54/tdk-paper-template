@@ -22,12 +22,6 @@
 \providecommand{\BIBdecl}{\relax}
 \BIBdecl
 
-\bibitem[Jeney(2014)]{guide:Jeney}
-G.~Jeney, ``Hogyan néz ki egy igényes dokumentum? {N}éhány szóban az
-  alapvető tipográfiai szabályokról,'' Budapesti Műszaki és
-  Gazdaságtudományi Egyetem, Híradástechnikai Tanszék, Tech. Rep., 2014,
-  \url{http://www.mcl.hu/~jeneyg/kinezet.pdf}.
-
 \bibitem[Farkas et~al.(2024)Farkas, Toldi, Péter, and
   Kocsis]{guide:farkas2024selfevaluated}
 M.~Farkas, B.~{\'A}. Toldi, B.~Z. Péter, and I.~Kocsis, ``A {P}rolog-based
@@ -76,5 +70,14 @@ A.~Gulyás, J.~J. Bíró, A.~Kőrösi, G.~Rétvári, and D.~Krioukov,
 L.~Lamport, ``Time, clocks, and the ordering of events in a distributed
   system,'' \emph{Communications of the ACM}, vol.~21, no.~7, pp. 558--565,
   1978.
+
+\bibitem[Jeney(2014)]{guide:Jeney}
+\BIBentryALTinterwordspacing
+G.~Jeney, ``Hogyan néz ki egy igényes dokumentum? {N}éhány szóban az
+  alapvető tipográfiai szabályokról,'' Budapesti Műszaki és
+  Gazdaságtudományi Egyetem, Híradástechnikai Tanszék, Tech. Rep., 2014.
+  [Online]. Available: \url{http://webspn.hit.bme.hu/~telek/latex/kinezet.pdf}.
+  Accessed: 2026-10-28
+\BIBentrySTDinterwordspacing
 
 \end{thebibliography}

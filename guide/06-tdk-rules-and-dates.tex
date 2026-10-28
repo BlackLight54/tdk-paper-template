@@ -1,0 +1,125 @@
+\part*{Guide: reference}\addcontentsline{toc}{part}{Guide: reference}
+%----------------------------------------------------------------------------
+\chapter{TDK rules and dates}\label{app:tdk}
+%----------------------------------------------------------------------------
+Present your research in a TDK paper at the \href{https://tdk.bme.hu/}{Students' Scientific Conference} (Tudományos Diákköri Konferencia; \href{https://tdk.bme.hu/conference/VIK/2026}{this year's faculty call}). The conference gives a semester's work a written result, a review and a presentation. The best papers qualify for the national round, the \href{https://otdk.hu/}{OTDK}.
+
+\section{Where to look}
+\begin{itemize}
+  \item The \href{https://tdk.bme.hu/}{BME TDK portal} and the \href{https://tdk.bme.hu/conference/VIK/2026}{faculty's page for the current year}: check the call, the templates, the FAQ, and the review sheet. Calls change from year to year.
+  \item The group's \href{https://github.com/ftsrg/cheat-sheets/wiki/TDK-Howto}{TDK Howto} covers portal steps, the slide template and presentation advice. Its chapter page ranges predate the call's 30--35 page limit. Follow the call.
+  \item Past first-place papers of the research group and of neighbouring groups at the faculty (\cref{app:tdk:papers}), for structure and tone.
+\end{itemize}
+
+\section{Official dates}\label{app:tdk:dates}
+The portal publishes dates each year. These are the 2026 dates, shown in \cref{fig:timeline} and planned for in \cref{tab:lifecycle}.
+\begin{itemize}
+  \item \textbf{1--30 September:} register on the portal with Hungarian and English abstracts (the paper's Kivonat and Abstract). At this stage, they describe the planned work (\cref{app:writing:abstract}). Registration is required to submit a paper.
+  \item \textbf{1 October -- 1 November:} upload the paper. The portal closes on the last day.
+  \item \textbf{2--16 November:} the reviewers read and score the paper.
+  \item \textbf{18 November:} conference day. The plenary starts at 8:00 and section presentations at 8:30. Each presentation has fifteen minutes plus five for questions. The awards ceremony is that evening.
+  \item \textbf{Placements.} Each section awards several first, second and third places, plus special prizes. The jury ranks papers using both reviews and presentations, so prepare both carefully. First and second places are nominated to the OTDK, held every two years; until recently, only first places qualified. A placement belongs on your CV and counts towards scholarship and doctoral-school applications.
+  \advisortodo{Placements: confirm the current nomination rule (first and second place) against this year's call, and add what else a placement brings that students ask about: the prize money or company awards of the section, and how the faculty's own awards relate to the TDK placements.}
+\end{itemize}
+
+
+\begin{figure}[!ht]
+  \centering
+  % One unit = one day from 1 September (1 October is 30, 1 November is 61).
+  % The phases follow tab:lifecycle: draft 1--22 October, the full draft ten days before the deadline (22 October, day 51), polish 22--28 October, submit 29 October -- 1 November.
+  \newcommand{\tlband}[6]{\fill[#5, rounded corners=1.2pt] (#1,#3) rectangle (#2,#4); \node[font=\footnotesize, #6] at ({(#1+#2)/2},{(#3+#4)/2}) {\strut};}
+  \begin{tikzpicture}[x=0.142cm, y=1cm, every node/.style={inner sep=1.5pt}]
+    % months and weeks
+    \foreach \d/\m in {0/September, 30/October, 61/November, 91/December} {
+      \draw[gray!60] (\d,0.25) -- (\d,-3.55);
+      \node[anchor=south west, font=\footnotesize\bfseries, text=gray!70!black] at (\d,0.3) {\m};
+    }
+    \draw[gray!60] (111,0.25) -- (111,-3.55);
+    \foreach \d in {7,14,21,28,37,44,51,58,68,75,82,89,98,105} \draw[gray!50] (\d,0.1) -- (\d,0.25);
+    \draw[thick, gray!70!black] (0,0.25) -- (111,0.25);
+    % lane 1: the faculty's dates
+    \node[anchor=east, font=\footnotesize\bfseries, text=orange!80!black] at (-1,-0.3) {Faculty};
+    \fill[official, rounded corners=1.5pt] (0,-0.62) rectangle (29,-0.02);
+    \node[font=\footnotesize] at (14.5,-0.32) {registration + abstract};
+    \fill[official, rounded corners=1.5pt] (30,-0.62) rectangle (61,-0.02);
+    \node[font=\footnotesize] at (45.5,-0.32) {paper upload};
+    \fill[official, rounded corners=1.5pt] (62,-0.62) rectangle (76,-0.02);
+    \node[font=\footnotesize] at (69,-0.32) {review};
+    \foreach \d/\t in {29/30 Sep, 61/1 Nov} {
+      \draw[orange!80!black, very thick] (\d,-0.68) -- (\d,0.1);
+      \node[font=\footnotesize\bfseries, text=orange!80!black, anchor=north] at (\d,-0.68) {\t};
+    }
+    \node[diamond, fill=orange!80!black, inner sep=2.2pt] at (78,-0.32) {};
+    \node[font=\footnotesize\bfseries, text=orange!80!black, anchor=west] at (79,-0.32) {18 Nov conference};
+    % lane 2: our phases and the anchors
+    \node[anchor=east, font=\footnotesize\bfseries, text=teal!60!black] at (-1,-1.45) {Us};
+    \foreach \a/\b/\t in {0/14/research, 15/29/plan, 30/50/draft, 51/57/polish, 58/61/{}, 62/76/{talk, code}} {
+      \fill[teal!12, rounded corners=1.5pt] (\a,-1.75) rectangle (\b,-1.15);
+      \node[font=\footnotesize] at ({(\a+\b)/2},-1.45) {\t};
+    }
+    \node[font=\footnotesize, anchor=north] at (59.5,-1.78) {submit}; % the band is too narrow for its name
+    \fill[teal!12, rounded corners=1.5pt] (79,-1.75) rectangle (111,-1.15);
+    \node[font=\footnotesize] at (95,-1.45) {paper or thesis};
+    \foreach \d/\t/\p in {-0.5/manifest/west, 29/spine/east, 51/full draft/east} {
+      \draw[red!70!black, very thick] (\d,-1.85) -- (\d,-1.05);
+      \node[font=\footnotesize\bfseries, text=red!70!black, anchor=north \p] at (\d,-1.85) {\t};
+    }
+    % lane 3: the semester and the department
+    \node[anchor=east, font=\footnotesize\bfseries, text=gray!70!black] at (-1,-2.95) {Semester};
+    \fill[gray!14, rounded corners=1.5pt] (6,-3.25) rectangle (100,-2.65);
+    \node[font=\footnotesize] at (29,-2.95) {fourteen teaching weeks, a consultation in each};
+    \fill[gray!30, rounded corners=1.5pt] (103,-3.25) rectangle (108,-2.65);
+    \node[font=\footnotesize, anchor=north, align=center] at (105.5,-3.3) {pótlási\\hét};
+    \draw[-Stealth, gray!70!black] (108.5,-2.95) -- (111,-2.95);
+    \node[font=\footnotesize, anchor=north, align=center] at (6,-3.3) {semester\\starts};
+    \foreach \d/\t in {57/{writing session}, 76/{talk rehearsal}} {
+      \fill[department, draw=green!45!black, rounded corners=1.5pt] (\d-2.2,-3.3) rectangle (\d+2.2,-2.6);
+      \draw[green!45!black, line width=1.6pt] (\d,-3.3) -- (\d,-2.6);
+      \node[font=\footnotesize\bfseries, text=green!45!black, anchor=north, align=center] at (\d,-3.35) {department\\\t};
+    }
+  \end{tikzpicture}
+  \caption{The faculty's deadlines are yellow; our phases are teal, with three anchors in red. Green marks the department's writing session just before upload, and its presentation rehearsal two days before the conference. The semester lane shows the 2026 autumn dates as known in October 2026.}\label{fig:timeline}
+\end{figure}
+
+\section{Form requirements}\label{app:tdk:form}
+The faculty's call states these requirements under \enquote{A dolgozat formai és terjedelmi követelményei}; the template already follows them. Each part of the call is quoted, then summarised.
+\begin{itemize}
+  \item \textbf{Terjedelem:} \enquote{A dolgozat hossza 30--35 oldal, amely a törzsszövegre vonatkozik. A fedlap, az opcionális feladatkiírás, a tartalomjegyzék, az irodalomjegyzék, az absztrakt és a mellékletek (appendix) nem számítanak bele az oldalszámba.}
+  \textbf{Length}: 30--35 pages of main text. The title page, the optional task description, the table of contents, the bibliography, the abstract and the appendices do not count.
+  \item \textbf{Formai követelmények (függetlenül attól, hogy LaTeX vagy Word kerül használatra):}
+  \begin{itemize}[noitemsep]
+    \item \enquote{Papírméret: A4}
+    \item \enquote{Elrendezés: egyhasábos szöveg}
+    \item \enquote{Betűtípus: Times New Roman (vagy más, jól olvasható serif betűtípus)}
+    \item \enquote{Betűméret: 12 pt}
+    \item \enquote{Sorköz: egyszeres}
+    \item \enquote{Margók: minden oldalon 1,5--3,5 cm közötti tartományban kell lenniük.}
+  \end{itemize}
+  \textbf{Layout}, whether you use \LaTeX{} or Word: A4 paper, single column, Times New Roman or another readable serif font, 12\,pt, single line spacing, margins between 1.5 and 3.5\,cm on every side.
+  \item \textbf{Ábrák és táblázatok:} \enquote{Az ábrák és táblázatok a törzsszöveg részét képezik, tehát beleszámítanak az oldalszámba. Méretükre nincs formai megkötés, de a tartalomnak nyomtatásban is olvashatónak kell lennie (10 pt alatti betűméret kerülendő címkéken is).}
+  \textbf{Figures and tables} are part of the main text, so they count towards the page limit. Their size is free, but they must be readable in print: avoid text below 10\,pt, labels included.
+  \item \textbf{Hasznos segédanyagok:} \enquote{A dolgozat elkészítéséhez sablonok érhetők el a Letöltések menüpont alatt. Ezek alapvetően diplomaterv-sablonok, ezért a formai követelményekhez igazodva előfordulhat, hogy kisebb módosításokra lesz szükség (pl.\ margók, címsorok beállítása).}
+  The faculty's templates under \emph{Letöltések} are diploma thesis templates, so they need small changes for the TDK, such as margins and headings. This template has them.
+\end{itemize}
+Our reading of the length: the main text (törzsszöveg) runs from the first page of \tplref{ch:intro} to the last page of the conclusion (\path{content/07-conclusion.tex}). The acknowledgements, the glossary lists and the AI declaration are not main text. The lint counts the pages this way and fails outside 30--35 at \texttt{submit}; that is our requirement.
+
+\section{Two papers in one year}\label{app:tdk:companion}
+A topic sometimes yields two TDK papers in the same year: you write both, or you and a fellow student write neighbouring parts of one project, such as a system in one paper and its formal verification in the other. Each paper is then the other's \emph{companion paper}, and three rules hold.
+\begin{itemize}
+  \item \textbf{Never cite or link it.} It gets no bibliography entry and no Overleaf, GitHub or portal link. Citing it is very bad practice. The two papers are reviewed at the same time, each on its own, so the reviewer scores this paper against a source that is not published and that nobody has reviewed yet, and the citation suggests one contribution cut in two.
+  \item \textbf{Call it a companion paper.} Where the reader needs to know where this paper ends, one sentence says what the other one does, without its title: \enquote{A companion paper verifies the registry's revocation protocol in Tamarin; this paper builds the registry and measures it.}
+  \item \textbf{Restate what this paper needs from it.} The core part this paper relies on, such as a system model, its definitions or a protocol, goes into the background chapter (\cref{app:chapters:background}), condensed to what this paper uses, so that the paper reads without the other. It is background here even if you wrote it, so claim each result in only one of the two papers. Only when the page limit leaves no room does it go into an appendix; the background chapter then keeps a paragraph that summarises it and points there.
+\end{itemize}
+The \texttt{companion} rule of the lint (\cref{app:code:paperci}) fails on a citation of a TDK paper of the same year; on a link to an Overleaf project, to a paper of this year's TDK on the portal or to the repository of a TDK paper of this year other than this paper's own, the first repository the implementation chapter cites or links; and on a citation or link attached to the words \enquote{companion paper}.
+
+\section{The review sheet}\label{app:tdk:sheet}
+The review sheet (bírálói lap), saved in \texttt{docs/}, awards 35 points across five criteria: A form and style, B figures and literature, C topic, D originality and soundness, and E introduction and evaluation. \Cref{app:chapters} explains how to argue relevance, non-triviality, novelty and correctness throughout the paper. Each of its sections quotes the sheet's lower steps, the ones a weak chapter lands on, so you can assess your work in the reviewer's wording. The top scores are defined as follows:
+\begin{description}[noitemsep]
+  \item[A. Szerkesztés, stílus (0--5)] \enquote{4--5: kiváló (ha a dolgozat közel hibamentes, jól tagolt, követhető, gördülékeny stílusú)}. The sheet also says: \enquote{Terjedelmi korlát 30--35 oldal. Ettől eltérés esetén 3 oldalanként 1 pont levonás javasolt.} \enquote{Műszaki tudományi OTDK szekcióba 50 oldal felett nem fogadnak dolgozatot.} The sheet recommends that reviewers deduct the point; it does not require them to.
+  \item[B/1. Ábrák, táblázatok] \enquote{4: kiváló (a dolgozat megfelelő számú és jól átgondolt ábrát, táblázatot tartalmaz, és a szakirodalmi hivatkozások pontosak)}.
+  \item[B/2. Hivatkozások, irodalom feldolgozás] \enquote{3--4: újszerű ipari megoldások és kutatási eredmények (a dolgozat -- az újszerű ipari megoldásokon túl -- bemutatja a dolgozat témakörében releváns kutatási eredményeket a szakterületen)}. B is the average of B/1 and B/2.
+  \item[C. A dolgozat témája (0--8)] \enquote{7--8: tudományos vizsgálat szükséges (ha a dolgozat témája korszerű, nem lezárt, vizsgálata magas szintű, tudományos, elmélyült tudást igényel)}.
+  \item[D/1. Tudományos újdonságtartalom és kontribúció (0--5)] \enquote{5: újszerű (legalább hazánkban újszerű, vagy eddig még nem létező megoldás)}; one step below, \enquote{3--4: inkrementális (értékes inkrementális kontribúció, létező megoldások apró továbbfejlesztése)}.
+  \item[D/2. Technikai helyesség és színvonal (0--5)] \enquote{5: kiváló (kimagasló színvonalú kidolgozás, a közölt eredmények helyessége kétségkívül megalapozott)}. D is the sum of D/1 and D/2.
+  \item[E. Bevezetés és az eredmények értékelése (0--8)] \enquote{7--8: teljeskörű -- A bevezetés megfelelő és az elért eredmények pontosak és teljesek, az értékelés megalapozott. A szerző skálázhatósági, robosztussági vizsgálatokat is elvégzett, mellyel igazolta, hogy rendszere ipari környezetben is megállja a helyét}.
+\end{description}

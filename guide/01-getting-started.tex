@@ -1,14 +1,6 @@
-\part*{Guide}\addcontentsline{toc}{part}{Guide}
 %----------------------------------------------------------------------------
 \chapter{Getting started}\label{app:start}
 %----------------------------------------------------------------------------
-This guide explains how to start, write and submit a TDK paper with FTSRG advisors Martin Farkas (\href{https://github.com/BlackLight54}{\texttt{BlackLight54}} on GitHub) and Imre Kocsis (\href{https://github.com/imrekocsis}{\texttt{imrekocsis}}). It covers our working process and recommended tools.
-The guide follows the appendices in the paper template. You do not need to delete it before submission. Build \texttt{reviewer.tex} and upload the resulting \texttt{reviewer.pdf}, which excludes the guide and all notes (\cref{app:latex:todo}).
-
-The template uses three kinds of notes. \todo[inline]{An orange note is for you: what a part of the paper must contain.}
-\advisortodo{A blue note is for us: a draft we still have to confirm, or a link we still have to add.}
-\atodo[inline]{A green note, marked A, is our review comment on your paper. Resolve it, then delete it.}
-
 Work through these steps in order during your first week. Each step names its owner.
 
 %----------------------------------------------------------------------------
@@ -17,21 +9,21 @@ Work through these steps in order during your first week. Each step names its ow
 
 %----------------------------------------------------------------------------
 \section{Accounts and access}\label{app:start:access}
-\paragraph{Overleaf project.} \emph{We} create your semester's project from this template under our Overleaf Pro subscription. Ask us to set it up. The template adapts the current BME template to the TDK form requirements (\cref{app:tdk:form}); check it against the current call.
+\paragraph{Overleaf project.} \emph{We} create your semester's project from this template under our Overleaf Pro subscription. Ask us to set it up.
 
 \paragraph{Repositories.} Your work lives in three GitHub repositories, cloned as one (\cref{app:code:github}):
 \begin{itemize}
-  \item \textbf{Notes repository}, at the top level, holds notes, drawings, consultation summaries, presentations and a README linking them. \emph{You} create a private repository from \href{https://github.com/BlackLight54/tdk-notes-template}{tdk-notes-template}. Add the other two repositories as Git submodules. Its CI maintains the lifecycle table (\cref{app:code:paperci}).
-  \item \textbf{\texttt{paper/}}, the paper repository. \emph{We} create it through Overleaf's GitHub integration and add you. This Pro feature requires the Overleaf project owner and a fresh GitHub repository. Use the GitHub dialog in Overleaf's menu to sync changes in either direction; see \href{https://www.overleaf.com/learn/how-to/GitHub_Synchronization}{GitHub Synchronization}.
+  \item \textbf{Notes repository}, at the top level, holds notes, drawings, consultation summaries, slides and a README linking them. \emph{You} create a private repository from \href{https://github.com/BlackLight54/tdk-notes-template}{tdk-notes-template}. Its CI maintains \texttt{lifecycle.md}, a status page for the lifecycle (\cref{app:code:paperci}).
+  \item \textbf{\texttt{paper/}}, the paper repository. \emph{We} create it through Overleaf's GitHub integration and add you. Only the project's owner can link it, and the link needs an empty GitHub repository, so this step is ours. Use the GitHub dialog in Overleaf's menu to sync changes in either direction; see \href{https://www.overleaf.com/learn/how-to/GitHub_Synchronization}{GitHub Synchronization}.
   \item \textbf{\texttt{code/}}, the code repository. \emph{You} create it from \href{https://github.com/BlackLight54/tdk-code-template}{tdk-code-template}, which supplies recipes, CI and the files needed for Zenodo archiving (\cref{app:code:github}, \cref{app:zenodo}).
 \end{itemize}
 Add both advisors to all three repositories. Add \texttt{paper/} and \texttt{code/} as submodules of the notes repository, then clone it with \texttt{git clone --recurse-submodules}; see the Git book's chapter on \href{https://git-scm.com/book/en/v2/Git-Tools-Submodules}{submodules}. This gives you one workspace for local paper builds, GitHub features and AI agents working across notes, paper and code (\cref{app:code:ai}).
 
 \paragraph{Zotero group.} \emph{We} add you to \href{https://www.zotero.org/groups/6715800/ftsrg_blockchain_lab}{ftsrg\_blockchain\_lab}, our shared literature library. \emph{You} install \href{https://www.zotero.org/}{Zotero} and its \href{https://www.zotero.org/download/connectors}{browser connector}, then save every source you read to the group. Allow ten minutes for the \href{https://www.zotero.org/support/quick_start_guide}{quick start guide}. \Cref{app:latex:cite} explains how to cite the library's sources.
 
-Import the library through Overleaf's Zotero integration, included in our Pro subscription. In Overleaf's account settings, link Zotero under \emph{Reference Managers}; see \href{https://www.overleaf.com/learn/how-to/How_to_link_your_Overleaf_account_to_Mendeley_and_Zotero}{linking your account to Zotero}. In the project, delete the placeholder \texttt{bib/zotero.bib}. Choose \emph{New file}, then \emph{From Zotero}, select the group library and name the file \texttt{bib/zotero.bib}. Use \emph{Refresh} to import new sources. Refresh overwrites this file, so keep hand-written entries, including the Zenodo artifact and AI citations, in \texttt{bib/references.bib}. The paper reads both files. For local work without Overleaf, Zotero's \href{https://retorque.re/zotero-better-bibtex/}{Better BibTeX} plugin can export the group to the same file.
+Import the library through Overleaf's Zotero integration, included in our Pro subscription. In Overleaf's account settings, link Zotero under \emph{Reference Managers}; see \href{https://www.overleaf.com/learn/how-to/How_to_link_your_Overleaf_account_to_Mendeley_and_Zotero}{linking your account to Zotero}. In the project, delete the placeholder \texttt{bib/zotero.bib}. Choose \emph{New file}, then \emph{From Zotero}, select the group library and name the file \texttt{bib/zotero.bib}. Use \emph{Refresh} to import new sources. Refresh overwrites this file, so keep hand-written entries, such as the Zenodo artifact, in \texttt{bib/references.bib}. The paper reads both files. For local work without Overleaf, Zotero's \href{https://retorque.re/zotero-better-bibtex/}{Better BibTeX} plugin can export the group to the same file.
 
-\paragraph{GitHub Student Developer Pack.} Apply for the free \href{https://education.github.com/pack}{GitHub Student Developer Pack} with your \texttt{@edu.bme.hu} address; it includes GitHub Pro and GitHub Copilot.
+\paragraph{GitHub Student Developer Pack.} You can apply for the free \href{https://education.github.com/pack}{GitHub Student Developer Pack} with your \texttt{@edu.bme.hu} address; it includes GitHub Pro and GitHub Copilot.
 
 %----------------------------------------------------------------------------
 \section{Calendar}\label{app:start:calendar}
@@ -57,16 +49,16 @@ Import the library through Overleaf's Zotero integration, included in our Pro su
 
 %----------------------------------------------------------------------------
 \section{Development environment}\label{app:start:env}
-\paragraph{Operating system.} Use Linux on bare metal if possible. We recommend \href{https://omarchy.org/}{Omarchy}, a distribution configured for development; ask Martin for his setup. Ubuntu and Pop!\_OS are also good options. Omarchy includes a Windows virtual machine. Use dual boot if you occasionally need Windows on bare metal. Reserve Windows Subsystem for Linux (WSL) for cases where you must use Windows daily, for example for video editing.
+\paragraph{Operating system.} We recommend Linux on bare metal if possible, ideally \href{https://omarchy.org/}{Omarchy}, a distribution configured for development; ask Martin for his setup. Ubuntu and Pop!\_OS are also good options. Omarchy includes a Windows virtual machine. If you occasionally need Windows on bare metal, you can dual boot. We recommend Windows Subsystem for Linux (WSL) only if you must use Windows daily, for example for video editing.
 
 \paragraph{Editor.} We use \href{https://code.visualstudio.com/}{Visual Studio Code}. Useful extensions include Remote - SSH for the VM, GitHub Pull Requests, Claude Code, Codex and the extensions for your programming languages.
 
-\paragraph{Agent harness.} We recommend T3 Code or GitKraken Kepler in preference to the standard Codex and Claude desktop and CLI apps.
+\paragraph{Agent harness.} \Cref{app:code:ai} recommends the agents and harnesses we use.
 
 \paragraph{Notetaking and task management.} Keep notes in plain Markdown and commit them to GitHub. Obsidian, Tana and Emacs Org mode are options. Track tasks in GitHub issues or Todoist.
 
-\paragraph{Virtual machine and remote work.} In the message with your identifiers, ask us to request a VM in the BME cloud. We can provide 8 cores and 16\,GB of memory in the \href{https://cloud.bme.hu/}{BME cloud}, usually in its \href{https://fured.cloud.bme.hu/}{Füred} environment. Host your editor and repositories there, or run AI agents while your laptop is closed. Connect through SSH, RDP, VS Code Remote or Tailscale. Claude Code, Codex, T3 Code and GitKraken Kepler can run on the VM directly or through remote access.
+\paragraph{Virtual machine and remote work.} In the message with your identifiers, ask us to request a VM in the BME cloud. We can provide 8 cores and 16\,GB of memory in the \href{https://cloud.bme.hu/}{BME cloud}, usually in its \href{https://fured.cloud.bme.hu/}{Füred} environment. Host your editor and repositories there, or run AI agents while your laptop is closed. Connect through SSH, RDP, VS Code Remote or Tailscale. Agents and their harnesses (\cref{app:code:ai}) can run on the VM directly or through remote access.
 
-\paragraph{Workspace layout.} Keep one clone of the notes repository with its \texttt{paper/} and \texttt{code/} submodules (\cref{app:code:github}) on your machine or VM. Open it in one VS Code window, with the \LaTeX{} build and AI agent in the same folder. You can then edit, version and search code, paper and notes together. This also gives the agent the paper's claims and consultation decisions while it edits code or prose, which helps avoid mistakes. Commit each submodule separately. After a consultation, commit the submodule pointers in the notes repository so we can check out the state we discussed.
+\paragraph{Workspace layout.} Keep the clone of the notes repository (\cref{app:start:access}) on your machine or VM. We recommend opening it in one VS Code window, with the \LaTeX{} build and AI agent in the same folder. This gives the agent the paper's claims and consultation decisions while it edits code or prose, which helps avoid mistakes. Commit each submodule separately. After a consultation, commit the submodule pointers in the notes repository so we can check out the state we discussed.
 
 \paragraph{Do not overdo it.} Limit the time you spend setting up your environment. We learned this the hard way.
