@@ -174,6 +174,85 @@ Draft the figure during research and keep exploring it until the spine is agreed
   \caption{Leading figures drawn before their papers: (a) self-evaluated policies at EuroCyberSec 2024~\cite{guide:farkas2024selfevaluated}, (b) the 2023 TDK paper behind it~\cite{guide:farkas2023tdk}, (c) self-orchestrated business collaborations~\cite{guide:farkas2025selforchestration}, and (d) formal security analysis of BPMN collaborations~\cite{guide:farkas2026trustnopool}. Each combines the problem, contribution and result.}\label{fig:collage}
 \end{figure}
 
+When the contribution is spread over several chapters, \cref{app:writing:depgraph} draws the whole paper instead.
+
+\section{An alternative: the paper as a dependency graph}\label{app:writing:depgraph}
+The skeleton mind map (\cref{fig:mindmap}) is a tree of chapters and their paragraphs. Draw an arrow from each paragraph to every paragraph that needs it, and the tree becomes a dependency graph of the paper (\cref{fig:depgraph}). Lay it out in bands, one per chapter in reading order, with each band's paragraphs in their order in the chapter. Colour green the paragraphs that deliver a contribution, tag each with its contribution, and leave the rest white. The green is for the reviewer: before reading a sentence, they see where your contribution is, how much of the paper it fills, what it stands on, and which evaluation question tests it. Green marks paragraphs here, not components, so the architecture figure keeps the blue of \texttt{ours} for the parts of the system you built.
+
+\begin{figure}[!ht]
+  \centering
+  \begin{tikzpicture}[
+      x=25mm, y=-17mm,
+      para/.style={draw=gray!60, fill=white, rounded corners=1pt, text width=20mm, minimum height=10mm,
+        align=center, font=\footnotesize, inner sep=2pt, execute at begin node={\hyphenpenalty=10000}},
+      contrib/.style={para, draw=green!50!black, line width=1.1pt, fill=green!15},
+      dep/.style={-Stealth, gray!70, semithick}]
+    % One band per chapter, in reading order; within a band, paragraphs keep their order in the chapter.
+    \begin{scope}[on background layer]
+      \foreach \r/\chap in {0/Introduction, 1/Background, 2/Approach, 3/Implementation,
+                            4/Evaluation, 5/Related work, 6/Conclusion} {
+        \pgfmathsetmacro{\n}{int(\r+1)}
+        \pgfmathparse{mod(\r,2) ? "white" : "gray!8"}
+        \fill[\pgfmathresult] (-1.6,\r-0.47) rectangle (5.5,\r+0.47);
+        \node[anchor=west, font=\footnotesize] at (-1.58,\r) {\textbf{\n}~\chap};
+      }
+    \end{scope}
+    \node[para]    (problem)  at (0,0) {Problem: a stale status};
+    \node[para]    (req)      at (1,0) {REQ1--REQ3};
+    \node[para]    (gap)      at (2,0) {Gap: none meets all three};
+    \node[para]    (claims)   at (3,0) {Contributions C1--C3};
+    \node[para]    (cred)     at (0,1) {Revocation status};
+    \node[para]    (acc)      at (1,1) {Accumulators};
+    \node[para]    (ledger)   at (2,1) {Permissioned ledgers};
+    \node[para]    (dy)       at (3,1) {Dolev--Yao and Tamarin};
+    \node[contrib] (model)    at (0,2) {\textbf{C1} Registry model};
+    \node[contrib] (check)    at (1,2) {\textbf{C1} Check with one witness};
+    \node[para]    (threat)   at (3,2) {Adversary and assumptions};
+    \node[contrib] (thm)      at (4,2) {\textbf{C1} Theorem: SG1};
+    \node[contrib] (arch)     at (0,3) {\textbf{C2} Architecture};
+    \node[contrib] (design)   at (1,3) {\textbf{C2} Signed values};
+    \node[contrib] (code)     at (2,3) {\textbf{C2} The check, tested};
+    \node[contrib] (rq1)      at (2,4) {\textbf{C3} RQ1 correctness};
+    \node[contrib] (rq2)      at (3,4) {\textbf{C3} RQ2 scalability};
+    \node[contrib] (rq3)      at (4,4) {\textbf{C3} RQ3 robustness};
+    \node[para]    (validity) at (5,4) {Threats to validity};
+    \node[para]    (families) at (0,5) {Families A--C};
+    \node[para]    (matrix)   at (1,5) {Gap matrix};
+    \node[para]    (summary)  at (3,6) {Summary of C1--C3};
+    \node[para]    (limits)   at (4,6) {Limitations};
+    \node[para]    (future)   at (5,6) {Future work};
+    % An arrow points from a paragraph to the paragraph that needs it.
+    \draw[dep] (problem) -- (req);
+    \draw[dep] (req) -- (gap);
+    \draw[dep] (gap) -- (claims);
+    \draw[dep] (cred) -- (model);
+    \draw[dep] (acc) -- (check);
+    \draw[dep] (model) -- (check);
+    \draw[dep] (dy) -- (threat);
+    \draw[dep] (threat) -- (thm);
+    \draw[dep] (check.south east) .. controls (2.1,2.62) and (3.3,2.62) .. (thm.south west);
+    \draw[dep] (check) -- (arch);
+    \draw[dep] (ledger) -- (design.north east);
+    \draw[dep] (arch) -- (design);
+    \draw[dep] (design) -- (code);
+    \draw[dep] (thm.250) -- (rq1.north east);
+    \draw[dep] (code) -- (rq1);
+    \draw[dep] (code.east) -| ($(rq2.north)+(-0.2,0)$);
+    \draw[dep] (thm) -- (rq3);
+    \draw[dep] (families) -- (matrix);
+    \draw[dep] (rq1) -- (summary);
+    \draw[dep] (rq2) -- (summary);
+    \draw[dep] (rq3) -- (summary);
+    \draw[dep] (validity) -- (limits);
+    \draw[dep] (limits) -- (future);
+  \end{tikzpicture}
+  \caption{The guide's running example as a dependency graph: each contribution stands on the background and leads to an evaluation question. One band per chapter in reading order, one box per paragraph in its order within the chapter, and an arrow from a paragraph to each paragraph that needs it. Green boxes deliver the contribution in their tag, white boxes are context, and every arrow runs to a later chapter or rightwards within one. It is the paper of \cref{fig:mindmap} with fewer boxes: the figure keeps the paragraphs that carry the argument, not all of them.}\label{fig:depgraph}
+\end{figure}
+
+It can take either of two places in the paper. As \tplref{fig:overview}, it suits a work whose contribution is a model, a tool and an evaluation spread over several chapters, which a problem-to-result picture would flatten into one box; the green has to read at a glance, so merge a chapter's paragraphs into its sections when there are many. As the figure of the structure paragraph at the end of the introduction (\cref{app:chapters:structure}), it replaces the list of chapters: the paragraph says what the bands, arrows and colours mean, and the figure shows the rest.
+
+Drawing it also checks the skeleton before any prose exists. Every arrow should run down to a later chapter or right within one; an arrow pointing up or left is a paragraph that needs something the reader has not reached yet, so move one of the two, or say where the missing part comes. A green box with no path to an evaluation question is a contribution the paper claims but does not back. A background box that no arrow leaves is background the paper does not use. Draw only the arrows a reader needs to follow the argument: the figure shows where the contribution is, not every cross-reference.
+
 \section{Figures}\label{app:writing:figures}
 Use vector figures. Draw final versions in TikZ in the paper repository to match its fonts, scale cleanly and allow late edits; \cref{app:latex} covers the template's TikZ and pgfplots setup. Sketch in \href{https://www.drawio.com/}{draw.io} while exploring, then redraw in TikZ after agreeing the spine. Use an exported PDF only as a last resort, for example for a figure from another paper or a screenshot. Generate plots with pgfplots from the CSV written by \texttt{just reproduce}, so measurements update the figures automatically. Label every axis with its unit. Figure text must be at least 10\,pt in print.
 
