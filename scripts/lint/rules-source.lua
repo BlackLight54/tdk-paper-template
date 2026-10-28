@@ -511,6 +511,64 @@ rule("bib", "source", "check", "always", "the bibliography: every cited key exis
   end)
 end)
 
+-- the reference list as BibTeX printed it: the \bibitem keys of the .bbl, so a citation counts
+-- however it was written in the sources, and a \cite in a comment does not; each key is then
+-- looked up in the .bib files to tell papers, arXiv preprints and web pages apart
+rule("sources", "source", "advice", "always", "the reference list has the shape the guide asks for: no more than 50 references in a TDK paper, not web pages alone, and no arXiv preprint without a reason; the counts are references, web pages and preprints", function()
+  local bbl = C.readfile(C.bpath(C.opts.doc .. ".bbl"))
+  if not bbl then warn(nil, nil, C.opts.doc .. ".bbl not found: build the paper first, BibTeX writes it"); return end
+  local cited, seen = {}, {}
+  local pos = 1
+  while true do
+    local _, e = bbl:find("\\bibitem%f[^%a]", pos); if not e then break end
+    pos = e + 1
+    local _, oe = bbl:find("^%s*%b[]", pos); if oe then pos = oe + 1 end -- natbib's [label]
+    local ks, ke = bbl:find("^%s*%b{}", pos)
+    if ks then
+      local key = C.trim(bbl:sub(ks, ke):match("{(.*)}"))
+      if not seen[key] then seen[key] = true; cited[#cited + 1] = key end
+      pos = ke + 1
+    end
+  end
+  -- a field's value in lower case, from a lower-cased entry body; "" when the field is absent
+  local function field(body, name)
+    local v = body:match("[,%s]" .. name .. "%s*=%s*(%b{})") or body:match("[,%s]" .. name .. '%s*=%s*(%b"")')
+    return v and v:sub(2, -2) or ""
+  end
+  local function entry_line(file, key)
+    local s = C.readfile(file) or ""
+    local at = s:find("@%a+%s*{%s*" .. C.escape(key) .. "%s*,")
+    return at and (C.count(s:sub(1, at), "\n") + 1) or nil
+  end
+  local entries = C.bib_entries()
+  local web, arxiv = 0, 0
+  for _, key in ipairs(cited) do
+    local en = entries[key]
+    if en then
+      local b = en.body:lower()
+      local journal = field(b, "journal")
+      local venue = field(b, "booktitle") ~= "" or (journal ~= "" and not journal:find("arxiv", 1, true) and journal ~= "corr")
+      local marks = field(b, "archiveprefix") .. " " .. field(b, "eprinttype") .. " " .. journal .. " " .. field(b, "howpublished") .. " " .. field(b, "publisher") .. " " .. field(b, "note") .. " " .. field(b, "url") .. " " .. field(b, "doi")
+      local scholarly = venue or field(b, "doi") ~= "" or field(b, "publisher") ~= "" or field(b, "institution") ~= "" or field(b, "school") ~= "" or field(b, "isbn") ~= ""
+      local url = field(b, "url") ~= "" or b:find("\\url", 1, true) ~= nil or en.type == "online" or en.type == "electronic" or en.type == "www"
+      if not venue and (marks:find("arxiv", 1, true) or marks:find("10.48550/", 1, true)) then
+        arxiv = arxiv + 1
+        warn(en.file, entry_line(en.file, key), key .. ": an arXiv preprint; search dblp for its title and cite the published version, unless the work is too recent to be published")
+      elseif url and not scholarly then
+        web = web + 1
+      end
+    end
+  end
+  local total = #cited
+  if C.opts.profile ~= "thesis" and total > 50 then
+    warn(nil, nil, string.format("%d references: a TDK paper typically needs no more than 50; cut the weakest first, starting with those another entry already covers", total))
+  end
+  if total > 0 and web == total then
+    warn(nil, nil, "every reference is a web page, which the review sheet's B/2 places at step 1; cite the papers, standards and specifications behind them, and move links that back no claim to footnotes")
+  end
+  return string.format("references=%d web=%d arxiv=%d", total, web, arxiv)
+end)
+
 rule("code", "source", "check", "always", "listings: \\lstinline is ASCII (XeLaTeX fails on Unicode there), every listing has a caption and a label, minted sits in a listing float", function()
   C.each_line(MAIN, function(f, n, l)
     local inl = l:match("\\lstinline%b[]({.-})") or l:match("\\lstinline(%b{})")
