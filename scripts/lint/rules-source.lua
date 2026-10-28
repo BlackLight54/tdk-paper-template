@@ -753,6 +753,6 @@ rule("burndown", "source", "count", "always", "one line of JSON with the counts 
   local j = string.format('{"date":"%s","pages":%d,"todo":%d,"beats":%d,"notes":%d,"placeholders":%d,"citations":%d,"figures":%d}',
     os.date("!%Y-%m-%d"), main_pages() or 0, count(CONTENT, "TODO"), count(MAIN, "\\beat{"), count(MAIN, "\\a?d?v?i?s?o?r?todo%["),
     count(CONTENT, "[Pp]laceholder"), count(MAIN, "\\cite[tp]?{"), count(MAIN, "\\label{fig:"))
-  io.write(j, "\n")
+  if not C.opts.tex and not C.opts.json then io.write(j, "\n") end -- --json carries it as the counts
   return j
 end)
