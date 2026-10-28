@@ -6,9 +6,9 @@ Write the argument before the prose. We plan papers in this order, and each step
 \begin{description}
   \item[Problem] The entry point, and the only step you need to start. One paragraph: who has what problem, what goes wrong for them today, and one concrete scenario in which it goes wrong. The scenario becomes the running example, and the paragraph becomes the first page of \tplref{ch:intro}. If you can write it, you can start the literature review; if you cannot, bring what you have to the next consultation and we write it together.
   \item[Spine] One page that fixes the claims, the terminology and the notation of the whole paper. Every chapter, figure and review is checked against it. Its worst enemy is drift: terms, symbols and claims quietly changing between chapters.
-  \item[Skeleton mind map] The argument made explicit before any prose: each chapter broken into paragraphs, each paragraph reduced to its topic sentence and a pointer to the evidence that backs it. Drafting then means filling in sentences around a skeleton already known to be sound. A mind map, on paper or in a tool, is the quickest way to draw it; \cref{fig:mindmap} shows one for a made-up paper, at the level of detail we expect. \Cref{fig:template-skeleton} is the same picture for this template's own beats: the generic argument every chapter file starts from. Your skeleton is built per topic and will not look like either; what carries over is the shape.
+  \item[Skeleton mind map] The argument made explicit before any prose: each chapter broken into paragraphs, each paragraph reduced to its topic sentence and a pointer to the evidence that backs it. Drafting then means filling in sentences around a skeleton already known to be sound. A mind map, on paper or in a tool, is the quickest way to draw it; \cref{fig:mindmap} shows one for the guide's running example, a made-up paper, at the level of detail we expect. \Cref{fig:template-skeleton} is the same picture for this template's own beats: the generic argument every chapter file starts from. Your skeleton is built per topic and will not look like either; what carries over is the shape.
   \item[Running example] One concrete scenario that every chapter returns to. Name it once with \texttt{\textbackslash exname} in \texttt{thesis.tex}, introduce it in \tplref{ch:intro}, and revisit it in every chapter in a \texttt{runningexample} box: what each concept, component, measurement or competitor does with it. A reader who follows only the boxes should understand the paper.
-  \item[Beats] The moves inside each paragraph of the skeleton: what it establishes, which evidence it uses, what the running example shows there, and how it leads to the next one. The chapters of this template start every paragraph with a \texttt{\textbackslash beat\{establishes\}\{evidence\}\{running example\}\{leads to\}}; it prints as a todo, so it disappears from the final version.
+  \item[Beats] The moves inside each paragraph of the skeleton: what it establishes, which evidence it uses, what the running example shows there, and how it leads to the next one. \Cref{app:chapters} gives every heading of the template the generic beat of its paragraph. Write your own, specific to your topic, at the top of each paragraph you plan: \texttt{\textbackslash beat\{establishes\}\{evidence\}\{running example\}\{leads to\}}. It prints as a todo, so it disappears from the final version.
 \end{description}
 
 \begin{figure}[p]
@@ -23,54 +23,61 @@ Write the argument before the prose. We plan papers in this order, and each step
     where level=0{text width=2.4cm, font=\footnotesize}{},
     where level=1{text width=2.5cm}{},
     where level=2{text width=9.3cm}{},
-    [{\textbf{Conflict-free room booking on interval graphs}}
+    [{\textbf{Revoking\\credentials\\with bounded\\staleness}}
       [{\textbf{1 Introduction}}
-        [{Shared rooms are double-booked when two services write the same calendar \textit{[incident report, cited]}}]
-        [{Existing booking systems lock the calendar; under load the lock is the bottleneck \textit{[vendor docs, our measurement]}}]
-        [{Running example: a faculty with 40 rooms and three booking front ends}]
-        [{Claim: bookings are conflict-free iff the interval graph of requests is properly coloured by rooms \textit{[Thm 3.1]}}]
-        [{RQ1 correctness, RQ2 scalability, RQ3 robustness; C1 model, C2 service, C3 evaluation}]
+        [{Digital credentials are checked offline, so a revocation must reach the verifier another way \textit{[incident report, cited]}}]
+        [{Running example: a revoked diploma that an employer still accepts, because its status copy is stale}]
+        [{REQ1 timely revocation (within $\delta$), REQ2 offline checks, REQ3 holder privacy \textit{[Tab. 6.1]}}]
+        [{Gap: no existing approach meets REQ1--REQ3 together \textit{[approaches, cited]}}]
+        [{C1 model, C2 registry, C3 evaluation; RQ1 correctness, RQ2 scalability, RQ3 robustness \textit{[Fig. 1.1]}}]
       ]
       [{\textbf{2 Background}}
-        [{Interval graphs: definition, perfectness, greedy colouring in $O(n \log n)$ \textit{[Golumbic, cited]}}]
-        [{Alloy and TLA+: what each checks, which we use for what}]
-        [{Example: one day of the faculty's requests as an interval graph}]
+        [{Issuer, holder, verifier; what a revocation status is and how stale a copy can be \textit{[definition, cited]}}]
+        [{Accumulators: membership witness, update cost \textit{[definition, cited]}}]
+        [{Permissioned ledgers: writers, readers, finality \textit{[definition, cited]}}]
+        [{Dolev--Yao adversary and the Tamarin prover \textit{[tool paper, cited]}}]
       ]
       [{\textbf{3 Approach}}
-        [{Booking as online colouring: a request is an interval, a room is a colour \textit{[Def. 3.1]}}]
-        [{Threat model: a front end may replay or reorder requests, the store is trusted, clocks drift by at most $\delta$; what is out of scope \textit{[AS1--AS3, ADV1--ADV2]}}]
-        [{Theorem 3.1: the service never double-books \textit{[proof; Alloy model]}}]
-        [{Theorem 3.2: rooms used $\le$ max overlap $+ 1$ \textit{[proof]}}]
-        [{Theorem 3.3: liveness under crash and recovery \textit{[TLA+ model, TLC]}}]
-        [{Theorem 3.4: no booking is lost or duplicated under a replaying front end \textit{[TLA+ model; AS1--AS3]}}]
-        [{Example: a conflicting request pair and how the service rejects it}]
+        [{Overview: a check reads one accumulator witness \textit{[Fig. 3.1]}}]
+        [{Model: registry state, revocation, staleness of a verifier's copy \textit{[Def. 3.1]}}]
+        [{Check: one witness, offline (REQ2), credential not named (REQ3) \textit{[Alg. 3.1]}}]
+        [{Adversary: ADV1 a malicious holder replaying an old status proof, ADV2 a Dolev--Yao network adversary \textit{[ADV1--ADV2]}}]
+        [{Assumptions: AS1 sound signatures and accumulator, AS2 clock drift at most $\delta$, AS3 honest-but-curious operator \textit{[AS1--AS3]}}]
+        [{Out of scope: denial of service, compromised holder devices}]
+        [{Lemma 3.1: status proofs are fresh \textit{[Tamarin model; AS1, AS2]}}]
+        [{Theorem 3.1 = SG1: under AS1--AS3, against ADV1 and ADV2, a verifier rejects every credential revoked more than $\delta$ before the check \textit{[Tamarin proof]}}]
+        [{Example: the diploma presented with an old status proof is rejected}]
       ]
       [{\textbf{4 Implementation}}
-        [{Architecture: front ends, the colouring service, the calendar store \textit{[Fig. 4.1]}}]
-        [{Design decisions: in-memory interval tree, idempotent requests \textit{[code, archived]}}]
-        [{What is reused (store, web framework) and what is new (the service)}]
+        [{Architecture: registry service, verifier library, reused ledger \textit{[Fig. 3.1]}}]
+        [{Design: signed accumulator values, not ledger reads \textit{[alternative rejected]}}]
+        [{The verifier's check: signed and younger than $\delta$ \textit{[listing, tests]}}]
+        [{Code and scripts archived on Zenodo, with the rerun command \textit{[archived code]}}]
       ]
       [{\textbf{5 Evaluation}}
-        [{Correctness: Alloy finds no counterexample up to 12 rooms; 200 property-based tests \textit{[Tab. 5.1]}}]
-        [{Three representative days: exam week, a conference, an ordinary Tuesday \textit{[Tab. 5.2]}}]
-        [{Statistics: 1\,000 generated days, conflict rate and rooms used vs.\ the lock-based baseline \textit{[Fig. 5.2]}}]
-        [{Scalability: latency vs.\ requests per second up to 10$\times$ the faculty's load \textit{[Fig. 5.3]}}]
-        [{Robustness: crash of the service mid-day, clock skew, duplicate requests \textit{[Tab. 5.3, Fig. 5.4]}}]
-        [{Threats to validity: generated workloads, one faculty's shape of day}]
+        [{Setup: one 8-core cloud VM, 10 runs, fresh issuer sets \textit{[rerun command]}}]
+        [{RQ1 correctness: proofs per guarantee, tests per requirement \textit{[Tab. 5.1]}}]
+        [{The scenario before and after, as a sequence chart \textit{[Fig. 5.1]}}]
+        [{RQ2 scalability: checks stay within one round trip up to 10\,000 issuers; a list-based baseline grows linearly \textit{[Fig. 5.2]}}]
+        [{Storage grows with the credentials ever issued \textit{[Fig. 5.2]}}]
+        [{RQ3 robustness: a ledger node crash, a revocation burst, clock drift and $\delta$ varied \textit{[Tab. 5.2, Fig. 5.3]}}]
+        [{Threats to validity: synthetic issuer sets, one cloud VM}]
       ]
       [{\textbf{6 Related work}}
-        [{Lock-based and queue-based booking systems \textit{[three products, cited]}}]
-        [{Online interval colouring in theory \textit{[Kierstead--Trotter, cited]}}]
-        [{Gap matrix: no system both proves conflict-freedom and bounds rooms used \textit{[Tab. 6.1]}}]
+        [{Family A: how it works, which of REQ1--REQ3 it gives up \textit{[approaches, cited]}}]
+        [{Family B: how it works, which of REQ1--REQ3 it gives up \textit{[approaches, cited]}}]
+        [{Family C: how it works, which of REQ1--REQ3 it gives up \textit{[approaches, cited]}}]
+        [{Gap matrix: no family meets REQ1--REQ3 together \textit{[Tab. 6.1, Fig. 6.1]}}]
       ]
       [{\textbf{7 Conclusion}}
-        [{C1--C3 restated with their evidence}]
-        [{Limitations: fixed room sizes, no recurring bookings}]
-        [{Future work: weighted intervals, a formal model of the front ends}]
+        [{C1--C3 restated with their evidence \textit{[Thm 3.1, Fig. 5.2, Tab. 5.1]}}]
+        [{LIM1 synthetic workloads \textit{[threats to validity]}}]
+        [{LIM2 the registry cannot force an issuer to revoke \textit{[scope of SG1]}}]
+        [{Future work: real issuer workloads; holding issuers to their revocation duty}]
       ]
     ]
   \end{forest}
-  \caption{A skeleton mind map for a made-up paper: a room-booking service whose correctness rests on interval graph colouring. Every leaf is one paragraph's topic sentence, and the bracketed italics name the evidence behind it: a theorem, a model, a table, a figure or a citation. A skeleton at this level of detail shows whether the argument holds before a sentence of prose exists, and it is what the spine anchor of \cref{tab:lifecycle} is checked against. Copy the shape, not the topic: one leaf per paragraph, evidence on every leaf that makes a claim, and the running example visible in every chapter.}\label{fig:mindmap}
+  \caption{A skeleton mind map for the guide's running example, the credential revocation registry, whose items \cref{app:chapters} renders chapter by chapter, so one paper can be followed from skeleton to items. Every leaf is one paragraph's topic sentence, and the bracketed italics name the evidence behind it: a theorem, a model, a table, a figure or a citation. A skeleton at this level of detail shows whether the argument holds before a sentence of prose exists, and it is what the spine anchor of \cref{tab:lifecycle} is checked against. Copy the shape, not the topic: one leaf per paragraph, evidence on every leaf that makes a claim, and the running example visible in every chapter.}\label{fig:mindmap}
 \end{figure}
 
 
@@ -125,11 +132,11 @@ Write the argument before the prose. We plan papers in this order, and each step
       ]
     ]
   \end{forest}
-  \caption{The template's own beats drawn as a skeleton: one leaf per \texttt{\textbackslash beat} in the chapter files, the topic it establishes first and its evidence in brackets. This is the generic argument the template starts you from, not a skeleton to copy: \cref{fig:mindmap} shows what a topic's own skeleton looks like once the claims, examples and evidence are specific, and yours will have more leaves where your contribution is and fewer elsewhere.}\label{fig:template-skeleton}
+  \caption{The template's own beats drawn as a skeleton: one leaf per beat of \cref{app:chapters}, the topic it establishes first and its evidence in brackets. This is the generic argument the template starts you from, not a skeleton to copy: \cref{fig:mindmap} shows what a topic's own skeleton looks like once the claims, examples and evidence are specific, and yours will have more leaves where your contribution is and fewer elsewhere.}\label{fig:template-skeleton}
 \end{figure}
 
 \section{The essentials}\label{app:writing:essentials}
-Every paper of this kind contains the same two dozen elements, whatever its topic: a problem statement, requirements, a leading figure, a threat model, research questions, a gap matrix, a summary with its evidence, and the rest of the list below. They are the leaves of \cref{fig:template-skeleton} that a reviewer looks for by name, and the review sheet scores each of them somewhere; the letter after each row names the criterion. The lint calls them the \emph{essentials} and measures every paper against the same list, so the Checks page at the front of the draft shows where yours stands, and the job summary of your repository's CI opens with the same marks in one line. The list lives in \texttt{scripts/lint/essentials.lua}, and this section is printed from it by \texttt{make essentials}: delete the template's skeleton chapters and the list still holds.
+Every paper of this kind contains the same two dozen elements, whatever its topic: a problem statement, requirements, a leading figure, a threat model, research questions, a gap matrix, a summary with its evidence, and the rest of the list below. They are the leaves of \cref{fig:template-skeleton} that a reviewer looks for by name, and the review sheet scores each of them somewhere; the letter after each row names the criterion. The lint calls them the \emph{essentials} and measures every paper against the same list, so the Checks page at the front of the draft shows where yours stands, and the job summary of your repository's CI opens with the same marks in one line. The list lives in \texttt{scripts/lint/essentials.lua}, and this section is printed from it by \texttt{make essentials}: delete the template's skeleton chapters and the list still holds. Each row links to the same item in action in \cref{app:chapters}.
 
 \input{guide/essentials}
 

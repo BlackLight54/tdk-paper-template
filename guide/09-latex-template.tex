@@ -138,35 +138,12 @@ Tagged lists give short, stable names to the things a paper argues about: C for 
 Each item starts with a short name in bold, and a gap-matrix row reuses its requirement's name.
 A reference prints the tag alone, so the sentence around it reads as if the tag were typed by hand: \verb|\cref{asm:latex:clock}| prints \cref{asm:latex:clock}, and three or more in a row become a range.
 Add a new kind with one \texttt{\textbackslash NewTagList} line in \texttt{include/preamble.tex}.
-\begin{contributions}
-  \item\label{c:latex:model} \textbf{Registry model.} A formal model of revocation registries.
-  \item\label{c:latex:impl} \textbf{Ledger implementation.} An implementation on a permissioned ledger.
-\end{contributions}
-\begin{rqlist}
-  \item\label{rq:latex:latency} \textbf{Latency.} How long does a revocation take to become visible?
-\end{rqlist}
-\begin{requirements}
-  \item\label{req:latex:offline} \textbf{Offline checks.} Verifiers can check revocation status offline.
-\end{requirements}
-Derived requirements are what the design itself must do for the guarantees to hold. A test or a proof checks each, and none is a row of the gap matrix:
-\begin{derivedrequirements}
-  \item\label{dr:latex:owner} \textbf{Owner-only writes.} Only the issuer of a registry can change its state.
-\end{derivedrequirements}
-The threats list names the adversaries, and the attacks they try are rows of the threat model's attacks table:
-\begin{threats}
-  \item\label{thr:latex:holder} \textbf{Malicious holder.} A holder who keeps a credential after its revocation and replays it.
-\end{threats}
+Every kind is shown with content where a paper uses it, in \cref{app:chapters}: contributions and requirements in the introduction; threats, assumptions, guarantees and derived requirements in the approach; research questions in the evaluation; limitations in the conclusion. Here, one list and its references:
 \begin{assumptions}
   \item\label{asm:latex:clock} \textbf{Bounded drift.} Participants' clocks drift by at most $\delta$.
   \item\label{asm:latex:sig} \textbf{Unforgeable signatures.} The issuer's signature scheme is unforgeable.
   \item\label{asm:latex:ledger} \textbf{Ledger integrity.} Committed ledger history does not change.
 \end{assumptions}
-\begin{guarantees}
-  \item\label{g:latex:detect} \textbf{Replay detection.} Under \cref{asm:latex:clock,asm:latex:sig,asm:latex:ledger}, against \cref{thr:latex:holder}, every replay is rejected within $\delta$.
-\end{guarantees}
-\begin{limitations}
-  \item\label{lim:latex:liveness} \textbf{No forced revocation.} The registry cannot force an issuer to revoke.
-\end{limitations}
 When the items already live in a table, \verb|\tagrow{guarantees}| gives a row the list's next tag, and the row takes a label:
 \begin{center}
 \begin{tabular}{@{}lll@{}}
@@ -177,7 +154,7 @@ When the items already live in a table, \verb|\tagrow{guarantees}| gives a row t
   \bottomrule
 \end{tabular}
 \end{center}
-References: \cref{c:latex:model,c:latex:impl}, \cref{rq:latex:latency}, \cref{req:latex:offline}, \cref{dr:latex:owner}, \cref{thr:latex:holder}, \cref{asm:latex:clock,asm:latex:sig,asm:latex:ledger}, \cref{g:latex:detect,g:latex:monotone}, \cref{lim:latex:liveness}.
+References: \cref{asm:latex:clock}, \cref{asm:latex:clock,asm:latex:sig}, \cref{asm:latex:clock,asm:latex:sig,asm:latex:ledger}, \cref{g:latex:monotone}.
 
 Inline lists: the protocol has three roles, \begin{enumerate*}[label=(\roman*)] \item issuer, \item holder, and \item verifier. \end{enumerate*}
 Compact lists:

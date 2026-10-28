@@ -185,6 +185,14 @@
 % A beat: the plan of one paragraph (see the Writing chapter of the guide). Prints as a student todo.
 %   \beat{what it establishes}{its evidence}{what the running example shows here}{what it leads to}
 \newcommand{\beat}[4]{\todo[inline, caption={Beat: #1}]{\textbf{Beat.} \textit{Establishes:} #1. \textit{Evidence:} #2. \textit{Running example:} #3. \textit{Leads to:} #4.}}
+% A heading's pointer to its instruction and example in the guide chapter "The paper, chapter by
+% chapter" (guide/chapter-by-chapter.tex). Prints as a student todo, so the reviewer build drops it.
+%   \guidetodo{Context}{app:chapters:context}
+\newcommand{\guidetodo}[2]{\todo[inline, caption={#1}]{\textbf{#1.} What goes here, with an example: \cref{#2}.}}
+% The guide prints its beats as text, so they stay out of the paper's list of todos, and marks a
+% heading whose section holds something a skimming reviewer reads.
+\newcommand{\guidebeat}[4]{\par{\small\color{gray!30!black}\textbf{Beat.} \textit{Establishes:} #1. \textit{Evidence:} #2. \textit{Running example:} #3. \textit{Leads to:} #4.\par}\smallskip}
+\newcommand{\skimmark}{\enspace{\small\faEye}}
 
 % The running example, named once in thesis.tex (\exname) and revisited in every chapter.
 %   \begin{runningexample}[what this chapter adds] ... \end{runningexample}
@@ -209,8 +217,6 @@
 \deftplref{ch:related}{the related-work chapter}{The related-work chapter}{06-related-work}
 \deftplref{fig:overview}{the leading figure}{The leading figure}{01-introduction}
 \deftplref{fig:positioning}{the positioning figure}{The positioning figure}{06-related-work}
-\deftplref{fig:scalability}{the scalability figure}{The scalability figure}{05-evaluation}
-\deftplref{tab:robustness}{the robustness table}{The robustness table}{05-evaluation}
 \deftplref{aidecl}{the AI declaration}{The AI declaration}{09-ai-declaration}
 
 % A web link that looks like one: underlined, in the link color. Links set with \href or \url
