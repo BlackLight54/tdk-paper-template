@@ -22,6 +22,18 @@ check:
 lint-%:
 	$(LINT) $*
 
+# The fixes the lint suggests (scripts/lint/fixes.lua): fix writes the safe ones and prints the
+# diff, fix-dry only prints it, fix-review writes the ones to read first as well. Placeholders are
+# never written: the lint prints them, you fill in their holes.
+fix:
+	$(LINT) fix
+
+fix-dry:
+	$(LINT) fix --dry-run
+
+fix-review:
+	$(LINT) fix --review
+
 # The same against the reviewer build, which is the one the page count and the todos are judged on.
 check-reviewer: reviewer
 	$(LINT) all --doc reviewer
@@ -43,4 +55,4 @@ essentials:
 guide-bib:
 	texlua scripts/guide-bib.lua
 
-.PHONY: all reviewer clean check check-reviewer check-final guide-bib skeleton essentials
+.PHONY: all reviewer clean check check-reviewer check-final fix fix-dry fix-review guide-bib skeleton essentials
