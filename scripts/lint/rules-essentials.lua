@@ -503,6 +503,18 @@ local function write_summary(rows)
   h:close()
 end
 
+-- the label of a row found by its heading, right after the heading; safe, since a label prints
+-- nothing, unless a file of the paper already defines it
+local function label_fix(r)
+  local label = "\\label{" .. r.label .. "}"
+  local taken = false
+  for _, f in ipairs(C.CONTENT) do if C.file_has(f, label) then taken = true end end
+  local first = true
+  return C.fix(taken and "review" or "safe", "add " .. label, table.unpack(C.matches(C.raw_lines(r.where.file)[r.where.line], "\\" .. r.cmd .. "%*?%s*%b{}", function(m)
+    if first then first = false; return m .. label end
+  end)))
+end
+
 C.rule("essentials", "source", "check", "always", "the essentials every paper of this kind contains, from scripts/lint/essentials.lua, each missing, a placeholder, started, written or used where the argument needs it; the phase asks for a level of every row (plan: present, draft: started, polish and final: used)", function()
   local rows = M.evaluate()
   C.ESSENTIALS = rows
@@ -514,7 +526,7 @@ C.rule("essentials", "source", "check", "always", "the essentials every paper of
     local line = r.where and r.where.line
     local msg = string.format("%s %s: %s", M.GLYPH[r.level], r.row.title, r.next ~= "" and r.next or M.LEVEL_NAME[r.level])
     if r.level < t then fail(file, line, msg) end
-    if r.via == "heading" then note(file, line, string.format("%s found by its heading; add \\label{%s} so it is found when the heading changes", r.row.title, r.label)) end
+    if r.via == "heading" then note(file, line, string.format("%s found by its heading; add \\label{%s} so it is found when the heading changes", r.row.title, r.label), label_fix(r)) end
   end
   for _, w in ipairs(M.gapwarn) do warn(C.ROLE.related, nil, w) end
   if not C.opts.tex and not C.opts.json and not C.opts.quiet then io.write(M.fingerprint(rows), "\n") end
