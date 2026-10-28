@@ -20,9 +20,9 @@
   	\szerzo \\
 	\if\relax\detokenize\expandafter{\tdkszerzoB}\relax\else\tdkszerzoB \\\fi % second author, if any
   	\vspace{1.5cm}
-  	\konzulens: \\ \vspace{0.3cm}
+  	\if\relax\detokenize\expandafter{\vikkonzulensBVezeteknev}\relax\konzulens\else\konzulensek\fi: \\ \vspace{0.3cm}
   	\vikkonzulensA \\
-  	\vikkonzulensB \\
+	\if\relax\detokenize\expandafter{\vikkonzulensBVezeteknev}\relax\else\vikkonzulensB \\\fi % second advisor, if any
   }
   
   \vspace{2cm}
