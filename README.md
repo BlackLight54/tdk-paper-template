@@ -22,4 +22,5 @@ the notes repository and [tdk-code-template](https://github.com/BlackLight54/tdk
 for the code repository. The guide, in the draft PDF after the appendices, explains all three.
 
 Build locally with `make all` (draft) and `make reviewer`, in a TeX Live with XeLaTeX, Inkscape
-and shell escape; `make check-reviewer` runs the lint on the reviewer build.
+and shell escape; `make check-reviewer` runs the lint on the reviewer build, and `make check-final`
+runs it at the final phase: the check before you upload.

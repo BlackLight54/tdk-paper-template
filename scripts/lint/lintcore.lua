@@ -146,15 +146,33 @@ function M.roles_ok(list)
   return ok
 end
 
--- the manual phase, from \newcommand{\lintphase}{...} in thesis.tex (or --phase / LINT_PHASE)
+-- a \newcommand in thesis.tex that the lint reads as its setting (\lintphase):
+-- its body, trimmed, or nil when thesis.tex does not define it or defines it only in a comment
+function M.setting(name)
+  for _, l in ipairs(M.lines("thesis.tex")) do
+    local v = M.strip_comment(l):match("\\%a*newcommand%s*{?%s*\\" .. name .. "%s*}?%s*(%b{})")
+    if v then return M.trim(v:sub(2, -2)) end
+  end
+end
+-- the manual phase: --phase, else LINT_PHASE, else \lintphase in thesis.tex, else plan. A value
+-- that is none of the four is an error, never read as plan: lint.lua stops on it before any rule
+function M.resolve_phase()
+  local p, src = M.opts.phase, "--phase"
+  if not p then
+    p, src = os.getenv("LINT_PHASE"), "LINT_PHASE"
+    if p == "" then p = nil end -- an empty variable is an unset one
+  end
+  if not p then p, src = M.setting("lintphase"), "\\lintphase in thesis.tex" end
+  if not p then p, src = "plan", "the default" end
+  M.opts.phase, M.opts.phase_source = p, src
+  if not M.PHASES[p] then return nil, string.format("unknown phase '%s' from %s: use plan, draft, polish or final", p, src) end
+  return p
+end
 function M.phase()
-  if M.opts.phase then return M.opts.phase end
-  local p = os.getenv("LINT_PHASE")
-  if not p then p = (M.readfile("thesis.tex") or ""):match("\\newcommand{\\lintphase}{(%a+)}") end
-  M.opts.phase = p or "plan"
+  if not M.opts.phase_source then M.resolve_phase() end
   return M.opts.phase
 end
-function M.phase_reached(due) if due == "always" then return true end; return (M.PHASES[M.phase()] or 1) >= (M.PHASES[due] or 1) end
+function M.phase_reached(due) if due == "always" then return true end; return M.PHASES[M.phase()] >= M.PHASES[due] end
 
 -- findings and reporting -------------------------------------------------------------
 local gh = os.getenv("GITHUB_ACTIONS") ~= nil
