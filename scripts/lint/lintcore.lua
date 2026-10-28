@@ -117,25 +117,40 @@ function M.bib_entries()
   end
   return bib_cache
 end
--- every key cited by \cite, \citet, \citep, \citeauthor, \Citet and the rest of the family (not
--- \nocite, not the \citeneeded marker), as fn(file, line, key)
-function M.each_cite(files, fn)
-  M.each_line(files, function(f, n, l)
-    local pos = 1
+-- every call of a command whose name passes want(name) in the printed text of the files (no
+-- comments, commented-out environments, code, todo notes or beats: M.printed_lines), with up to
+-- two optional [..] arguments and its first {..} argument, which may each be preceded by spaces
+-- or a line break and may span lines, as TeX reads them: fn(file, line of the command, name, arg)
+function M.each_call(files, want, fn)
+  for _, f in ipairs(files) do
+    local text = table.concat(M.printed_lines(f), "\n")
+    local pos, line, counted = 1, 1, 1
     while true do
-      local s, e = l:find("\\[cC]ite%a*%*?", pos); if not s then break end
+      local s, e, name = text:find("\\(%a+%*?)", pos)
+      if not s then break end
       pos = e + 1
-      if l:sub(s + 1, e) ~= "citeneeded" then
-        if l:sub(pos, pos) == "[" then local _, be = l:find("%b[]", pos); pos = (be or pos) + 1 end
-        if l:sub(pos, pos) == "[" then local _, be = l:find("%b[]", pos); pos = (be or pos) + 1 end
-        local bs, be = l:find("%b{}", pos)
-        if bs == pos then
-          for k in l:sub(bs + 1, be - 1):gmatch("[^,%s]+") do fn(f, n, k) end
+      if want(name) then
+        local i = text:match("^%s*()", pos)
+        for _ = 1, 2 do
+          local _, be = text:find("^%b[]", i)
+          if not be then break end
+          i = text:match("^%s*()", be + 1)
+        end
+        local _, be = text:find("^%b{}", i)
+        if be then
+          line = line + M.count(text:sub(counted, s - 1), "\n"); counted = s
+          fn(f, line, name, text:sub(i + 1, be - 1))
           pos = be + 1
         end
       end
     end
-  end)
+  end
+end
+-- every key cited by \cite, \citet, \citep, \citeauthor, \Citet and the rest of the family (not
+-- \nocite, not the \citeneeded marker), as fn(file, line, key)
+local function is_cite(name) return name:match("^[cC]ite%a*%*?$") ~= nil and name ~= "citeneeded" end
+function M.each_cite(files, fn)
+  M.each_call(files, is_cite, function(f, n, _, arg) for k in arg:gmatch("[^,%s]+") do fn(f, n, k) end end)
 end
 -- a rule that needs chapters by role calls this first; it fails with the right message and returns false
 function M.roles_ok(list)
@@ -146,7 +161,7 @@ function M.roles_ok(list)
   return ok
 end
 
--- a \newcommand in thesis.tex that the lint reads as its setting (\lintphase):
+-- a \newcommand in thesis.tex that the lint reads as its setting (\lintphase, \lintcompanion):
 -- its body, trimmed, or nil when thesis.tex does not define it or defines it only in a comment
 function M.setting(name)
   for _, l in ipairs(M.lines("thesis.tex")) do
@@ -303,7 +318,11 @@ end
 -- tikzpicture and axis blocks, and listings removed; line numbers preserved as empty lines
 -- environments that hold no prose: commented-out text, pictures, code and display maths
 M.NONPROSE = { "comment", "tikzpicture", "lstlisting", "minted", "forest", "equation", "equation*", "align", "align*", "gather", "gather*", "multline", "multline*", "displaymath" }
-function M.prose_lines(file)
+-- environments whose text never prints as text: commented-out text and code. M.printed_lines
+-- keeps pictures and maths, where a \cite or \url prints like anywhere else
+M.UNPRINTED = { "comment", "lstlisting", "minted" }
+function M.printed_lines(file) return M.prose_lines(file, M.UNPRINTED) end
+function M.prose_lines(file, skip)
   local out, depth, intodo, inblock = {}, 0, false, nil
   for _, raw in ipairs(M.lines(file)) do
     local l = M.strip_comment(raw)
@@ -314,12 +333,12 @@ function M.prose_lines(file)
         local s, e, name = l:find("\\(%a*todo)%s*%[?", i)
         local bs = l:find("\\beat{", i, true)
         local blk, bstart
-        for _, b in ipairs(M.NONPROSE) do
+        for _, b in ipairs(skip or M.NONPROSE) do
           local p = l:find("\\begin{" .. b .. "}", i, true)
           if p and (not bstart or p < bstart) then blk, bstart = "\\end{" .. b .. "}", p end
         end
         local dm = l:find("\\[", i, true) -- display maths \[ ... \], but not the line break \\[2pt]
-        if dm and l:sub(dm - 1, dm - 1) ~= "\\" and (not bstart or dm < bstart) then blk, bstart = "\\]", dm end
+        if dm and not skip and l:sub(dm - 1, dm - 1) ~= "\\" and (not bstart or dm < bstart) then blk, bstart = "\\]", dm end
         local first = math.min(s or math.huge, bs or math.huge, bstart or math.huge)
         if first == math.huge then keep[#keep + 1] = l:sub(i); break end
         keep[#keep + 1] = l:sub(i, first - 1)
