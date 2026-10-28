@@ -506,25 +506,43 @@ end)
 -- other source; so is this year's once a thesis builds on it (LINT_PROFILE=thesis).
 local TDK_NAMES = { "%f[%a]o?tdk%f[%A]", "tudom%S*nyos%s+di%S*kk%S*ri", "scientific%s+students?%f[%A]",
   "students?%S*%s+scientific%s+conference", "students?%S*%s+scientific%s+association" }
--- what a link points at, when it is a draft or a TDK paper of the given year
-local function companion_link(url, year)
+-- the github.com/<owner>/<name> a URL or bib entry points into, lower case, without .git
+local function github_repo(s)
+  local r = s:lower():match("github%.com/[^/%s{}\",]+/[^/%s{}\",?#]+")
+  return r and (r:gsub("%.git$", ""))
+end
+-- this paper's own repository: the first GitHub repository the implementation chapter cites or
+-- links, as the template's overview does; its tdkYY name makes it no companion paper
+local function own_repo(entries)
+  local own
+  C.each_call(C.role_files("implementation"), function(name) return name == "url" or name == "href" or name == "weblink" or (name:match("^[cC]ite") and name ~= "citeneeded") end, function(_, _, name, arg)
+    if own then return end
+    if name:match("^[cC]ite") then
+      for k in arg:gmatch("[^,%s]+") do own = own or (entries[k] and github_repo(entries[k].body)) end
+    else own = github_repo(arg) end
+  end)
+  return own
+end
+-- what a link points at, when it is a draft or a TDK paper of the given year, other than own
+local function companion_link(url, year, own)
   local u = url:lower()
   if u:find("overleaf%.com/project/") or u:find("overleaf%.com/read/") then return "an Overleaf project, a draft no reviewer can open," end
   local y = u:match("tdk%.bme%.hu/conference/[^/]+/(%d%d%d%d)/sessions/")
   if y and tonumber(y) >= year then return "a paper of the " .. y .. " TDK on the portal" end
-  if u:find("github%.com/[^/]+/[^/]*tdk" .. string.format("%02d", year % 100) .. "%f[%D]") then return "the repository of a " .. year .. " TDK paper" end
+  if u:find("github%.com/[^/]+/[^/]*tdk" .. string.format("%02d", year % 100) .. "%f[%D]") and github_repo(u) ~= own then return "the repository of a " .. year .. " TDK paper" end
 end
 rule("companion", "source", "check", "always", "a TDK paper of the same year is a companion paper: never cited or linked (Overleaf, its portal page, its repository), and no citation or link is attached to the words companion paper; what this paper needs from it is restated in the background", function()
   if C.opts.profile == "thesis" then C.skip("a thesis may cite the TDK paper it grew from"); return end
   local year = tonumber((C.readfile("include/tdk-variables.tex") or ""):match("\\newcommand{\\tdkev}{%s*(%d%d%d%d)%s*}")) or tonumber(os.date("%Y"))
   local entries, first, times, flagged = C.bib_entries(), {}, {}, {}
+  local own = own_repo(entries)
   local function flag(f, n, msg) flagged[f .. ":" .. n] = true; fail(f, n, msg) end
   C.each_cite(CONTENT, function(f, n, k)
     first[k] = first[k] or { f, n }; times[k] = (times[k] or 0) + 1
   end)
   for k, at in pairs(first) do
     local e = entries[k]
-    if e then
+    if e and not (own and github_repo(e.body) == own) then
       -- Zotero writes accents as {\'a}: drop the commands and braces before matching the names
       local plain = e.body:lower():gsub("\\%p", ""):gsub("\\%a+%s?", ""):gsub("[{}]", "")
       local tdk = false
@@ -535,7 +553,7 @@ rule("companion", "source", "check", "always", "a TDK paper of the same year is 
         flag(at[1], at[2], string.format("%s is a TDK paper of %s, %s: a paper of the same TDK is a companion paper; write \"a companion paper\" instead of citing it, and restate what this paper needs from it in the background, or as a last resort in an appendix", k, ey or "unknown year", cited))
       else
         for url in e.body:gmatch("https?://[^%s{}\"]+") do
-          local what = companion_link(url, year)
+          local what = companion_link(url, year, own)
           if what then flag(at[1], at[2], string.format("%s, %s, points at %s: a TDK paper of the same year is a companion paper, named as one, never cited", k, cited, what)); break end
         end
       end
@@ -545,7 +563,7 @@ rule("companion", "source", "check", "always", "a TDK paper of the same year is 
     C.each_line({ f }, function(_, n, l)
       for cmd, arg in l:gmatch("\\(%a+)%s*(%b{})") do
         if cmd == "url" or cmd == "href" or cmd == "weblink" then
-          local what = companion_link(arg:sub(2, -2), year)
+          local what = companion_link(arg:sub(2, -2), year, own)
           if what then flag(f, n, "links " .. what .. ": a TDK paper of the same year is a companion paper, named as one, never linked") end
         end
       end
