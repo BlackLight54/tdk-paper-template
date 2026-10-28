@@ -88,7 +88,7 @@ Red rows mark anchors. Yellow rows marked \official{} are faculty steps with fix
 Run the reviewer passes (\cref{app:lifecycle:reviewers}) at four steps of \cref{tab:lifecycle}: the premortem, the panel pass, the skim pass, and the reviews and questions. Each row says when the step is done.
 
 \section{Requirements}\label{app:lifecycle:polish}
-In this guide, \emph{must} marks a requirement and always names its source: the faculty (the call, the review sheet or the faculty's AI guideline) or us, the advisors. \emph{We recommend} marks our default, which you may depart from with a reason. \emph{You can} marks an option.
+The words \emph{must}, \emph{we recommend} and \emph{you can} mean what \cref{app:here:words} says.
 
 \Cref{tab:polish} lists the requirements, in the order they come due. A rule name marks a row the lint checks; \emph{reading} marks a row you check yourself. The lint's rows are checked by \texttt{make check-reviewer}, which runs every rule against the reviewer PDF (\cref{app:code:paperci}); keep them passing before the last week, as the paper CI runs them on every push. Use the polish phase for checks. Any row that takes more than an hour should have been completed in the draft phase. Before upload, set \texttt{\textbackslash lintphase} to \texttt{submit} and go through every row due by \texttt{submit}.
 {\small
