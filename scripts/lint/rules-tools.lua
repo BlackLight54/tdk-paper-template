@@ -161,7 +161,7 @@ rule("repo-hygiene", "tools", "check", "always", "the repository tracks no build
     if why then
       -- a command, so the fix is shown and never written
       local q = f:match("^[%w%._/%-]+$") and f or "'" .. f:gsub("'", "'\\''") .. "'"
-      n = n + 1; fail(f, nil, why .. " is tracked: git rm --cached it (the .gitignore keeps it out afterwards)", C.fix("review", "stop tracking it", C.command("git rm --cached " .. q)))
+      n = n + 1; fail(f, nil, why .. " is tracked", "git rm --cached it (the .gitignore keeps it out afterwards)", C.fix("review", "stop tracking it", C.command("git rm --cached " .. q)))
     end
   end
   return string.format("tracked=%d", n)

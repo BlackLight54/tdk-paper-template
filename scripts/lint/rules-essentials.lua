@@ -531,9 +531,9 @@ C.rule("essentials", "source", "check", "always", "the essentials every paper of
     counts[r.level] = counts[r.level] + 1
     local file = r.home
     local line = r.where and r.where.line
-    local msg = string.format("%s %s: %s", M.GLYPH[r.level], r.row.title, r.next ~= "" and r.next or M.LEVEL_NAME[r.level])
-    if r.level < t then fail(file, line, msg, r.fix) end
-    if r.via == "heading" then note(file, line, string.format("%s found by its heading; add \\label{%s} so it is found when the heading changes", r.row.title, r.label), label_fix(r)) end
+    local msg = string.format("%s %s", M.GLYPH[r.level], r.row.title)
+    if r.level < t then fail(file, line, msg, r.next ~= "" and r.next or M.LEVEL_NAME[r.level], r.fix) end
+    if r.via == "heading" then note(file, line, string.format("%s found by its heading", r.row.title), string.format("add \\label{%s} so it is found when the heading changes", r.label), label_fix(r)) end
   end
   for _, w in ipairs(M.gapwarn) do warn(C.ROLE.related, nil, w) end
   if not C.opts.tex and not C.opts.json and not C.opts.quiet then io.write(M.fingerprint(rows), "\n") end
