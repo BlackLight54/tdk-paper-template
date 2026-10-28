@@ -266,7 +266,7 @@ fun accept(cred, witness, acc, now):
 
 \textbf{In the sheet's words.} D/2 gives \enquote{3--4: jó (színvonalas kidolgozás, de esetleg egyes eredmények helyessége nincs kellőképpen alátámasztva)} when a result is reported without the setup that supports it, and E gives \enquote{1--2: nagyon hiányos -- ha a dolgozat bevezetése hiányos (tématerület áttekintése, bemutatása, problémafelvetés, fő kontribúció kimondása) VAGY az eredmények értékelése hiányzik ill. aránytalanul kis méretű vagy hibás} when the evaluation stops at small examples. An evaluation that goes beyond them but is incomplete or imprecise earns \enquote{3--4: pontatlan -- ha a dolgozat bevezetése megfelelő és a dolgozatban szerepel az eredmények kis mintapéldákon túlmenő értékelése is, de az utóbbi hiányos, pontatlan} or \enquote{5--6: pontos, de hiányos}.
 
-\textbf{Three kinds of work, one chapter.} The examples below primarily describe a measured system (track S). Formal work (track F: Tamarin or ProVerif models, Lean or Coq proofs, model checking) and benchmarked analysis tools (track T: detectors, static analysers, generators) answer the same three questions with different evidence. Use \cref{tab:guide:eval-tracks}, the alternative figures and tables, and the track F and T research questions, kept as comments beside the track S ones in \texttt{guide/05-chapter-by-chapter.tex}, to adapt the chapter.
+\textbf{Three kinds of work, one chapter.} The examples below primarily describe a measured system (track S). Formal work (track F: Tamarin or ProVerif models, Lean or Coq proofs, model checking) and benchmarked analysis tools (track T: detectors, static analysers, generators) answer the same three questions with different evidence. Use \cref{tab:guide:eval-tracks}, which also words the research questions for tracks F and T, and the alternative figures and tables to adapt the chapter.
 
 \begin{table}[!ht]
   \centering
@@ -277,6 +277,8 @@ fun accept(cred, witness, acc, now):
     \toprule
     & \textbf{S: system} & \textbf{F: formal} & \textbf{T: analysis tool} \\
     \midrule
+    Research questions & \Cref{rq:guide:correct,rq:guide:scale,rq:guide:robust} below & RQ1: does the model satisfy every property of the threat model, and does it find the known attacks? RQ2: how do verification time and memory grow with the size of the model, and where does the prover stop? RQ3: which properties survive a stronger adversary and each dropped assumption, and how do the others break? & RQ1: does the tool find the real instances in the benchmark, and only those? RQ2: how does analysis time grow with input size, and what is the largest real instance it handles? RQ3: how do the results change under parameter changes, mutated inputs, and a benchmark from another source? \\
+    \addlinespace
     Setup & Hardware, software versions, workloads, repetitions, the rerun command & Prover and version, heuristics and oracles, time limit, machine; which parts of the model are hand-written and which generated & Benchmark origin and size, how the ground truth was built, tool versions, the rerun command \\
     \addlinespace
     Correctness (\cref{rq:guide:correct}) & Test suite and model-checked properties per requirement; the running example before and after (\cref{tab:guide:correctness}, \cref{fig:guide:example-trace}) & Every property of the threat model proved, or an attack found: per lemma, proved, falsified with the trace, or timed out; the attack on the running example reconstructed (\cref{tab:guide:correctness}, one row per lemma) & Precision and recall against the ground truth, every false positive and false negative explained (\cref{tab:guide:precision}); the running example's verdict (\cref{fig:guide:example-trace}) \\
@@ -290,17 +292,11 @@ fun accept(cred, witness, acc, now):
 \end{table}
 
 \subsection[Research questions]{Research questions\skimmark}\label{app:chapters:research-questions}
-Use three research questions, one for each evaluation section below.
+Use three research questions, one for each evaluation section below. These are track S's; the first row of \cref{tab:guide:eval-tracks} words the same three for tracks F and T.
 \begin{rqlist}
   \item\label{rq:guide:correct} \textbf{Correctness.} Does the registry reject every revoked credential, in the scenario and in the model, against both adversaries?
-    % Track F: Does the model satisfy every property of the threat model, and does it find the known attacks?
-    % Track T: Does the tool find the real instances in the benchmark, and only those?
   \item\label{rq:guide:scale} \textbf{Scale.} How do the latency of a check and the registry's throughput grow with the number of issuers?
-    % Track F: How do verification time and memory grow with the size of the model, and where does the prover stop?
-    % Track T: How does analysis time grow with input size, and what is the largest real instance it handles?
   \item\label{rq:guide:robust} \textbf{Robustness.} How does the registry behave when a ledger node fails, under a burst of checks, and as $\delta$ varies?
-    % Track F: Which properties survive a stronger adversary and each dropped assumption, and how do the others break?
-    % Track T: How do the results change under parameter changes, mutated inputs, and a benchmark from another source?
 \end{rqlist}
 
 \subsection{Setup}\label{app:chapters:setup}
