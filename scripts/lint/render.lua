@@ -155,10 +155,16 @@ end
 -- what a fix writes, short enough for a cell: the replacement, the added line or the command;
 -- the cell's typewriter text breaks only at its spaces, so a long one is cut
 local function cut(s, n) if #s > n then return s:sub(1, n - 3):gsub("[\128-\191]*$", ""):gsub("[\192-\255]$", "") .. "..." end; return s end
+-- what an edit writes, in a few words: the new text, the added line, the command, or for a deletion
+-- the text it deletes
+local function edit_text(e)
+  if e.new == "" then return "delete " .. e.old end
+  return e.new or e.after or e.cmd
+end
 local FIX_NOTE = { review = "\\enspace{\\itshape read it first}", placeholder = "\\enspace{\\itshape fill in the <holes>}" }
 local function fix_cell(fx)
   local t = {}
-  for _, e in ipairs(fx.edits) do t[#t + 1] = e.new or e.after or e.cmd end
+  for _, e in ipairs(fx.edits) do t[#t + 1] = edit_text(e) end
   return "\\newline\\hspace*{1em}$\\to$ \\texttt{" .. esc(cut(table.concat(t, " / "), 70)) .. "}" .. (FIX_NOTE[fx.safety] or "")
 end
 
@@ -186,7 +192,7 @@ end
 -- a fix whose braces do not balance loses them, and % and # would end or break the line
 local function log_fix(fx)
   local t = {}
-  for _, e in ipairs(fx.edits) do t[#t + 1] = e.new or e.after or e.cmd end
+  for _, e in ipairs(fx.edits) do t[#t + 1] = edit_text(e) end
   local s = cut(table.concat(t, " / "), 120):gsub("[%%#\n]", " ")
   local depth, balanced = 0, true
   for c in s:gmatch("[{}]") do depth = depth + (c == "{" and 1 or -1); if depth < 0 then balanced = false end end
