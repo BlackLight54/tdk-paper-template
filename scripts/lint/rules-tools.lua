@@ -1,10 +1,10 @@
 -- Rules that wrap the tools TeX Live and the CI container provide: chktex, lacheck, texcount,
--- checkcites, the BibTeX log, hunspell. All report; none is a gate, because each has its noise.
+-- checkcites, the BibTeX log, aspell. All report; none is a gate, because each has its noise.
 local C = require("lintcore")
 local rule, fail, warn, note = C.rule, C.fail, C.warn, C.note
 
 rule("chktex", "tools", "advice", "always", "chktex: typographic slips in the sources (dashes, quotes, spacing before citations, \\ldots, maths in text)", function()
-  if not C.have("chktex") then warn(nil, nil, "chktex not installed: skipped"); return end
+  if not C.have("chktex") then C.skip("chktex not installed"); return end
   local n = 0
   -- off: 1 command terminated with space, 3 \( \) advice, 8 dash length, 13 \@ after a capital, 24 space before \label (the template puts it on its own line), 36 brace spacing, 44 user regex, 46 \( \)
   local out = C.run("chktex -q -I0 -n1 -n3 -n8 -n13 -n24 -n36 -n44 -n46 -f '%f:%l:%n:%m\n' " .. table.concat(C.MAIN, " ") .. " " .. (C.FILES.abstract or "")) or ""
@@ -17,7 +17,7 @@ rule("chktex", "tools", "advice", "always", "chktex: typographic slips in the so
 end)
 
 rule("lacheck", "tools", "advice", "always", "lacheck: unmatched braces and environments, missing \\@ after capitals, double spaces", function()
-  if not C.have("lacheck") then warn(nil, nil, "lacheck not installed: skipped"); return end
+  if not C.have("lacheck") then C.skip("lacheck not installed"); return end
   local n = 0
   for _, f in ipairs(C.MAIN) do
     local out = C.run("lacheck " .. f) or ""
@@ -31,7 +31,7 @@ rule("lacheck", "tools", "advice", "always", "lacheck: unmatched braces and envi
 end)
 
 rule("words", "tools", "count", "polish", "texcount: words per chapter and in the abstract; there are no per-chapter budgets, this is for seeing where the paper is", function()
-  if not C.have("texcount") then warn(nil, nil, "texcount not installed: skipped"); return end
+  if not C.have("texcount") then C.skip("texcount not installed"); return end
   local parts, total = {}, 0
   for _, f in ipairs(C.MAIN) do
     local out = C.run_quiet("texcount -q -1 -sum " .. f) or ""
@@ -53,7 +53,7 @@ rule("words", "tools", "count", "polish", "texcount: words per chapter and in th
 end)
 
 rule("checkcites", "tools", "count", "always", "checkcites: bibliography entries never cited (your reading list that has not reached the paper) and citations with no entry", function()
-  if not C.have("checkcites") then warn(nil, nil, "checkcites not installed: skipped"); return end
+  if not C.have("checkcites") then C.skip("checkcites not installed"); return end
   local aux = C.bpath(C.opts.doc .. ".aux")
   if not C.exists(aux) then warn(nil, nil, "no " .. aux .. ": build first"); return end
   local out = C.run("checkcites --backend bibtex " .. aux) or ""
@@ -80,12 +80,15 @@ rule("bibtex-log", "tools", "count", "always", "the BibTeX log: empty fields and
   return string.format("warnings=%d", n)
 end)
 
-rule("spelling", "tools", "advice", "always", "hunspell on the detexed chapters: unknown words, and whether British and American spellings are mixed", function()
-  if not (C.have("hunspell") and C.have("detex")) then warn(nil, nil, "hunspell or detex not installed: skipped"); return end
-  local dicts = C.run("hunspell -D 2>&1 | grep -E '/en_(GB|US)$' | sed 's#.*/##' | sort -u") or ""
-  local have_gb, have_us = dicts:match("en_GB") ~= nil, dicts:match("en_US") ~= nil
-  if not (have_gb or have_us) then warn(nil, nil, "no English hunspell dictionary: skipped"); return end
-  local personal = C.exists("scripts/words.txt") and (" -p scripts/words.txt") or ""
+rule("spelling", "tools", "advice", "always", "aspell on the detexed chapters: unknown words, and whether British and American spellings are mixed", function()
+  if not (C.have("aspell") and C.have("detex")) then C.skip("aspell or detex not installed"); return end
+  local dicts = C.run("aspell dump dicts 2>/dev/null") or ""
+  local have_gb, have_us = dicts:match("%f[%w]en_GB%f[%W]") ~= nil, dicts:match("%f[%w]en_US%f[%W]") ~= nil
+  if not (have_gb or have_us) then C.skip("no English aspell dictionary"); return end
+  -- the project's own words, one per line; aspell's personal lists need a header line, so the
+  -- words are dropped from its output here instead
+  local personal = {}
+  for w in (C.readfile("scripts/words.txt") or ""):gmatch("[^%s]+") do personal[w] = true end
   -- the prose only: todos, beats, pictures, code and maths removed, and the arguments that are not
   -- words (labels, references, citations, glossary keys, file names), written to a file for detex
   local tmp = os.tmpname()
@@ -100,9 +103,9 @@ rule("spelling", "tools", "advice", "always", "hunspell on the detexed chapters:
     h:close()
   end
   local function unknown(dict)
-    local out = C.run("detex " .. tmp .. " | tr -c \"[:alpha:]'\" '\\n' | grep -E \"^[A-Za-z][a-z']{3,}$\" | hunspell -d " .. dict .. personal .. " -l | sort | uniq -c | sort -rn") or ""
+    local out = C.run("detex " .. tmp .. " | tr -c \"[:alpha:]'\" '\\n' | grep -E \"^[A-Za-z][a-z']{3,}$\" | aspell -d " .. dict .. " list | sort | uniq -c | sort -rn") or ""
     local t, order = {}, {}
-    for l in out:gmatch("[^\n]+") do local c, w = l:match("^%s*(%d+)%s+(%S+)"); if w then t[w] = tonumber(c); order[#order + 1] = w end end
+    for l in out:gmatch("[^\n]+") do local c, w = l:match("^%s*(%d+)%s+(%S+)"); if w and not personal[w] then t[w] = tonumber(c); order[#order + 1] = w end end
     return t, order
   end
   local gb, gborder = {}, {}; local us, usorder = {}, {}
@@ -129,7 +132,7 @@ rule("spelling", "tools", "advice", "always", "hunspell on the detexed chapters:
 end)
 
 rule("links", "tools", "advice", "always", "every \\url and \\href answers over the network; skipped when LINT_OFFLINE is set", function()
-  if os.getenv("LINT_OFFLINE") or not C.have("curl") then note(nil, nil, "offline: skipped"); return end
+  if os.getenv("LINT_OFFLINE") or not C.have("curl") then C.skip("offline"); return end
   local urls, seen = {}, {}
   C.each_line(C.MAIN, function(f, n, l)
     for u in l:gmatch("\\url{([^}]*)}") do if not seen[u] then seen[u] = true; urls[#urls + 1] = { u = u, f = f, n = n } end end
@@ -150,15 +153,19 @@ end)
 -- personal settings of an AI coding agent. git exists in CI and in a clone, not on Overleaf
 local BUILD_OUTPUT = { "aux", "bbl", "blg", "fdb_latexmk", "fls", "lof", "lol", "lot", "out", "synctex.gz", "tdo", "thm", "toc", "xdv" }
 rule("repo-hygiene", "tools", "check", "always", "the repository tracks no build output (aux, log, thesis.pdf, reviewer.pdf, minted caches, ...) and no personal agent settings", function()
-  if not C.exists(".git") or not C.have("git") then note(nil, nil, "not a git checkout: skipped"); return end
-  if not (C.run("git rev-parse --is-inside-work-tree 2>/dev/null") or ""):match("true") then note(nil, nil, "git cannot read this checkout: skipped"); return end
+  if not C.exists(".git") or not C.have("git") then C.skip("not a git checkout"); return end
+  if not (C.run("git rev-parse --is-inside-work-tree 2>/dev/null") or ""):match("true") then C.skip("git cannot read this checkout"); return end
   local n = 0
   for f in (C.run_quiet("git ls-files") or ""):gmatch("[^\n]+") do
     local why
     for _, ext in ipairs(BUILD_OUTPUT) do if f:sub(-#ext - 1) == "." .. ext and f ~= "guide/guide.bbl" then why = "build output" end end
     if f:match("%.log$") or f == "thesis.pdf" or f == "reviewer.pdf" or f == "lint-checks.tex" or f:match("^_minted") or f:match("^svg%-inkscape/") then why = "build output" end
     if f:match("^%.claude/settings%.local%.json$") then why = "personal settings of an AI coding agent" end
-    if why then n = n + 1; fail(f, nil, why .. " is tracked: git rm --cached it (the .gitignore keeps it out afterwards)") end
+    if why then
+      -- a command, so the fix is shown and never written
+      local q = f:match("^[%w%._/%-]+$") and f or "'" .. f:gsub("'", "'\\''") .. "'"
+      n = n + 1; fail(f, nil, why .. " is tracked", "git rm --cached it (the .gitignore keeps it out afterwards)", C.fix("review", "stop tracking it", C.command("git rm --cached " .. q)))
+    end
   end
   return string.format("tracked=%d", n)
 end)

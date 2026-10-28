@@ -3,7 +3,13 @@
 # so the run page lists the rules with a check or a cross each, findings appear as annotations
 # on the files, and the job summary ends with one table. Gates fail the run; report rules only
 # report. The paper repository is created by Overleaf per project, so this file travels with the
-# Overleaf project; see "Paper CI" in the guide. The steps below mirror `texlua scripts/lint.lua list`.
+# Overleaf project; see "The checks and paper CI" in the guide (guide/07-code-tools-checks.tex).
+# The steps below mirror `texlua scripts/lint.lua list`.
+# Every run also uploads the review bundle of the commit it built, kept 14 days: both PDFs, their
+# logs, lint.json, the skim view and manifest.json (scripts/review/README.md). A failed build is
+# still evidence: its log goes into the bundle, and a build that never ran is recorded as not
+# started. The TeX image is danteev/texlive:latest, resolved to one digest per run so that the
+# manifest can name it; a run whose digest cannot be resolved fails before building.
 name: paper
 on:
   push:
@@ -14,32 +20,69 @@ on:
 env:
   LINT_PROFILE: tdk   # thesis: the faculty's thesis guide instead of the TDK call; the phase comes from \lintphase in thesis.tex
 jobs:
-  paper:
+  image:
     if: github.event_name != 'pull_request' || !github.event.pull_request.draft
     runs-on: ubuntu-latest
-    container: texlive/texlive:latest
+    outputs:
+      digest: ${{ steps.resolve.outputs.digest }}
+    steps:
+      - name: Resolve danteev/texlive:latest to the digest this run builds with
+        id: resolve
+        # the docker command's own failure fails this step: an empty digest would hand the paper
+        # job an invalid image reference and hide why
+        run: |
+          set -euo pipefail
+          digest=$(docker buildx imagetools inspect danteev/texlive:latest --format '{{.Manifest.Digest}}')
+          [[ "$digest" == sha256:* ]] || { echo "::error::no digest resolved for danteev/texlive:latest (got '$digest')"; exit 1; }
+          echo "digest=$digest" >> "$GITHUB_OUTPUT"
+  paper:
+    needs: image
+    runs-on: ubuntu-latest
+    # TeX Live with Inkscape for SVG figures, poppler for the PDF rules and aspell for spelling
+    container: danteev/texlive@${{ needs.image.outputs.digest }}
+    defaults:
+      run:
+        shell: bash
     steps:
       - uses: actions/checkout@v4
-      - name: Inkscape for SVG figures, poppler for the PDF rules, hunspell for spelling
-        run: apt-get update -qq && apt-get install -y -qq --no-install-recommends inkscape poppler-utils hunspell hunspell-en-gb hunspell-en-us >/dev/null
+        with:
+          # on a pull request the student's commit, not the merge preview: the bundle is that commit's
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+      # the container runs git as root over files the runner owns, and the safe.directory entry the
+      # checkout action adds is gone by the time the lint runs: without this git says "dubious
+      # ownership", the repo-hygiene rule reports itself skipped and that gate never runs
+      - name: Let git read the checkout
+        run: git config --global --add safe.directory "$GITHUB_WORKSPACE"
+      # the skim needs it, the builds do not: a failed install is the skim's exit in the bundle, not
+      # a run without a build (a failed step skips every later one that has no `if: always()`)
+      - name: PyMuPDF for the skim
+        continue-on-error: true
+        run: pip install --break-system-packages --root-user-action=ignore --quiet pymupdf
       - name: template / the lint's skeleton copy matches content/ (the template's repository only)
-        if: github.repository == 'BlackLight54/tdk-paper-template'
+        if: github.repository == 'BlackLight54/TDK-template'
         run: for f in content/0[1-7]-*.tex; do cmp "$f" "scripts/lint/skeleton/${f#content/}" || exit 1; done
       - name: template / the guide's essentials page matches scripts/lint/essentials.lua (the template's repository only)
-        if: github.repository == 'BlackLight54/tdk-paper-template'
+        if: github.repository == 'BlackLight54/TDK-template'
         run: texlua scripts/lint.lua essentials --guide | cmp - guide/essentials.tex
+      - name: template / each chapter role's criteria are the ones its guide section names (the template's repository only)
+        if: github.repository == 'BlackLight54/TDK-template'
+        run: texlua scripts/lint.lua criteria
+      - name: template / review.py passes its tests (the template's repository only)
+        if: always() && github.repository == 'BlackLight54/TDK-template'
+        run: make test-review
+      # both builds run whatever the template checks above said, so a failed check still leaves
+      # the build evidence; the job is red from the failed step either way
       - name: Build the draft
-        run: make all
-      - name: Build the reviewer PDF
-        run: make reviewer
-      - name: Upload the PDFs
+        id: draft
         if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: paper
-          path: |
-            thesis.pdf
-            reviewer.pdf
+        run: rc=0; make all || rc=$?; echo "rc=$rc" >> "$GITHUB_OUTPUT"; exit $rc
+      - name: Build the reviewer PDF
+        id: reviewer
+        if: always()
+        run: rc=0; make reviewer || rc=$?; echo "rc=$rc" >> "$GITHUB_OUTPUT"; exit $rc
+      - name: template / the lint catches each mutation of the skeleton (the template's repository only)
+        if: always() && github.repository == 'BlackLight54/TDK-template' && hashFiles('reviewer.aux') != ''
+        run: make test-lint
       - name: source / essentials (check)
         if: always()
         run: texlua scripts/lint.lua essentials
@@ -103,6 +146,12 @@ jobs:
       - name: source / bib (check)
         if: always()
         run: texlua scripts/lint.lua bib
+      - name: source / companion (check)
+        if: always()
+        run: texlua scripts/lint.lua companion
+      - name: source / sources (advice)
+        if: always()
+        run: texlua scripts/lint.lua sources --doc reviewer
       - name: source / code (check)
         if: always()
         run: texlua scripts/lint.lua code
@@ -139,14 +188,14 @@ jobs:
       - name: source / stock (check, draft)
         if: always()
         run: texlua scripts/lint.lua stock
-      - name: source / pages (check, final)
+      - name: source / pages (check, submit)
         if: always()
-        continue-on-error: ${{ github.ref_name != 'main' }}
+        continue-on-error: ${{ github.ref_name != 'main' && github.ref_name != 'master' }}
         run: texlua scripts/lint.lua pages --doc reviewer
-      - name: source / aidecl (check, final)
+      - name: source / aidecl (check, submit)
         if: always()
         run: texlua scripts/lint.lua aidecl
-      - name: source / titlepage (check, final)
+      - name: source / titlepage (check, submit)
         if: always()
         run: texlua scripts/lint.lua titlepage
       - name: pdf / pdf-file (check, polish)
@@ -164,31 +213,72 @@ jobs:
       - name: pdf / pdf-smalltext (advice, polish)
         if: always()
         run: texlua scripts/lint.lua pdf-smalltext --doc reviewer
-      - name: pdf / pdf-pages (check, final)
+      - name: pdf / pdf-pages (check, submit)
         if: always()
-        continue-on-error: ${{ github.ref_name != 'main' }}
+        continue-on-error: ${{ github.ref_name != 'main' && github.ref_name != 'master' }}
         run: texlua scripts/lint.lua pdf-pages --doc reviewer
-      - name: pdf / pdf-parts (check, final)
+      - name: pdf / pdf-parts (check, submit)
         if: always()
         run: texlua scripts/lint.lua pdf-parts --doc reviewer
       - name: source / markers (check, draft)
         if: always()
         run: texlua scripts/lint.lua markers
-      - name: source / placeholders (count, final)
+      - name: source / placeholders (count, submit)
         if: always()
         run: texlua scripts/lint.lua placeholders
-      - name: source / beats (count, final)
+      - name: source / beats (count, submit)
         if: always()
         run: texlua scripts/lint.lua beats
       - name: tools / words (count, polish)
         if: always()
         run: texlua scripts/lint.lua words
+      # the rule prints the JSON record and then its status line: the artifact is the record alone
       - name: burn-down record
         if: always()
-        run: texlua scripts/lint.lua burndown --doc reviewer | tail -1 | tee burndown.json
+        run: texlua scripts/lint.lua burndown --doc reviewer > burndown.txt; grep -m1 '^{' burndown.txt | tee burndown.json; [ -s burndown.json ]
       - name: Keep the burn-down record
         if: always()
         uses: actions/upload-artifact@v4
         with:
           name: burndown-${{ github.run_number }}
           path: burndown.json
+          overwrite: true   # a re-run of the same run uploads the same name again
+      # the lint and the skim report into the bundle; their exits go into its manifest and do not
+      # fail the run, which the lint steps above already decide
+      - name: Lint as JSON, for the skim and the review bundle
+        id: lintjson
+        if: always()
+        run: rc=0; texlua scripts/lint.lua all --doc reviewer --json > lint.json || rc=$?; echo "rc=$rc" >> "$GITHUB_OUTPUT"; [ -s lint.json ]
+      - name: Skim view of the reviewer PDF
+        id: skim
+        if: always() && hashFiles('reviewer.pdf') != ''
+        run: rc=0; python3 scripts/skim/skim.py build . -o skim --lint lint.json || rc=$?; echo "rc=$rc" >> "$GITHUB_OUTPUT"
+      # the bundle is assembled even when a build failed or never ran, or the lint wrote no JSON:
+      # the logs and the recorded exits are the evidence of that commit (review.py bundle refuses
+      # only a claimed success without a PDF, and a run with no log at all). The github.* values
+      # reach the script through the environment, never pasted into it: a branch name is text
+      # someone chose, not shell
+      - name: Review bundle
+        id: bundle
+        if: always()
+        env:
+          SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+          REF: ${{ github.head_ref || github.ref_name }}
+          IMAGE_DIGEST: ${{ needs.image.outputs.digest }}
+          RC_THESIS: ${{ steps.draft.outputs.rc || 1 }}
+          RC_REVIEWER: ${{ steps.reviewer.outputs.rc || 1 }}
+          RC_LINT: ${{ steps.lintjson.outputs.rc || 2 }}
+          RC_SKIM: ${{ steps.skim.outputs.rc || 1 }}
+        run: |
+          python3 scripts/review/review.py bundle --built . --lint lint.json --skim skim --out review-bundle --by ci \
+            --sha "$SHA" --ref "$REF" --image-ref danteev/texlive:latest --image-digest "$IMAGE_DIGEST" \
+            --exit "thesis=$RC_THESIS" --exit "reviewer=$RC_REVIEWER" --exit "lint=$RC_LINT" --exit "skim=$RC_SKIM"
+          echo "name=review-${SHA::7}" >> "$GITHUB_OUTPUT"
+      - name: Keep the review bundle for 14 days
+        if: always() && steps.bundle.outcome == 'success'
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ steps.bundle.outputs.name }}
+          path: review-bundle/
+          retention-days: 14
+          overwrite: true   # a re-run of the same commit uploads the same name again

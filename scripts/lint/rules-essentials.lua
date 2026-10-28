@@ -3,7 +3,7 @@
 --   ○ missing, ◔ placeholder (only TODO or the template's own text), ◑ started (own text, not
 --   enough yet), ◕ written, ● written and used where the argument needs it.
 -- A row with no "used" condition is ● once written. The phase asks every row for a level
--- (plan ◔, draft ◑, polish and final ●), and a row below it fails. The rows, with their level,
+-- (topic to plan ◔, draft ◑, polish and submit ●), and a row below it fails. The rows, with their level,
 -- place and next step, stay in C.ESSENTIALS for the Checks page, the job summary and --json.
 local C = require("lintcore")
 local ROWS = require("essentials")
@@ -13,14 +13,14 @@ local M = {}
 M.ROWS = ROWS
 M.GLYPH = { [0] = "○", "◔", "◑", "◕", "●" }
 M.LEVEL_NAME = { [0] = "missing", "placeholder", "started", "written", "used" }
-M.TARGET = { plan = 1, draft = 2, polish = 4, final = 4 }
+M.TARGET = { 1, 2, 4, 4 } -- by the phase's level: topic to plan, draft, polish, submit
 M.ROLE_ORDER = { "front", "intro", "approach", "evaluation", "related", "conclusion" }
 M.ROLE_TITLE = { front = "Front matter", intro = "Introduction", approach = "Approach", evaluation = "Evaluation", related = "Related work", conclusion = "Conclusion" }
 M.ROLE_SHORT = { front = "front", intro = "intro", approach = "approach", evaluation = "evaluation", related = "related", conclusion = "concl." }
 M.EXAMPLE_WORDS = 10 -- own words that make the introduction's example box written
 C.ESS = M
 
-function M.target() return M.TARGET[C.phase()] or 1 end
+function M.target() return M.TARGET[C.level()] end
 
 -- lines, comment-stripped, and prose lines, read once per file
 local raw_cache, prose_cache = {}, {}
@@ -146,19 +146,27 @@ end
 -- the canonical label for a row found by its heading: par: on a paragraph, sec: otherwise
 function M.label_for(row, cmd) return (cmd == "paragraph" and "par:" or "sec:") .. row.key end
 
-local function cited_doi(files)
-  local bib = C.bib_entries()
-  for _, f in ipairs(files) do
-    for _, l in ipairs(plines(f)) do
-      for _, arg in l:gmatch("\\cite%a*%*?([^{]-)(%b{})") do
-        for key in arg:sub(2, -2):gmatch("[^,%s]+") do
-          local e = bib[key]
-          local doi = e and (e.body:match("[Dd][Oo][Ii]%s*=%s*(%b{})") or e.body:match('[Dd][Oo][Ii]%s*=%s*(%b"")'))
-          if doi and not doi:match("TODO") and doi:match("10%.%d+/") then return key end
-        end
-      end
-    end
-  end
+-- the first cited entry of the files whose doi or url field is a Zenodo record (10.5281/zenodo.N),
+-- the archive the template's code repository releases to, and whose type is an artifact's (@software,
+-- @dataset, @misc, @online): a paper with a Zenodo DOI, or a DOI mentioned only in a note, is not the
+-- artifact. Whether the record is this paper's code, and the version the results came from, the
+-- lint cannot tell; the reader checks that. Returns the key, or nil and why the nearest miss fails
+local ARTIFACT_TYPES = { software = true, dataset = true, misc = true, online = true, electronic = true, www = true, data = true }
+local function zenodo_in(body, field)
+  local v = body:match("[,%s]" .. field .. "%s*=%s*[{\"]([^}\"]*)")
+  return v and v:match("10%.5281/zenodo%.%d+")
+end
+local function cited_artifact(files)
+  local bib, found, why = C.bib_entries(), nil, nil
+  C.each_cite(files, function(_, _, key)
+    local e = bib[key]
+    if found or not e then return end
+    local doi = zenodo_in(e.body, "[dD][oO][iI]") or zenodo_in(e.body, "[uU][rR][lL]")
+    if not doi then return end
+    if ARTIFACT_TYPES[e.type] then found = key
+    else why = why or string.format("%s is an @%s entry with a Zenodo DOI, a publication rather than the artifact: cite the artifact's own record (@software or @misc)", key, e.type) end
+  end)
+  return found, why
 end
 
 local TEXT_USED = {
@@ -167,8 +175,9 @@ local TEXT_USED = {
     return false, "point to the full comparison: \\cref{ch:related}, \\cref{tab:related} or \\cref{fig:positioning}"
   end,
   setup = function()
-    if cited_doi(C.role_files("evaluation")) then return true end
-    return false, "cite the archived artifact with its DOI (Zenodo) in the evaluation"
+    local key, why = cited_artifact(C.role_files("evaluation"))
+    if key then return true end
+    return false, why or "cite the archived artifact in the evaluation: a bibliography entry with its Zenodo DOI, 10.5281/zenodo.<number>"
   end,
   scalability = function(f, a, b)
     for _, key in ipairs(labels_in_span(f, a, b)) do if (key:match("^fig:") or key:match("^tab:")) and main_refs(key) > 0 then return true end end
@@ -354,8 +363,10 @@ local function eval_float(row, r)
   return 3, why
 end
 
--- the gap matrix's argument: rows are requirements, this work meets all with pointers, every other
--- approach misses something. Returns the failures; warnings go out as the rule's own findings.
+-- the gap matrix's argument: one row per requirement, each exactly once; this work meets all, each
+-- with a pointer to a result; every other approach misses something. Returns the failures;
+-- warnings go out as the rule's own findings. Whether a pointed-at result shows what the cell
+-- claims is for the reader to judge.
 M.gapwarn = {}
 function M.gapmatrix()
   local fails = {}
@@ -365,25 +376,53 @@ function M.gapmatrix()
   local tab = fl.block:match("\\label{tab:related}(.-)\\end{tabularx}") or fl.block:match("\\label{tab:related}(.-)\\end{tabular}")
     or fl.block:match("\\begin{tabularx}(.-)\\label{tab:related}") or fl.block:match("\\begin{tabular}(.-)\\label{tab:related}")
   if not tab then return { "the gap matrix has no tabular" } end
-  local rows, ncols = {}, nil
+  local rows, ncols, seen = {}, nil, {}
   for line in tab:gmatch("[^\n]+") do
-    if line:match("\\ref{req:") and line:match("\\\\") then
+    local req = line:match("\\ref{(req:[^}]*)}")
+    if req and line:match("\\\\") then
       local cells = {}
       for cell in (line:gsub("\\\\.*$", "") .. "&"):gmatch("(.-)&") do cells[#cells + 1] = C.trim(cell) end
       rows[#rows + 1] = cells; ncols = ncols or #cells
       if #cells ~= ncols then fails[#fails + 1] = "gap matrix rows have different numbers of cells" end
+      if seen[req] then fails[#fails + 1] = req .. " has two rows in the gap matrix" end
+      seen[req] = true
     end
   end
   if #rows == 0 then return { "the gap matrix has no rows starting with \\ref{req:...}" } end
-  local nreq = #tag_items("req")
-  if #rows < nreq then fails[#fails + 1] = string.format("the gap matrix has %d rows but there are %d requirements", #rows, nreq) end
+  local declared = {}
+  for _, it in ipairs(tag_items("req")) do
+    declared[it.key] = true
+    if not seen[it.key] then fails[#fails + 1] = it.key .. " has no row in the gap matrix" end
+  end
+  for req in pairs(seen) do
+    if not declared[req] then fails[#fails + 1] = req .. " is a row of the gap matrix but no requirement carries that label" end
+  end
+  -- what this work's cells may point at: a label in an evaluation chapter, or a research question,
+  -- guarantee or derived requirement the evaluation answers; a chapter or an unknown label is no result
+  local labels = C.collect_labels_and_refs(C.main_chapters())
+  local evalfile = {}
+  for _, f in ipairs(C.role_files("evaluation")) do evalfile[f] = true end
+  local function result_problem(key)
+    local at = labels[key]
+    if not at then return key .. ", which no label defines" end
+    if evalfile[at.file] or key:match("^rq:") or key:match("^g:") or key:match("^dr:") then return nil end
+    return key .. " is not an evaluation result: point at a result in the evaluation chapter, or at the research question or guarantee it answers"
+  end
   local approaches = ncols - 3 -- tag, name, approaches..., this work
   if approaches < 2 then M.gapwarn[#M.gapwarn + 1] = "fewer than two other approaches in the gap matrix: the gap is argued against the closest existing work, plural" end
   local allmet = {}
   for _, r in ipairs(rows) do
     local last = r[#r]
     if not last:match("\\gapyes") then fails[#fails + 1] = string.format("row %s: this work does not meet its own requirement; if a requirement is not met, say so in the text and the limitations", r[1])
-    elseif not last:match("\\[cC]ref{") and not last:match("\\ref{") then M.gapwarn[#M.gapwarn + 1] = string.format("row %s: this work's cell points at no evaluation result", r[1]) end
+    else
+      local keys = {}
+      for list in last:gmatch("\\[cC]?ref%*?%s*{([^}]*)}") do for k in list:gmatch("[^,%s]+") do keys[#keys + 1] = k end end
+      if #keys == 0 then fails[#fails + 1] = string.format("row %s: this work's cell points at no evaluation result: add \\cref to the result that shows it", r[1]) end
+      for _, k in ipairs(keys) do
+        local why = result_problem(k)
+        if why then fails[#fails + 1] = string.format("row %s: this work's cell points at %s", r[1], why) end
+      end
+    end
     if (r[2] or ""):match("TODO") then M.gapwarn[#M.gapwarn + 1] = string.format("row %s: the requirement's short name is a TODO", r[1]) end
     for c = 3, #r - 1 do allmet[c] = (allmet[c] == nil or allmet[c]) and r[c]:match("\\gapyes") ~= nil end
   end
@@ -411,7 +450,14 @@ local function eval_example(row, r)
   end
   if not found then return 0, row.add end
   r.where = place(found.file, found.line, found.last)
-  if not name or name:match("TODO") then return 1, "name the example: \\exname in thesis.tex is still a TODO" end
+  if not name or name:match("TODO") then
+    -- the finding sits on the example box; the fix shows the line to edit, in thesis.tex
+    for n, raw in ipairs(C.raw_lines("thesis.tex")) do
+      local def = C.strip_comment(raw):match("\\newcommand{\\exname}%b{}")
+      if def then r.fix = C.fix("placeholder", "name the running example", C.replace_at("thesis.tex", n, def, "\\newcommand{\\exname}{<the example's name>}")); break end
+    end
+    return 1, "name the example: \\exname in thesis.tex is still a TODO"
+  end
   local w, ps = 0, plines(found.file)
   for i = found.line, found.last do w = w + C.own_words(ps[i] or "") end
   if w < M.EXAMPLE_WORDS then return 2, "write the introduction's example box in your own words: the actors, what they want, what goes wrong" end
@@ -492,7 +538,7 @@ local function write_summary(rows)
   local t = M.target()
   h:write(string.format("## Essentials: %d of %d at the %s level\n\n", M.at_target(rows), #rows, C.phase()))
   h:write("`" .. M.fingerprint(rows) .. "`\n\n")
-  h:write("○ missing · ◔ placeholder · ◑ started · ◕ written · ● used where the argument needs it. The phase asks for: plan ◔, draft ◑, polish ●, final ●. **Bold** rows are below it.\n\n")
+  h:write("○ missing · ◔ placeholder · ◑ started · ◕ written · ● used where the argument needs it. The phase asks for: topic to plan ◔, draft ◑, polish ●, submit ●. **Bold** rows are below it.\n\n")
   h:write("| | Essential | Next step | Where |\n|---|---|---|---|\n")
   for _, r in ipairs(rows) do
     local name = r.level < t and ("**" .. r.row.title .. "**") or r.row.title
@@ -503,7 +549,19 @@ local function write_summary(rows)
   h:close()
 end
 
-C.rule("essentials", "source", "check", "always", "the essentials every paper of this kind contains, from scripts/lint/essentials.lua, each missing, a placeholder, started, written or used where the argument needs it; the phase asks for a level of every row (plan: present, draft: started, polish and final: used)", function()
+-- the label of a row found by its heading, right after the heading; safe, since a label prints
+-- nothing, unless a file of the paper already defines it
+local function label_fix(r)
+  local label = "\\label{" .. r.label .. "}"
+  local taken = false
+  for _, f in ipairs(C.CONTENT) do if C.file_has(f, label) then taken = true end end
+  local first = true
+  return C.fix(taken and "review" or "safe", "add " .. label, table.unpack(C.matches(C.raw_lines(r.where.file)[r.where.line], "\\" .. r.cmd .. "%*?%s*%b{}", function(m)
+    if first then first = false; return m .. label end
+  end)))
+end
+
+C.rule("essentials", "source", "check", "always", "the essentials every paper of this kind contains, from scripts/lint/essentials.lua, each missing, a placeholder, started, written or used where the argument needs it; the phase asks for a level of every row (topic to plan: present, draft: started, polish and submit: used)", function()
   local rows = M.evaluate()
   C.ESSENTIALS = rows
   local t = M.target()
@@ -512,13 +570,12 @@ C.rule("essentials", "source", "check", "always", "the essentials every paper of
     counts[r.level] = counts[r.level] + 1
     local file = r.home
     local line = r.where and r.where.line
-    local msg = string.format("%s %s: %s", M.GLYPH[r.level], r.row.title, r.next ~= "" and r.next or M.LEVEL_NAME[r.level])
-    if r.level < t then fail(file, line, msg) end
-    if r.via == "heading" then note(file, line, string.format("%s found by its heading; add \\label{%s} so it is found when the heading changes", r.row.title, r.label)) end
+    local msg = string.format("%s %s", M.GLYPH[r.level], r.row.title)
+    if r.level < t then fail(file, line, msg, r.next ~= "" and r.next or M.LEVEL_NAME[r.level], r.fix) end
+    if r.via == "heading" then note(file, line, string.format("%s found by its heading", r.row.title), string.format("add \\label{%s} so it is found when the heading changes", r.label), label_fix(r)) end
   end
   for _, w in ipairs(M.gapwarn) do warn(C.ROLE.related, nil, w) end
-  if not C.opts.tex and not C.opts.json then io.write(M.fingerprint(rows), "\n") end
-  write_summary(rows)
+  if not C.quiet() then io.write(M.fingerprint(rows), "\n"); write_summary(rows) end
   return string.format("at-target=%d/%d %s=%d %s=%d %s=%d %s=%d %s=%d", M.at_target(rows), #rows, M.GLYPH[4], counts[4], M.GLYPH[3], counts[3], M.GLYPH[2], counts[2], M.GLYPH[1], counts[1], M.GLYPH[0], counts[0])
 end, { summary = false })
 

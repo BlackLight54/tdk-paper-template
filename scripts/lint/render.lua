@@ -37,24 +37,25 @@ local function legend()
   return "{\\footnotesize\\color{lintmute}" .. table.concat(t, "\\quad ") .. "\\par}"
 end
 
--- the phase line: the four phases on a rule, the current one filled, each phase's level beneath
+-- the phase line: the four levels of the checks on a rule, the current one filled, each level's target beneath;
+-- topic, setup, research and plan share the first level
 local function phase_line(E)
-  local cur = C.phase()
-  local phases = { "plan", "draft", "polish", "final" }
+  local cur = C.level()
+  local phases = { "topic to plan", "draft", "polish", "submit" }
   local out = {}
   out[#out + 1] = "{\\setlength{\\tabcolsep}{0pt}\\noindent\\begin{tikzpicture}[x=\\linewidth]"
   out[#out + 1] = "\\useasboundingbox (0,-1ex) rectangle (1,1ex);\\draw[lintmute,line width=.4pt] (.125,0) -- (.875,0);"
-  for i, p in ipairs(phases) do
-    out[#out + 1] = string.format("\\filldraw[draw=black,line width=.5pt,fill=%s] (%.3f,0) circle (.55ex);", p == cur and "black" or "white", (i - .5) / 4)
+  for i in ipairs(phases) do
+    out[#out + 1] = string.format("\\filldraw[draw=black,line width=.5pt,fill=%s] (%.3f,0) circle (.55ex);", i == cur and "black" or "white", (i - .5) / 4)
   end
   out[#out + 1] = "\\end{tikzpicture}\\par\\nointerlineskip\\vspace{.4ex}"
   out[#out + 1] = "\\noindent\\begin{tabular}{@{}*{4}{>{\\centering\\arraybackslash}p{.25\\linewidth}}@{}}"
   local names, targets = {}, {}
-  for _, p in ipairs(phases) do
-    names[#names + 1] = p == cur and ("\\textbf{\\textsc{" .. p .. "}}") or ("\\textsc{" .. p .. "}")
-    local tgt = string.format("all \\lintball[lintmute]{%d}", E.TARGET[p])
-    if p == "final" then tgt = tgt .. " and the form" end
-    if p == cur then tgt = tgt .. " (now)" end
+  for i, p in ipairs(phases) do
+    names[#names + 1] = i == cur and ("\\textbf{\\textsc{" .. p .. "}}") or ("\\textsc{" .. p .. "}")
+    local tgt = string.format("all \\lintball[lintmute]{%d}", E.TARGET[i])
+    if p == "submit" then tgt = tgt .. " and the form" end
+    if i == cur then tgt = tgt .. " (now: " .. C.phase() .. ")" end
     targets[#targets + 1] = "{\\footnotesize\\color{lintmute}" .. tgt .. "}"
   end
   out[#out + 1] = table.concat(names, " & ") .. "\\\\"
@@ -144,12 +145,30 @@ end
 local STATUS = {
   fix = "\\leavevmode\\textcolor{lintaccent}{\\textsc{fix}}",
   suggestion = "\\textit{suggestion}",
+  skipped = "\\leavevmode{\\color{lintmute}\\textit{skipped}}",
+  error = "\\leavevmode\\textcolor{lintaccent}{\\textsc{error}}",
 }
 local function status_cell(s)
   if STATUS[s] then return STATUS[s] end
   local p = s:match("^due at (%a+)$")
   if p then return "\\leavevmode{\\color{lintmute}\\textsc{due at " .. p .. "}}" end
   return esc(s)
+end
+
+-- what a fix writes, short enough for a cell: the replacement, the added line or the command;
+-- the cell's typewriter text breaks only at its spaces, so a long one is cut
+local function cut(s, n) if #s > n then return s:sub(1, n - 3):gsub("[\128-\191]*$", ""):gsub("[\192-\255]$", "") .. "..." end; return s end
+-- what an edit writes, in a few words: the new text, the added line, the command, or for a deletion
+-- the text it deletes
+local function edit_text(e)
+  if e.new == "" then return "delete " .. e.old end
+  return e.new or e.after or e.cmd
+end
+local FIX_NOTE = { review = "\\enspace{\\itshape read it first}", placeholder = "\\enspace{\\itshape fill in the <holes>}" }
+local function fix_cell(fx)
+  local t = {}
+  for _, e in ipairs(fx.edits) do t[#t + 1] = edit_text(e) end
+  return "\\newline\\hspace*{1em}$\\to$ \\texttt{" .. esc(cut(table.concat(t, " / "), 70)) .. "}" .. (FIX_NOTE[fx.safety] or "")
 end
 
 local function findings_cell(res)
@@ -160,7 +179,11 @@ local function findings_cell(res)
         local where = f.file and (loc(f.file, f.line) .. " ") or ""
         local msg = f.msg
         if #msg > 150 then msg = msg:sub(1, 147):gsub("[\128-\191]*$", "") .. "..." end
-        shown[#shown + 1] = where .. esc(msg)
+        -- under the message, the fix's text when there is one, or else the help, in italics
+        local under = ""
+        if f.fix then under = fix_cell(f.fix)
+        elseif f.help then under = "\\newline\\hspace*{1em}{\\itshape " .. esc(cut(f.help, 150)) .. "}" end
+        shown[#shown + 1] = where .. esc(msg) .. under
       else extra = extra + 1 end
     end
   end
@@ -171,6 +194,19 @@ local function findings_cell(res)
   return s
 end
 
+-- the fix in a package warning, as the characters to type: \detokenize keeps \cref{fig:x} from
+-- expanding (it prints "\cref {fig:x}"); the braces must balance inside the warning's argument, so
+-- a fix whose braces do not balance loses them, and % and # would end or break the line
+local function log_fix(fx)
+  local t = {}
+  for _, e in ipairs(fx.edits) do t[#t + 1] = edit_text(e) end
+  local s = cut(table.concat(t, " / "), 120):gsub("[%%#\n]", " ")
+  local depth, balanced = 0, true
+  for c in s:gmatch("[{}]") do depth = depth + (c == "{" and 1 or -1); if depth < 0 then balanced = false end end
+  if depth ~= 0 or not balanced then s = s:gsub("[{}]", " ") end
+  return " -- fix: \\detokenize{" .. s .. "}"
+end
+
 local function other_checks(results)
   local out = {}
   local head = "\\textbf{Status} & \\textbf{Check} & \\textbf{Rule} \\\\"
@@ -179,15 +215,27 @@ local function other_checks(results)
   out[#out + 1] = "\\toprule " .. head .. " \\midrule \\endhead \\bottomrule \\endlastfoot"
   local first = true
   for _, g in ipairs(P.GROUPS) do
-    local shown, passing, nfix = {}, {}, 0
+    local shown, passing, nfix, ndue, nskip, nerr = {}, {}, 0, 0, 0, 0
     for _, res in ipairs(results) do
       if res.rule ~= "essentials" and res.severity ~= "count" and P.group(res.rule) == g.id then
         if res.status == "pass" then passing[#passing + 1] = esc(P.title(res.rule)):gsub("^%u", string.lower)
-        else shown[#shown + 1] = res; if res.status == "fix" then nfix = nfix + 1 end end
+        else
+          shown[#shown + 1] = res
+          if res.status == "fix" then nfix = nfix + 1
+          elseif res.status == "skipped" then nskip = nskip + 1
+          elseif res.status == "error" then nerr = nerr + 1
+          elseif res.status:match("^due at ") then ndue = ndue + 1 end
+        end
       end
     end
     if #shown + #passing > 0 then
-      out[#out + 1] = string.format("%s\\multicolumn{3}{@{}l}{\\textsc{%s}\\enspace{\\footnotesize\\color{lintmute}--- %s}} \\\\", first and "" or "\\addlinespace[.8ex]", esc(g.title), nfix > 0 and (nfix .. " to fix") or "nothing to fix")
+      -- "nothing to fix" only when nothing fails, later or now, and every rule ran: a check that
+      -- fails but is not due yet, or a rule that could not run, is not a pass
+      local said = { nfix > 0 and (nfix .. " to fix") or (ndue + nskip + nerr > 0 and ("nothing to fix at " .. C.phase():upper())) or "nothing to fix" }
+      if ndue > 0 then said[#said + 1] = ndue .. " deferred" end
+      if nskip > 0 then said[#said + 1] = nskip .. " skipped" end
+      if nerr > 0 then said[#said + 1] = nerr .. " did not run" end
+      out[#out + 1] = string.format("%s\\multicolumn{3}{@{}l}{\\textsc{%s}\\enspace{\\footnotesize\\color{lintmute}--- %s}} \\\\", first and "" or "\\addlinespace[.8ex]", esc(g.title), table.concat(said, "; "))
       first = false
       for _, res in ipairs(shown) do
         local f = findings_cell(res)
@@ -253,14 +301,15 @@ function M.checks_page(results)
   w(other_checks(C.results))
   w(counts_table(C.results))
   w("\\par\\medskip\\noindent\\rule{.4\\linewidth}{.4pt}\\par")
-  w(string.format("{\\footnotesize\\color{lintmute}\\noindent Generated %s by \\texttt{texlua scripts/lint.lua overleaf}. The build log's own warnings and the PDF rules are not here: Overleaf shows the first, CI runs the second. A finding judged and rejected is silenced by \\texttt{\\%% lint-ignore: <id> <reason>} on its line.\\par}", os.date("%Y-%m-%d")))
+  w(string.format("{\\footnotesize\\color{lintmute}\\noindent Generated %s by \\texttt{texlua scripts/lint.lua overleaf}. The build log's own warnings and the PDF rules are not here: Overleaf shows the first, CI runs the second. A finding judged and rejected is silenced by \\texttt{\\%% lint-ignore: <id> <reason>} on its line. Under a finding, after $\\to$, is the text to write instead, or else in italics what to do; in a local clone, \\texttt{make fix} writes the safe fixes and prints the diff.\\par}", os.date("%Y-%m-%d")))
   -- failing checks as package warnings, for Overleaf's log panel
   for _, res in ipairs(C.results) do
     if res.severity == "check" and res.status == "fix" then
       for _, f in ipairs(res.findings) do
         if f.level == "error" then
           local where = f.file and (f.file .. (f.line and (":" .. f.line) or "") .. ": ") or ""
-          w(string.format("\\PackageWarningNoLine{tdk-lint}{%s: %s%s}", res.rule, where, (f.msg:gsub("[%%#{}\\]", " "):gsub("\n", " "))))
+          local text = f.msg .. (C.help_of(f) and (" -- " .. C.help_of(f)) or "")
+          w(string.format("\\PackageWarningNoLine{tdk-lint}{%s: %s%s%s}", res.rule, where, (text:gsub("[%%#{}\\]", " "):gsub("\n", " ")), f.fix and log_fix(f.fix) or ""))
         end
       end
     end
@@ -292,7 +341,7 @@ function M.guide()
   end
   w("% generated by texlua scripts/lint.lua essentials --guide (make essentials); do not edit")
   for _, m in ipairs(M.MACROS) do w(m) end
-  w("The lint places each essential on a ladder of five levels: \\lintball{0} missing; \\lintball{1} a placeholder, only TODO or the template's own text; \\lintball{2} started, your own text but not enough of it; \\lintball{3} written; \\lintball{4} used where the argument needs it. An essential with no condition for its use is \\lintball{4} once written. The phase in \\texttt{thesis.tex} asks every essential for a level: \\textsc{plan} \\lintball{" .. E.TARGET.plan .. "}, \\textsc{draft} \\lintball{" .. E.TARGET.draft .. "}, \\textsc{polish} and \\textsc{final} \\lintball{" .. E.TARGET.polish .. "}. An essential is found by its label first, then by a heading that contains one of the words given. Text is your own when it is neither a TODO line nor a line of the template, and floats, tagged lists and example boxes count toward their own essentials, not toward the text around them.")
+  w("The lint places each essential on a ladder of five levels: \\lintball{0} missing; \\lintball{1} a placeholder, only TODO or the template's own text; \\lintball{2} started, your own text but not enough of it; \\lintball{3} written; \\lintball{4} used where the argument needs it. An essential with no condition for its use is \\lintball{4} once written. The phase in \\texttt{thesis.tex} asks every essential for a level: \\textsc{topic} to \\textsc{plan} \\lintball{" .. E.TARGET[1] .. "}, \\textsc{draft} \\lintball{" .. E.TARGET[2] .. "}, \\textsc{polish} and \\textsc{submit} \\lintball{" .. E.TARGET[3] .. "}. An essential is found by its label first, then by a heading that contains one of the words given. Text is your own when it is neither a TODO line nor a line of the template, and floats, tagged lists and example boxes count toward their own essentials, not toward the text around them.")
   w("")
   w("{\\small\\begin{xltabular}{\\linewidth}{@{}>{\\raggedright\\arraybackslash}p{.25\\linewidth}>{\\raggedright\\arraybackslash}X>{\\raggedright\\arraybackslash}p{.3\\linewidth}@{}}")
   local head = "\\textbf{Essential} & \\textbf{What it is, and why} & \\textbf{Written, and used} \\\\"
@@ -349,18 +398,43 @@ local function js(v)
   end
   return "null"
 end
-function M.json()
-  local E = C.ESS
-  local rows = {}
-  for _, r in ipairs(C.ESSENTIALS or {}) do
-    local row = r.row
-    rows[#rows + 1] = { id = row.id, role = row.role, kind = row.kind, title = row.title, level = r.level, glyph = E.GLYPH[r.level],
-      next = r.next, via = r.via, cmd = r.cmd, label = r.label or row.label, prefix = row.prefix, key = row.key,
-      where = r.where, words = r.words }
+-- everything the run established, for scripts: the phase and where it came from, every rule that
+-- ran with its status and counts, every finding, and, when the essentials ran, their rows. ok is
+-- the exit status: true when every gate passed
+function M.json(ok)
+  local out = { ok = ok, phase = C.phase(), phase_source = C.opts.phase_source, profile = C.opts.profile, doc = C.opts.doc, rules = {}, findings = {} }
+  -- what a reader of the PDF needs from the sources: each chapter role with its criteria and its
+  -- chapters, and the paper's tag lists (scripts/review/README.md, "What the lint exports")
+  out.chapter_roles = {}
+  for _, role in ipairs(C.ROLE_SEQ) do
+    out.chapter_roles[role] = { label = C.ROLE_LABEL[role], name = C.ROLE_NAME[role], criteria = C.ROLE_CRITERIA[role],
+      guide = "app:chapters:" .. role, files = C.role_files(role) }
   end
-  local roles = {}
-  for _, role in ipairs(E.ROLE_ORDER) do roles[role] = C.role_files(role) end
-  return js({ phase = C.phase(), target = E.target(), fingerprint = E.fingerprint(C.ESSENTIALS or {}), rows = rows, roles = roles, example_box = C.example_box() }) .. "\n"
+  out.tag_lists = C.tag_lists()
+  for _, res in ipairs(C.results) do
+    out.rules[#out.rules + 1] = { rule = res.rule, family = res.family, severity = res.severity, phase = res.phase, status = res.status,
+      errors = res.errors, warnings = res.warnings, ignored = res.ignored, counts = res.counts }
+    -- every finding with its help and its fix, for editors and agents
+    for _, f in ipairs(res.findings) do
+      local fix
+      if f.fix then fix = { safety = f.fix.safety, help = f.fix.help, edits = f.fix.edits, text = C.fix_lines(f) } end
+      out.findings[#out.findings + 1] = { rule = res.rule, level = f.level, file = f.file, line = f.line, msg = f.msg, help = f.help, fix = fix }
+    end
+  end
+  if C.ESSENTIALS then
+    local E = C.ESS
+    out.rows = {}
+    for _, r in ipairs(C.ESSENTIALS) do
+      local row = r.row
+      out.rows[#out.rows + 1] = { id = row.id, role = row.role, kind = row.kind, title = row.title, criterion = row.criterion, level = r.level, glyph = E.GLYPH[r.level],
+        next = r.next, via = r.via, cmd = r.cmd, label = r.label or row.label, prefix = row.prefix, key = row.key,
+        where = r.where, words = r.words }
+    end
+    out.roles = {}
+    for _, role in ipairs(E.ROLE_ORDER) do out.roles[role] = C.role_files(role) end
+    out.target, out.fingerprint, out.example_box = E.target(), E.fingerprint(C.ESSENTIALS), C.example_box()
+  end
+  return js(out) .. "\n"
 end
 
 return M
