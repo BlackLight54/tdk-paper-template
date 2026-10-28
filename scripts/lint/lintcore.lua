@@ -161,7 +161,7 @@ function M.roles_ok(list)
   return ok
 end
 
--- a \newcommand in thesis.tex that the lint reads as its setting (\lintphase, \lintcompanion):
+-- a \newcommand in thesis.tex that the lint reads as its setting (\lintphase):
 -- its body, trimmed, or nil when thesis.tex does not define it or defines it only in a comment
 function M.setting(name)
   for _, l in ipairs(M.lines("thesis.tex")) do
